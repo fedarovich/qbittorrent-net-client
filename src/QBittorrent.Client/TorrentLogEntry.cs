@@ -1,6 +1,4 @@
-﻿using System;
-using Newtonsoft.Json;
-using QBittorrent.Client.Converters;
+﻿using Newtonsoft.Json;
 
 namespace QBittorrent.Client
 {

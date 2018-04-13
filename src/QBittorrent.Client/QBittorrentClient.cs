@@ -1376,7 +1376,5 @@ namespace QBittorrent.Client
             [JsonProperty("url")]
             public Uri Url { get; set; }
         }
-
-        
     }
 }

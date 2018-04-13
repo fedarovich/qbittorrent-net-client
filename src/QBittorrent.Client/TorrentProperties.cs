@@ -1,5 +1,7 @@
 ﻿using System;
+using System.Collections.Generic;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using QBittorrent.Client.Converters;
 
 namespace QBittorrent.Client
@@ -235,5 +237,11 @@ namespace QBittorrent.Client
         [JsonProperty("reannounce")]
         [JsonConverter(typeof(SecondsToTimeSpanConverter))]
         public TimeSpan? Reannounce { get; set; }
+
+        /// <summary>
+        /// Additional properties not handled by this library.
+        /// </summary>
+        [JsonExtensionData]
+        public IDictionary<string, JToken> AdditionalData { get; set; }
     }
 }

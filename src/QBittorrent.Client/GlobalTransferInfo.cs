@@ -1,4 +1,7 @@
-﻿using Newtonsoft.Json;
+﻿using System.Collections;
+using System.Collections.Generic;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using QBittorrent.Client.Converters;
 
 namespace QBittorrent.Client
@@ -55,12 +58,18 @@ namespace QBittorrent.Client
         /// </summary>
         [JsonProperty("dht_nodes")]
         [JsonConverter(typeof(NegativeToNullConverter))]
-        public int? DhtNodes { get; set; }
+        public long? DhtNodes { get; set; }
 
         /// <summary>
         /// Connection status
         /// </summary>
         [JsonProperty("connection_status")]
         public ConnectionStatus? ConnectionStatus { get; set; }
+
+        /// <summary>
+        /// Additional properties not handled by this library.
+        /// </summary>
+        [JsonExtensionData]
+        public IDictionary<string, JToken> AdditionalData { get; set; }
     }
 }

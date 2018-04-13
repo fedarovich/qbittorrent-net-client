@@ -1,4 +1,6 @@
-﻿using Newtonsoft.Json;
+﻿using System.Collections.Generic;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using QBittorrent.Client.Converters;
 
 namespace QBittorrent.Client
@@ -44,5 +46,17 @@ namespace QBittorrent.Client
         [JsonProperty("piece_range")]
         [JsonConverter(typeof(ArrayToRangeConverter))]
         public Range PieceRange { get; set; }
+
+        /// <summary>
+        /// Gets the file availability, calculated as <c>(available_pieces)/(total_pieces)</c>
+        /// </summary>
+        [JsonProperty("availability")]
+        public double? Availability { get; set; }
+
+        /// <summary>
+        /// Additional properties not handled by this library.
+        /// </summary>
+        [JsonExtensionData]
+        public IDictionary<string, JToken> AdditionalData { get; set; }
     }
 }

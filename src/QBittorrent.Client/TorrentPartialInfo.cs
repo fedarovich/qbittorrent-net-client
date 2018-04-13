@@ -1,8 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Text;
+using System.Diagnostics;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
+using Newtonsoft.Json.Linq;
+using QBittorrent.Client.Converters;
 
 namespace QBittorrent.Client
 {
@@ -11,6 +13,7 @@ namespace QBittorrent.Client
     /// </summary>
     /// <seealso cref="PartialData"/>
     /// <seealso cref="QBittorrentClient.GetPartialDataAsync"/>
+    [DebuggerDisplay("{" + nameof(Name) + "}")]
     public class TorrentPartialInfo
     {
         /// <summary>
@@ -18,6 +21,12 @@ namespace QBittorrent.Client
         /// </summary>
         [JsonProperty("name")]
         public string Name { get; set; }
+
+        /// <summary>
+        /// Magnet URI for the torrent
+        /// </summary>
+        [JsonProperty("magnet_uri")]
+        public string MagnetUri { get; set; }
 
         /// <summary>
         /// Total size (bytes) of files selected for download
@@ -74,16 +83,17 @@ namespace QBittorrent.Client
         public int? TotalLeechers { get; set; }
 
         /// <summary>
-        /// Torrent share ratio. Max ratio value: 9999.
+        /// Torrent share ratio. Max ratio value is <c>9999</c>. If actual ratio is greater than <c>9999</c>, <c>-1</c> is returned.
         /// </summary>
         [JsonProperty("ratio")]
         public double? Ratio { get; set; }
 
         /// <summary>
-        /// Torrent ETA (seconds)
+        /// Torrent ETA
         /// </summary>
         [JsonProperty("eta")]
-        public int? EstimatedTime { get; set; }
+        [JsonConverter(typeof(SecondsToTimeSpanConverter))]
+        public TimeSpan? EstimatedTime { get; set; }
 
         /// <summary>
         /// Torrent state
@@ -111,6 +121,12 @@ namespace QBittorrent.Client
         public string Category { get; set; }
 
         /// <summary>
+        /// The torrent tags
+        /// </summary>
+        [JsonProperty("tags")]
+        public IReadOnlyCollection<string> Tags { get; set; }
+
+        /// <summary>
         /// True if super seeding is enabled
         /// </summary>
         [JsonProperty("super_seeding")]
@@ -121,6 +137,134 @@ namespace QBittorrent.Client
         /// </summary>
         [JsonProperty("force_start")]
         public bool? ForceStart { get; set; }
+
+        /// <summary>
+        /// The torrent save path
+        /// </summary>
+        [JsonProperty("save_path")]
+        public string SavePath { get; set; }
+
+        /// <summary>
+        /// The date and time when the torrent was added
+        /// </summary>
+        [JsonProperty("added_on")]
+        [JsonConverter(typeof(UnixTimeToNullableDateTimeConverter))]
+        public DateTime? AddedOn { get; set; }
+
+        /// <summary>
+        /// The date and time when the torrent was completed
+        /// </summary>
+        [JsonProperty("completion_on")]
+        [JsonConverter(typeof(UnixTimeToNullableDateTimeConverter))]
+        public DateTime? CompletionOn { get; set; }
+
+        /// <summary>
+        /// The current torrent tracker
+        /// </summary>
+        [JsonProperty("tracker")]
+        public string CurrentTracker { get; set; }
+
+        /// <summary>
+        /// The download speed limit (bytes/second)
+        /// </summary>
+        [JsonProperty("dl_limit")]
+        [JsonConverter(typeof(NegativeToNullConverter))]
+        public int? DownloadLimit { get; set; }
+
+        /// <summary>
+        /// The upload speed limit (bytes/second)
+        /// </summary>
+        [JsonProperty("up_limit")]
+        [JsonConverter(typeof(NegativeToNullConverter))]
+        public int? UploadLimit { get; set; }
+
+        /// <summary>
+        /// The downloaded data size (bytes)
+        /// </summary>
+        [JsonProperty("downloaded")]
+        [JsonConverter(typeof(NegativeToNullConverter))]
+        public long? Downloaded { get; set; }
+
+        /// <summary>
+        /// The uploaded data size (bytes)
+        /// </summary>
+        [JsonProperty("uploaded")]
+        [JsonConverter(typeof(NegativeToNullConverter))]
+        public long? Uploaded { get; set; }
+
+        /// <summary>
+        /// The downloaded in this session data size (bytes)
+        /// </summary>
+        [JsonProperty("downloaded_session")]
+        [JsonConverter(typeof(NegativeToNullConverter))]
+        public long? DownloadedInSession { get; set; }
+
+        /// <summary>
+        /// The uploaded in this session data size (bytes)
+        /// </summary>
+        [JsonProperty("uploaded_session")]
+        [JsonConverter(typeof(NegativeToNullConverter))]
+        public long? UploadedInSession { get; set; }
+
+        /// <summary>
+        /// The remaining amount to download (bytes)
+        /// </summary>
+        [JsonProperty("amount_left")]
+        [JsonConverter(typeof(NegativeToNullConverter))]
+        public long? IncompletedSize { get; set; }
+
+        /// <summary>
+        /// The completed amount (bytes)
+        /// </summary>
+        [JsonProperty("completed")]
+        [JsonConverter(typeof(NegativeToNullConverter))]
+        public long? CompletedSize { get; set; }
+
+        /// <summary>
+        /// The maximal allowed ratio
+        /// </summary>
+        [JsonProperty("ratio_limit")]
+        public double? RatioLimit { get; set; }
+
+        /// <summary>
+        /// The date and time when this torrent was seen complete for the last time
+        /// </summary>
+        [JsonProperty("seen_complete")]
+        [JsonConverter(typeof(UnixTimeToNullableDateTimeConverter))]
+        public DateTime? LastSeenComplete { get; set; }
+
+        /// <summary>
+        /// The date and time when this torrent was seen active for the last time
+        /// </summary>
+        [JsonProperty("last_activity")]
+        [JsonConverter(typeof(UnixTimeToNullableDateTimeConverter))]
+        public DateTime? LastActivityTime { get; set; }
+
+        /// <summary>
+        /// The active time of this torrent
+        /// </summary>
+        [JsonProperty("time_active")]
+        [JsonConverter(typeof(SecondsToTimeSpanConverter))]
+        public TimeSpan? ActiveTime { get; set; }
+
+        /// <summary>
+        /// Indicates whether automatic torrent management is enabled.
+        /// </summary>
+        [JsonProperty("auto_tmm")]
+        public bool? AutomaticTorrentManagement { get; set; }
+
+        /// <summary>
+        /// Total torrent size (bytes)
+        /// </summary>
+        [JsonProperty("total_size")]
+        [JsonConverter(typeof(NegativeToNullConverter))]
+        public long? TotalSize { get; set; }
+
+        /// <summary>
+        /// Additional properties not handled by this library.
+        /// </summary>
+        [JsonExtensionData]
+        public IDictionary<string, JToken> AdditionalData { get; set; }
 
         /// <inheritdoc />
         public override string ToString()

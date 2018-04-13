@@ -28,7 +28,7 @@ namespace QBittorrent.Client.Converters
             if (reader.TokenType == JsonToken.Integer)
             {
                 var unixTime = Convert.ToInt64(reader.Value);
-                if (unixTime < 0)
+                if (unixTime <= 0)
                     return null;
 
                 var dto = DateTimeOffset.FromUnixTimeSeconds(unixTime);

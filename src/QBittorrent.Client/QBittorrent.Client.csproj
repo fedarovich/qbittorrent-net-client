@@ -10,9 +10,9 @@
     <Authors>Pavel Fedarovich</Authors>
     <Company>Pavel Fedarovich</Company>
     <Copyright>© Pavel Fedarovich, 2018</Copyright>
-    <PackageProjectUrl>https://github.com/fedarovich/qbittorrent-cli</PackageProjectUrl>
-    <RepositoryUrl>https://github.com/fedarovich/qbittorrent-cli</RepositoryUrl>
-    <PackageLicenseUrl>https://github.com/fedarovich/qbittorrent-cli/blob/master/LICENSE</PackageLicenseUrl>
+    <PackageProjectUrl>https://github.com/fedarovich/qbittorrent-net-client</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/fedarovich/qbittorrent-net-client</RepositoryUrl>
+    <PackageLicenseUrl>https://github.com/fedarovich/qbittorrent-net-client/blob/master/LICENSE</PackageLicenseUrl>
   </PropertyGroup>
 
   <PropertyGroup>

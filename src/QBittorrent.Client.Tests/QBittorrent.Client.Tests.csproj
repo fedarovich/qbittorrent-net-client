@@ -1,0 +1,34 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netcoreapp2.0</TargetFramework>
+
+    <IsPackable>false</IsPackable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <None Remove="docker\qbt-4.0.4\Dockerfile" />
+    <None Remove="docker\qbt-4.0.4\libtorrent-rasterbar9_1.1.6+git20180215.01c41fadcf+patched-configure-1ppa1~xenial1_amd64.deb" />
+    <None Remove="docker\qbt-4.0.4\qbittorrent-nox_4.0.4.99~201802160102-6283-d2f3d1e~ubuntu16.04.1_amd64.deb" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Docker.DotNet" Version="3.125.1" />
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="15.7.0" />
+    <PackageReference Include="SharpZipLib.NETStandard" Version="1.0.7" />
+    <PackageReference Include="xunit" Version="2.3.1" />
+    <PackageReference Include="xunit.runner.visualstudio" Version="2.3.1" />
+    <DotNetCliToolReference Include="dotnet-xunit" Version="2.3.1" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\QBittorrent.Client\QBittorrent.Client.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Update="docker\**\*.*">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+
+</Project>

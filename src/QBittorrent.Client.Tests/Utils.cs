@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Reflection;
 using System.Text;
+using System.Threading.Tasks;
 using ICSharpCode.SharpZipLib.GZip;
 using ICSharpCode.SharpZipLib.Tar;
 
@@ -9,6 +11,11 @@ namespace QBittorrent.Client.Tests
 {
     public static class Utils
     {
+        public static string StartupFolder => Path.GetDirectoryName(
+            Assembly.GetExecutingAssembly().GetModules()[0].FullyQualifiedName);
+
+        public static string TorrentsFolder => Path.Combine(StartupFolder, "torrents");
+
         public static void CreateTarGz(string tgzFilename, string sourceDirectory)
         {
             var currDir = Environment.CurrentDirectory;

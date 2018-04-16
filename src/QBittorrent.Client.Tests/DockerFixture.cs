@@ -23,18 +23,19 @@ namespace QBittorrent.Client.Tests
             ImageName = Environment.GetEnvironmentVariable("QBT_IMAGE") ?? DefaultImageName;
             var os = Environment.GetEnvironmentVariable("QBT_OS") ?? DefaulOS;
 
-            var path = Path.GetDirectoryName(
-                Assembly.GetExecutingAssembly().GetModules()[0].FullyQualifiedName);
-
             var config = new DockerClientConfiguration(new Uri("http://localhost:2375"));
             Client = config.CreateClient();
 
+            Console.WriteLine($"\tSearching docker image {ImageName}...");
             var images = await Client.Images.ListImagesAsync(
                 new ImagesListParameters { MatchName = ImageName });
             if (!images.Any())
             {
+                Console.WriteLine("\tImage not found.");
+                Console.WriteLine($"\tCreating image {ImageName}");
+                
                 var fileName = Path.Combine(Path.GetTempPath(), $"{Guid.NewGuid():N}.tgz");
-                var sourceDir = Path.Combine(path, "docker", ImageName.Replace(':', '-'), os);
+                var sourceDir = Path.Combine(Utils.StartupFolder, "docker", ImageName.Replace(':', '-'), os);
                 Utils.CreateTarGz(fileName, sourceDir);
 
                 Stream inputStream = null;
@@ -55,11 +56,15 @@ namespace QBittorrent.Client.Tests
                             var text = await reader.ReadLineAsync();
                             if (text == null)
                                 break;
+                            
+                            Console.WriteLine($"\t\t{text}");
                         }
                     }
+                    
                 }
                 finally
                 {
+                    Console.WriteLine($"\tFinished creating image {ImageName}.");
                     inputStream?.Dispose();
                     File.Delete(fileName);
                 }
@@ -69,6 +74,7 @@ namespace QBittorrent.Client.Tests
 
         public async Task DisposeAsync()
         {
+            Console.WriteLine($"\t Deleting image {ImageName}...");
             await Client.Images.DeleteImageAsync(ImageName,
                 new ImageDeleteParameters()
                 {

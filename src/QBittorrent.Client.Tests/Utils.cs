@@ -16,6 +16,41 @@ namespace QBittorrent.Client.Tests
 
         public static string TorrentsFolder => Path.Combine(StartupFolder, "torrents");
 
+        public static async Task Retry(Func<Task> action, int attempts = 5, int delayMs = 3000)
+        {
+            while (true)
+            {
+                try
+                {
+                    await action();
+                    return;
+                }
+                catch
+                {
+                    if (--attempts <= 0)
+                        throw;
+                    await Task.Delay(delayMs);
+                }
+            }
+        }
+        
+        public static async Task<T> Retry<T>(Func<Task<T>> func, int attempts = 5, int delayMs = 3000)
+        {
+            while (true)
+            {
+                try
+                {
+                    return await func();
+                }
+                catch
+                {
+                    if (--attempts <= 0)
+                        throw;
+                    await Task.Delay(delayMs);
+                }
+            }
+        }
+        
         public static void CreateTarGz(string tgzFilename, string sourceDirectory)
         {
             var currDir = Environment.CurrentDirectory;

@@ -265,7 +265,7 @@ namespace QBittorrent.Client
                 var uri = BuildUri($"/query/propertiesWebSeeds/{hash}");
                 var json = await _client.GetStringAsync(uri, token).ConfigureAwait(false);
                 var result = JsonConvert.DeserializeObject<UrlItem[]>(json);
-                return result.Select(x => x.Url).ToArray();
+                return result?.Select(x => x.Url).ToArray();
             }
         }
 

@@ -8,6 +8,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Docker.DotNet;
 using Docker.DotNet.Models;
+using Newtonsoft.Json;
 using Xunit;
 
 namespace QBittorrent.Client.Tests
@@ -56,19 +57,17 @@ namespace QBittorrent.Client.Tests
                             var text = await reader.ReadLineAsync();
                             if (text == null)
                                 break;
-                            
+
                             Console.WriteLine($"\t\t{text}");
                         }
-                    }
-                    
+                    }                   
                 }
                 finally
                 {
                     Console.WriteLine($"\tFinished creating image {ImageName}.");
                     inputStream?.Dispose();
                     File.Delete(fileName);
-                }
-                    
+                } 
             }
         }
 

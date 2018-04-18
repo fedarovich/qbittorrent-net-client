@@ -226,7 +226,7 @@ namespace QBittorrent.Client
         /// <param name="hashes">The torrent hashes.</param>
         /// <param name="token">The cancellation token.</param>
         /// <returns></returns>
-        Task<IReadOnlyDictionary<string, long>> GetTorrentDownloadLimitAsync(
+        Task<IReadOnlyDictionary<string, long?>> GetTorrentDownloadLimitAsync(
             [NotNull, ItemNotNull] IEnumerable<string> hashes,
             CancellationToken token = default);
 
@@ -248,7 +248,7 @@ namespace QBittorrent.Client
         /// <param name="hashes">The torrent hashes.</param>
         /// <param name="token">The cancellation token.</param>
         /// <returns></returns>
-        Task<IReadOnlyDictionary<string, long>> GetTorrentUploadLimitAsync(
+        Task<IReadOnlyDictionary<string, long?>> GetTorrentUploadLimitAsync(
             [NotNull, ItemNotNull] IEnumerable<string> hashes,
             CancellationToken token = default);
 

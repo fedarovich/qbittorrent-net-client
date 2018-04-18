@@ -183,7 +183,7 @@ namespace QBittorrent.Client.Tests
             var list = await Client.GetTorrentListAsync();
             list.Should().BeEmpty();
 
-            var links = new Uri[]
+            var links = new []
             {
                 new Uri(
                     "http://releases.ubuntu.com/17.10/ubuntu-17.10.1-desktop-amd64.iso.torrent?_ga=2.234486046.1639235846.1523865053-1922367372.1523865053"),
@@ -416,6 +416,411 @@ namespace QBittorrent.Client.Tests
             states.Should().BeNull(because: "torrent with this hash has not been added");
         }
         
+        #endregion
+
+        #region GetGlobalTransferInfoAsync
+
+        [Fact]
+        public async Task GetGlobalTransferInfo()
+        {
+            await Client.LoginAsync("admin", "adminadmin");
+            var info = await Client.GetGlobalTransferInfoAsync();
+            info.ConnectionStatus.Should().NotBe(ConnectionStatus.Disconnected);
+            info.DhtNodes.Should().Be(0);
+            info.DownloadedData.Should().Be(0);
+            info.DownloadSpeed.Should().Be(0);
+            info.DownloadSpeedLimit.Should().Be(0);
+            info.UploadedData.Should().Be(0);
+            info.UploadSpeed.Should().Be(0);
+            info.UploadSpeedLimit.Should().Be(0);
+        }
+
+        #endregion
+        
+        #region Pause/Resume
+
+        [Fact]
+        public async Task Pause()
+        {
+            await Client.LoginAsync("admin", "adminadmin");
+
+            var filesToAdd = Directory.GetFiles(Utils.TorrentsFolder, "*.torrent");
+
+            await Client.AddTorrentsAsync(new AddTorrentFilesRequest(filesToAdd));
+            await Task.Delay(1000);
+
+            var list = await Client.GetTorrentListAsync();
+            list.Should().OnlyContain(t => t.State != TorrentState.PausedDownload);
+
+            var hash = list[1].Hash;
+            await Client.PauseAsync(hash);
+            await Utils.Retry(async () =>
+            {
+                list = await Client.GetTorrentListAsync();
+                list.Should().ContainSingle(t => t.State == TorrentState.PausedDownload)
+                    .Which.Hash.Should().Be(hash);
+            });
+        }
+        
+        [Fact]
+        public async Task Resume()
+        {
+            await Client.LoginAsync("admin", "adminadmin");
+
+            var filesToAdd = Directory.GetFiles(Utils.TorrentsFolder, "*.torrent");
+
+            await Client.AddTorrentsAsync(new AddTorrentFilesRequest(filesToAdd) { Paused = true });
+            await Task.Delay(1000);
+
+            var list = await Client.GetTorrentListAsync();
+            list.Should().OnlyContain(t => t.State == TorrentState.PausedDownload);
+
+            var hash = list[1].Hash;
+            await Client.ResumeAsync(hash);
+
+            await Utils.Retry(async () =>
+            {
+                list = await Client.GetTorrentListAsync();
+                list.Should().ContainSingle(t => t.State != TorrentState.PausedDownload)
+                    .Which.Hash.Should().Be(hash);
+            });
+        }
+
+        [Fact]
+        public async Task PauseAll()
+        {
+            await Client.LoginAsync("admin", "adminadmin");
+
+            var filesToAdd = Directory.GetFiles(Utils.TorrentsFolder, "*.torrent");
+
+            await Client.AddTorrentsAsync(new AddTorrentFilesRequest(filesToAdd));
+            await Task.Delay(1000);
+
+            var list = await Client.GetTorrentListAsync();
+            list.Should().OnlyContain(t => t.State != TorrentState.PausedDownload);
+
+            await Client.PauseAllAsync();
+            await Utils.Retry(async () =>
+            {
+                list = await Client.GetTorrentListAsync();
+                list.Should().OnlyContain(t => t.State == TorrentState.PausedDownload);
+            });
+        }
+        
+        [Fact]
+        public async Task ResumeAll()
+        {
+            await Client.LoginAsync("admin", "adminadmin");
+
+            var filesToAdd = Directory.GetFiles(Utils.TorrentsFolder, "*.torrent");
+
+            await Client.AddTorrentsAsync(new AddTorrentFilesRequest(filesToAdd) {Paused = true});
+            await Task.Delay(1000);
+
+            var list = await Client.GetTorrentListAsync();
+            list.Should().OnlyContain(t => t.State == TorrentState.PausedDownload);
+
+            await Client.ResumeAllAsync();
+            await Utils.Retry(async () =>
+            {
+                list = await Client.GetTorrentListAsync();
+                list.Should().OnlyContain(t => t.State != TorrentState.PausedDownload);
+            });
+        }
+
+        #endregion
+
+        #region SetTorrentCategoryAsync
+
+        [Fact]
+        public async Task SetTorrentCategory()
+        {
+            await Client.LoginAsync("admin", "adminadmin");
+
+            var file = Path.Combine(Utils.TorrentsFolder, "ubuntu-16.04.4-desktop-amd64.iso.torrent");
+            
+            await Client.AddTorrentsAsync(new AddTorrentFilesRequest(file) {Paused = true});
+            await Task.Delay(1000);
+            var list = await Client.GetTorrentListAsync();
+            list.Should().ContainSingle().Which.Category.Should().BeEmpty();
+            var hash = list.Single().Hash;
+            
+            await Client.SetTorrentCategoryAsync(hash, "test");
+            await Task.Delay(1000);
+            list = await Client.GetTorrentListAsync();
+            list.Should().ContainSingle().Which.Category.Should().Be("test");
+            
+            await Client.SetTorrentCategoryAsync(hash, "a/b");
+            await Task.Delay(1000);
+            list = await Client.GetTorrentListAsync();
+            list.Should().ContainSingle().Which.Category.Should().Be("a/b");
+            
+            await Client.SetTorrentCategoryAsync(hash, "");
+            await Task.Delay(1000);
+            list = await Client.GetTorrentListAsync();
+            list.Should().ContainSingle().Which.Category.Should().BeEmpty();
+        }
+        
+        [Fact]
+        public async Task SetTorrentCategoryWithPreset()
+        {
+            await Client.LoginAsync("admin", "adminadmin");
+
+            var file = Path.Combine(Utils.TorrentsFolder, "ubuntu-16.04.4-desktop-amd64.iso.torrent");
+            
+            await Client.AddTorrentsAsync(new AddTorrentFilesRequest(file) {Paused = true, Category = "xyz"});
+            await Task.Delay(1000);
+            var list = await Client.GetTorrentListAsync();
+            list.Should().ContainSingle().Which.Category.Should().Be("xyz");
+            var hash = list.Single().Hash;
+            
+            await Client.SetTorrentCategoryAsync(hash, "test");
+            await Task.Delay(1000);
+            list = await Client.GetTorrentListAsync();
+            list.Should().ContainSingle().Which.Category.Should().Be("test");
+            
+            await Client.SetTorrentCategoryAsync(hash, "a/b");
+            await Task.Delay(1000);
+            list = await Client.GetTorrentListAsync();
+            list.Should().ContainSingle().Which.Category.Should().Be("a/b");
+            
+            await Client.SetTorrentCategoryAsync(hash, "");
+            await Task.Delay(1000);
+            list = await Client.GetTorrentListAsync();
+            list.Should().ContainSingle().Which.Category.Should().BeEmpty();
+        }
+
+        #endregion
+        
+        #region Limits
+
+        [Fact]
+        public async Task GlobalLimits()
+        {
+            const long downLimit = 2048 * 1024;
+            const long upLimit = 1024 * 1024;
+            
+            await Client.LoginAsync("admin", "adminadmin");
+            
+            var (down, up, info) = await Utils.WhenAll(
+                Client.GetGlobalDownloadLimitAsync(),
+                Client.GetGlobalUploadLimitAsync(),
+                Client.GetGlobalTransferInfoAsync());
+            down.Should().Be(0);
+            up.Should().Be(0);
+            info.DownloadSpeedLimit.Should().Be(0);
+            info.UploadSpeedLimit.Should().Be(0);
+
+            await Client.SetGlobalDownloadLimitAsync(downLimit);
+            await Task.Delay(1000);
+            (down, up, info) = await Utils.WhenAll(
+                Client.GetGlobalDownloadLimitAsync(),
+                Client.GetGlobalUploadLimitAsync(),
+                Client.GetGlobalTransferInfoAsync());          
+            down.Should().Be(downLimit);
+            up.Should().Be(0);
+            info.DownloadSpeedLimit.Should().Be(downLimit);
+            info.UploadSpeedLimit.Should().Be(0);
+            
+            await Client.SetGlobalUploadLimitAsync(upLimit);
+            await Task.Delay(1000);
+            (down, up, info) = await Utils.WhenAll(
+                Client.GetGlobalDownloadLimitAsync(),
+                Client.GetGlobalUploadLimitAsync(),
+                Client.GetGlobalTransferInfoAsync());          
+            down.Should().Be(downLimit);
+            up.Should().Be(upLimit);
+            info.DownloadSpeedLimit.Should().Be(downLimit);
+            info.UploadSpeedLimit.Should().Be(upLimit);
+            
+            await Client.SetGlobalDownloadLimitAsync(0);
+            await Task.Delay(1000);
+            (down, up, info) = await Utils.WhenAll(
+                Client.GetGlobalDownloadLimitAsync(),
+                Client.GetGlobalUploadLimitAsync(),
+                Client.GetGlobalTransferInfoAsync());          
+            down.Should().Be(0);
+            up.Should().Be(upLimit);
+            info.DownloadSpeedLimit.Should().Be(0);
+            info.UploadSpeedLimit.Should().Be(upLimit);
+            
+            await Client.SetGlobalUploadLimitAsync(0);
+            await Task.Delay(1000);
+            (down, up, info) = await Utils.WhenAll(
+                Client.GetGlobalDownloadLimitAsync(),
+                Client.GetGlobalUploadLimitAsync(),
+                Client.GetGlobalTransferInfoAsync());          
+            down.Should().Be(0);
+            up.Should().Be(0);
+            info.DownloadSpeedLimit.Should().Be(0);
+            info.UploadSpeedLimit.Should().Be(0);
+        }
+        
+        [Fact]
+        public async Task TorrentLimitsInitiallyNotSet()
+        {
+            const long downLimit = 2048 * 1024;
+            const long upLimit = 1024 * 1024;
+            
+            await Client.LoginAsync("admin", "adminadmin");
+            
+            var file = Path.Combine(Utils.TorrentsFolder, "ubuntu-16.04.4-desktop-amd64.iso.torrent");
+            
+            await Client.AddTorrentsAsync(new AddTorrentFilesRequest(file) {Paused = true});
+            await Task.Delay(1000);
+            var list = await Client.GetTorrentListAsync();
+            list.Should().ContainSingle();
+            var torrent = list.Single();
+            var hash = torrent.Hash;
+            
+            var (down, up, props) = await Utils.WhenAll(
+                Client.GetTorrentDownloadLimitAsync(hash),
+                Client.GetTorrentUploadLimitAsync(hash),
+                Client.GetTorrentPropertiesAsync(hash));
+            down.Should().Be(null);
+            up.Should().Be(null);
+            props.DownloadLimit.Should().Be(null);
+            props.UploadLimit.Should().Be(null);
+
+            await Client.SetTorrentDownloadLimitAsync(hash, downLimit);
+            await Utils.Retry(async () =>
+            {
+                (down, up, props) = await Utils.WhenAll(
+                    Client.GetTorrentDownloadLimitAsync(hash),
+                    Client.GetTorrentUploadLimitAsync(hash),
+                    Client.GetTorrentPropertiesAsync(hash));
+                down.Should().Be(downLimit);
+                up.Should().Be(0);
+                props.DownloadLimit.Should().Be(downLimit);
+                props.UploadLimit.Should().Be(null);
+            });
+            
+            await Client.SetTorrentUploadLimitAsync(hash, upLimit);
+            await Utils.Retry(async () =>
+            {
+                (down, up, props) = await Utils.WhenAll(
+                    Client.GetTorrentDownloadLimitAsync(hash),
+                    Client.GetTorrentUploadLimitAsync(hash),
+                    Client.GetTorrentPropertiesAsync(hash));
+                down.Should().Be(downLimit);
+                up.Should().Be(upLimit);
+                props.DownloadLimit.Should().Be(downLimit);
+                props.UploadLimit.Should().Be(upLimit);
+            });
+            
+            await Client.SetTorrentDownloadLimitAsync(hash, 0);
+            await Utils.Retry(async () =>
+            {
+                (down, up, props) = await Utils.WhenAll(
+                    Client.GetTorrentDownloadLimitAsync(hash),
+                    Client.GetTorrentUploadLimitAsync(hash),
+                    Client.GetTorrentPropertiesAsync(hash));
+                down.Should().Be(0);
+                up.Should().Be(upLimit);
+                props.DownloadLimit.Should().Be(null);
+                props.UploadLimit.Should().Be(upLimit);
+            });
+            
+            await Client.SetTorrentUploadLimitAsync(hash, 0);
+            await Utils.Retry(async () =>
+            {
+                (down, up, props) = await Utils.WhenAll(
+                    Client.GetTorrentDownloadLimitAsync(hash),
+                    Client.GetTorrentUploadLimitAsync(hash),
+                    Client.GetTorrentPropertiesAsync(hash));
+                down.Should().Be(0);
+                up.Should().Be(0);
+                props.DownloadLimit.Should().Be(null);
+                props.UploadLimit.Should().Be(null);
+            });
+        }
+        
+        [Fact]
+        public async Task TorrentLimitsInitiallySet()
+        {
+            const int downPreset = 4 * 1024 * 1024;
+            const int upPreset = 3 * 1024 * 1024;
+            const long downLimit = 2 * 1024 * 1024;
+            const long upLimit = 1024 * 1024;
+            
+            await Client.LoginAsync("admin", "adminadmin");
+            
+            var file = Path.Combine(Utils.TorrentsFolder, "ubuntu-16.04.4-desktop-amd64.iso.torrent");
+            
+            await Client.AddTorrentsAsync(new AddTorrentFilesRequest(file)
+            {
+                Paused = true,
+                DownloadLimit = downPreset,
+                UploadLimit = upPreset
+            });
+            await Task.Delay(1000);
+            var list = await Client.GetTorrentListAsync();
+            list.Should().ContainSingle();
+            var torrent = list.Single();
+            var hash = torrent.Hash;
+            
+            var (down, up, props) = await Utils.WhenAll(
+                Client.GetTorrentDownloadLimitAsync(hash),
+                Client.GetTorrentUploadLimitAsync(hash),
+                Client.GetTorrentPropertiesAsync(hash));
+            down.Should().Be(downPreset);
+            up.Should().Be(upPreset);
+            props.DownloadLimit.Should().Be(downPreset);
+            props.UploadLimit.Should().Be(upPreset);
+
+            await Client.SetTorrentDownloadLimitAsync(hash, downLimit);
+            await Utils.Retry(async () =>
+            {
+                (down, up, props) = await Utils.WhenAll(
+                    Client.GetTorrentDownloadLimitAsync(hash),
+                    Client.GetTorrentUploadLimitAsync(hash),
+                    Client.GetTorrentPropertiesAsync(hash));
+                down.Should().Be(downLimit);
+                up.Should().Be(upPreset);
+                props.DownloadLimit.Should().Be(downLimit);
+                props.UploadLimit.Should().Be(upPreset);
+            });
+            
+            await Client.SetTorrentUploadLimitAsync(hash, upLimit);
+            await Utils.Retry(async () =>
+            {
+                (down, up, props) = await Utils.WhenAll(
+                    Client.GetTorrentDownloadLimitAsync(hash),
+                    Client.GetTorrentUploadLimitAsync(hash),
+                    Client.GetTorrentPropertiesAsync(hash));
+                down.Should().Be(downLimit);
+                up.Should().Be(upLimit);
+                props.DownloadLimit.Should().Be(downLimit);
+                props.UploadLimit.Should().Be(upLimit);
+            });
+            
+            await Client.SetTorrentDownloadLimitAsync(hash, 0);
+            await Utils.Retry(async () =>
+            {
+                (down, up, props) = await Utils.WhenAll(
+                    Client.GetTorrentDownloadLimitAsync(hash),
+                    Client.GetTorrentUploadLimitAsync(hash),
+                    Client.GetTorrentPropertiesAsync(hash));
+                down.Should().Be(0);
+                up.Should().Be(upLimit);
+                props.DownloadLimit.Should().Be(null);
+                props.UploadLimit.Should().Be(upLimit);
+            });
+            
+            await Client.SetTorrentUploadLimitAsync(hash, 0);
+            await Utils.Retry(async () =>
+            {
+                (down, up, props) = await Utils.WhenAll(
+                    Client.GetTorrentDownloadLimitAsync(hash),
+                    Client.GetTorrentUploadLimitAsync(hash),
+                    Client.GetTorrentPropertiesAsync(hash));
+                down.Should().Be(0);
+                up.Should().Be(0);
+                props.DownloadLimit.Should().Be(null);
+                props.UploadLimit.Should().Be(null);
+            });
+        }
+
         #endregion
     }
 }

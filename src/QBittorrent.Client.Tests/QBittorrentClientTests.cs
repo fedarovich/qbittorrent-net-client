@@ -122,7 +122,7 @@ namespace QBittorrent.Client.Tests
             var list = await Client.GetTorrentListAsync();
             list.Should().BeEmpty();
 
-            await Utils.Retry(async () => await Client.LogoutAsync());
+            await Client.LogoutAsync();
             await Assert.ThrowsAsync<HttpRequestException>(() => Client.GetTorrentListAsync());
         }
         

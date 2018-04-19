@@ -121,7 +121,8 @@ namespace QBittorrent.Client.Tests
             await Client.LoginAsync("admin", "adminadmin");
             var list = await Client.GetTorrentListAsync();
             list.Should().BeEmpty();
-            await Client.LogoutAsync();
+
+            await Utils.Retry(async () => await Client.LogoutAsync());
             await Assert.ThrowsAsync<HttpRequestException>(() => Client.GetTorrentListAsync());
         }
         

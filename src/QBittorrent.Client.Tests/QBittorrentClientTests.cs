@@ -121,16 +121,16 @@ namespace QBittorrent.Client.Tests
             try
             {
                 await Client.LoginAsync("admin", "adminadmin");
-                Console.WriteLine("Logged in.");
-
                 var list = await Client.GetTorrentListAsync();
                 list.Should().BeEmpty();
 
-                Console.WriteLine("Logging out...");
+                await Task.Delay(1000);
+
                 await Client.LogoutAsync();
-                Console.WriteLine("Logged out...");
+
+                await Task.Delay(1000);
+
                 await Assert.ThrowsAsync<HttpRequestException>(() => Client.GetTorrentListAsync());
-                Console.WriteLine("Finished test.");
             }
             catch (Exception e)
             {

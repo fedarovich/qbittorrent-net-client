@@ -112,7 +112,11 @@ namespace QBittorrent.Client
         public async Task LogoutAsync(
                     CancellationToken token = default)
         {
-            await _client.PostAsync(new Uri(_uri, "/logout"), BuildForm(), token).ConfigureAwait(false);
+            var response = await _client.PostAsync(new Uri(_uri, "/logout"), BuildForm(), token).ConfigureAwait(false);
+            using (response)
+            {
+                response.EnsureSuccessStatusCode();
+            }
         }
 
         #endregion

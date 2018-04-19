@@ -118,12 +118,25 @@ namespace QBittorrent.Client.Tests
         [Fact]
         public async Task Logout()
         {
-            await Client.LoginAsync("admin", "adminadmin");
-            var list = await Client.GetTorrentListAsync();
-            list.Should().BeEmpty();
+            try
+            {
+                await Client.LoginAsync("admin", "adminadmin");
+                Console.WriteLine("Logged in.");
 
-            await Client.LogoutAsync();
-            await Assert.ThrowsAsync<HttpRequestException>(() => Client.GetTorrentListAsync());
+                var list = await Client.GetTorrentListAsync();
+                list.Should().BeEmpty();
+
+                Console.WriteLine("Logging out...");
+                await Client.LogoutAsync();
+                Console.WriteLine("Logged out...");
+                await Assert.ThrowsAsync<HttpRequestException>(() => Client.GetTorrentListAsync());
+                Console.WriteLine("Finished test.");
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+                throw;
+            }
         }
         
         #endregion

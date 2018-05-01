@@ -8,6 +8,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using JetBrains.Annotations;
 using Newtonsoft.Json;
+using QBittorrent.Client.Converters;
 using QBittorrent.Client.Extensions;
 using static QBittorrent.Client.Utils;
 
@@ -341,6 +342,32 @@ namespace QBittorrent.Client
             var json = await _client.GetStringAsync(uri, token).ConfigureAwait(false);
             var result = JsonConvert.DeserializeObject<PartialData>(json);
             return result;
+        }
+
+        /// <summary>
+        /// Gets the peer partial data.
+        /// </summary>
+        /// <param name="hash"></param>
+        /// <param name="responseId">The response identifier.</param>
+        /// <param name="token">The cancellation token.</param>
+        /// <returns></returns>
+        public Task<PeerPartialData> GetPeerPartialDataAsync(
+            string hash, 
+            int responseId = 0,
+            CancellationToken token = default )
+        {
+            ValidateHash(hash);
+            return ExecuteAsync();
+            
+            async Task<PeerPartialData> ExecuteAsync()
+            {
+                var uri = BuildUri("/sync/torrent_peers",
+                    ("rid", responseId.ToString()),
+                    ("hash", hash));
+                var json = await _client.GetStringAsync(uri, token).ConfigureAwait(false);
+                var result = JsonConvert.DeserializeObject<PeerPartialData>(json);
+                return result;
+            }
         }
 
         /// <summary>

@@ -133,6 +133,18 @@ namespace QBittorrent.Client
             CancellationToken token = default);
 
         /// <summary>
+        /// Gets the peer partial data.
+        /// </summary>
+        /// <param name="hash">The torrent hash.</param>
+        /// <param name="responseId">The response identifier.</param>
+        /// <param name="token">The cancellation token.</param>
+        /// <returns></returns>
+        Task<PeerPartialData> GetPeerPartialDataAsync(
+            string hash,
+            int responseId = 0,
+            CancellationToken token = default);
+
+        /// <summary>
         /// Adds the torrent files to download.
         /// </summary>
         /// <param name="request">The request.</param>

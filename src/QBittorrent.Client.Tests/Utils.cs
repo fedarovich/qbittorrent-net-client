@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Reflection;
 using System.Text;
+using System.Threading.Tasks;
 using ICSharpCode.SharpZipLib.GZip;
 using ICSharpCode.SharpZipLib.Tar;
 
@@ -9,6 +11,67 @@ namespace QBittorrent.Client.Tests
 {
     public static class Utils
     {
+        public static string StartupFolder => Path.GetDirectoryName(
+            Assembly.GetExecutingAssembly().GetModules()[0].FullyQualifiedName);
+
+        public static string TorrentsFolder => Path.Combine(StartupFolder, "torrents");
+
+        public static async Task Retry(Func<Task> action, int attempts = 5, int delayMs = 3000)
+        {
+            while (true)
+            {
+                try
+                {
+                    await action();
+                    return;
+                }
+                catch
+                {
+                    if (--attempts <= 0)
+                        throw;
+                    await Task.Delay(delayMs);
+                }
+            }
+        }
+        
+        public static async Task<T> Retry<T>(Func<Task<T>> func, int attempts = 5, int delayMs = 3000)
+        {
+            while (true)
+            {
+                try
+                {
+                    return await func();
+                }
+                catch
+                {
+                    if (--attempts <= 0)
+                        throw;
+                    await Task.Delay(delayMs);
+                }
+            }
+        }
+
+        public static async Task<(T1, T2)> WhenAll<T1, T2>(
+            Task<T1> task1, Task<T2> task2)
+        {
+            await Task.WhenAll(task1, task2).ConfigureAwait(false);
+            return (task1.Result, task2.Result);
+        }
+        
+        public static async Task<(T1, T2, T3)> WhenAll<T1, T2, T3>(
+            Task<T1> task1, Task<T2> task2, Task<T3> task3)
+        {
+            await Task.WhenAll(task1, task2, task3).ConfigureAwait(false);
+            return (task1.Result, task2.Result, task3.Result);
+        }
+        
+        public static async Task<(T1, T2, T3, T4)> WhenAll<T1, T2, T3, T4>(
+            Task<T1> task1, Task<T2> task2, Task<T3> task3, Task<T4> task4)
+        {
+            await Task.WhenAll(task1, task2, task3).ConfigureAwait(false);
+            return (task1.Result, task2.Result, task3.Result, task4.Result);
+        }
+        
         public static void CreateTarGz(string tgzFilename, string sourceDirectory)
         {
             var currDir = Environment.CurrentDirectory;

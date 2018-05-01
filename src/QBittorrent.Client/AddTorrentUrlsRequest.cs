@@ -16,6 +16,15 @@ namespace QBittorrent.Client
         public AddTorrentUrlsRequest() : this(Enumerable.Empty<Uri>())
         {
         }
+        
+        /// <summary>
+        /// Initializes a new instance of the <see cref="AddTorrentUrlsRequest"/> class.
+        /// </summary>
+        /// <param name="url">The URL of the torrent to add.</param>
+        public AddTorrentUrlsRequest(Uri url)
+        {
+            TorrentUrls = new List<Uri>(1) {url};
+        }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="AddTorrentUrlsRequest"/> class.

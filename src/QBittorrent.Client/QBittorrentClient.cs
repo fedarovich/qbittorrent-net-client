@@ -266,7 +266,7 @@ namespace QBittorrent.Client
                 var uri = BuildUri($"/query/propertiesWebSeeds/{hash}");
                 var json = await _client.GetStringAsync(uri, token).ConfigureAwait(false);
                 var result = JsonConvert.DeserializeObject<UrlItem[]>(json);
-                return result.Select(x => x.Url).ToArray();
+                return result?.Select(x => x.Url).ToArray();
             }
         }
 
@@ -684,14 +684,14 @@ namespace QBittorrent.Client
         /// <param name="hashes">The torrent hashes.</param>
         /// <param name="token">The cancellation token.</param>
         /// <returns></returns>
-        public Task<IReadOnlyDictionary<string, long>> GetTorrentDownloadLimitAsync(
+        public Task<IReadOnlyDictionary<string, long?>> GetTorrentDownloadLimitAsync(
             IEnumerable<string> hashes,
             CancellationToken token = default)
         {
             var hashesString = JoinHashes(hashes);
             return ExecuteAsync();
 
-            async Task<IReadOnlyDictionary<string, long>> ExecuteAsync()
+            async Task<IReadOnlyDictionary<string, long?>> ExecuteAsync()
             {
                 var uri = BuildUri("/command/getTorrentsDlLimit");
                 var response = await _client.PostAsync(
@@ -704,7 +704,7 @@ namespace QBittorrent.Client
                     response.EnsureSuccessStatusCode();
 
                     var json = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
-                    var dict = JsonConvert.DeserializeObject<Dictionary<string, long>>(json);
+                    var dict = JsonConvert.DeserializeObject<Dictionary<string, long?>>(json, new NegativeToNullConverter());
                     return dict;
                 }
             }
@@ -751,14 +751,14 @@ namespace QBittorrent.Client
         /// <param name="hashes">The torrent hashes.</param>
         /// <param name="token">The cancellation token.</param>
         /// <returns></returns>
-        public Task<IReadOnlyDictionary<string, long>> GetTorrentUploadLimitAsync(
+        public Task<IReadOnlyDictionary<string, long?>> GetTorrentUploadLimitAsync(
             IEnumerable<string> hashes,
             CancellationToken token = default)
         {
             var hashesString = JoinHashes(hashes);
             return ExecuteAsync();
 
-            async Task<IReadOnlyDictionary<string, long>> ExecuteAsync()
+            async Task<IReadOnlyDictionary<string, long?>> ExecuteAsync()
             {
                 var uri = BuildUri("/command/getTorrentsUpLimit");
                 var response = await _client.PostAsync(
@@ -771,7 +771,7 @@ namespace QBittorrent.Client
                     response.EnsureSuccessStatusCode();
 
                     var json = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
-                    var dict = JsonConvert.DeserializeObject<Dictionary<string, long>>(json);
+                    var dict = JsonConvert.DeserializeObject<Dictionary<string, long?>>(json, new NegativeToNullConverter());
                     return dict;
                 }
             }

@@ -19,6 +19,15 @@ namespace QBittorrent.Client
         /// <summary>
         /// Initializes a new instance of the <see cref="AddTorrentFilesRequest"/> class.
         /// </summary>
+        /// <param name="torrentFile">The torrent file's path.</param>
+        public AddTorrentFilesRequest(string torrentFile)
+        {
+            TorrentFiles = new List<string>(1) {torrentFile};
+        }
+        
+        /// <summary>
+        /// Initializes a new instance of the <see cref="AddTorrentFilesRequest"/> class.
+        /// </summary>
         /// <param name="torrentFiles">The torrent files' paths.</param>
         public AddTorrentFilesRequest(IEnumerable<string> torrentFiles)
         {

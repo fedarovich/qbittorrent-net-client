@@ -9,14 +9,8 @@ namespace QBittorrent.Client.Tests
     {
         public override void After(MethodInfo methodUnderTest)
         {
-            Console.WriteLine("\tRunning test " + methodUnderTest.Name);
+            Console.WriteLine("\tRunning test {0}.{1}...", methodUnderTest.DeclaringType.Name, methodUnderTest.Name);
             base.After(methodUnderTest);
-        }
-
-        public override void Before(MethodInfo methodUnderTest)
-        {
-            base.Before(methodUnderTest);
-            Console.WriteLine("\t------------------------------");
         }
     }
 }

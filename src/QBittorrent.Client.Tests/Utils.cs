@@ -16,6 +16,8 @@ namespace QBittorrent.Client.Tests
 
         public static string TorrentsFolder => Path.Combine(StartupFolder, "torrents");
 
+        public static bool IsWindows => Environment.OSVersion.Platform == PlatformID.Win32NT;
+
         public static async Task Retry(Func<Task> action, int attempts = 5, int delayMs = 3000)
         {
             while (true)

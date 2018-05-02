@@ -46,11 +46,7 @@ namespace QBittorrent.Client.Tests
                 {
                     ["8080/tcp"] = new EmptyStruct()
                 },
-            };
-
-            if (Environment.OSVersion.Platform != PlatformID.Win32NT)
-            {
-                createContainerParameters.HostConfig = new HostConfig
+                HostConfig = new HostConfig
                 {
                     PortBindings = new Dictionary<string, IList<PortBinding>>
                     {
@@ -58,13 +54,13 @@ namespace QBittorrent.Client.Tests
                         {
                             new PortBinding
                             {
-                                HostIP = "0.0.0.0",
+                                HostIP = Utils.IsWindows ? null : "0.0.0.0",
                                 HostPort = "8080"
                             }
                         }
                     }
-                };
-            }
+                }
+            };
 
             Console.WriteLine("\tCreating container from image...");
             var result = await DockerFixture.Client.Containers.CreateContainerAsync(

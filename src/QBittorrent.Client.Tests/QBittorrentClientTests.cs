@@ -95,6 +95,7 @@ namespace QBittorrent.Client.Tests
         #region Login/Logout
         
         [Fact]
+        [PrintTestName]
         public async Task LoginCorrect()
         {
             await Client.LoginAsync("admin", "adminadmin");
@@ -103,6 +104,7 @@ namespace QBittorrent.Client.Tests
         }
         
         [Fact]
+        [PrintTestName]
         public async Task LoginIncorrect()
         {
             await Client.LoginAsync("admin", "incorrect");
@@ -110,6 +112,7 @@ namespace QBittorrent.Client.Tests
         }
         
         [Fact]
+        [PrintTestName]
         public async Task NoLogin()
         {
             await Assert.ThrowsAsync<HttpRequestException>(() => Client.GetTorrentListAsync());
@@ -117,6 +120,7 @@ namespace QBittorrent.Client.Tests
 
 #warning TODO: Fix this test.
         [Fact(Skip = "This test often fails on the build agent for some reason. TODO: Find the reason.")]
+        [PrintTestName]
         public async Task Logout()
         {
             try
@@ -145,6 +149,7 @@ namespace QBittorrent.Client.Tests
         #region Add Torrent
 
         [Fact]
+        [PrintTestName]
         public async Task AddTorrentsFromFiles()
         {
             await Client.LoginAsync("admin", "adminadmin");
@@ -170,6 +175,7 @@ namespace QBittorrent.Client.Tests
         }
         
         [Fact]
+        [PrintTestName]
         public async Task AddTorrentsFromMagnetLinks()
         {
             await Client.LoginAsync("admin", "adminadmin");
@@ -194,6 +200,7 @@ namespace QBittorrent.Client.Tests
         }
         
         [Fact]
+        [PrintTestName]
         public async Task AddTorrentsFromHttpLinks()
         {
             await Client.LoginAsync("admin", "adminadmin");
@@ -226,6 +233,7 @@ namespace QBittorrent.Client.Tests
         #region GetTorrentPropertiesAsync
         
         [Fact]
+        [PrintTestName]
         public async Task GetTorrentProperties()
         {
             await Client.LoginAsync("admin", "adminadmin");
@@ -251,6 +259,7 @@ namespace QBittorrent.Client.Tests
         }
 
         [Fact]
+        [PrintTestName]
         public async Task GetTorrentPropertiesUnknown()
         {
             await Client.LoginAsync("admin", "adminadmin");
@@ -266,6 +275,7 @@ namespace QBittorrent.Client.Tests
         #region GetTorrentContentsAsync
 
         [Fact]
+        [PrintTestName]
         public async Task GetTorrentContentsSingle()
         {
             await Client.LoginAsync("admin", "adminadmin");
@@ -290,6 +300,7 @@ namespace QBittorrent.Client.Tests
         }
         
         [Fact]
+        [PrintTestName]
         public async Task GetTorrentContentsMulti()
         {
             await Client.LoginAsync("admin", "adminadmin");
@@ -322,6 +333,7 @@ namespace QBittorrent.Client.Tests
         }
 
         [Fact]
+        [PrintTestName]
         public async Task GetTorrentContentsUnknown()
         {
             await Client.LoginAsync("admin", "adminadmin");
@@ -337,6 +349,7 @@ namespace QBittorrent.Client.Tests
         #region GetTorrentTrackersAsync
         
         [Fact]
+        [PrintTestName]
         public async Task GetTorrentTrackers()
         {
             await Client.LoginAsync("admin", "adminadmin");
@@ -359,6 +372,7 @@ namespace QBittorrent.Client.Tests
         }
         
         [Fact]
+        [PrintTestName]
         public async Task GetTorrentTrackersUnknown()
         {
             await Client.LoginAsync("admin", "adminadmin");
@@ -374,6 +388,7 @@ namespace QBittorrent.Client.Tests
         #region GetTorrentWebSeedsAsync
 
         [Fact]
+        [PrintTestName]
         public async Task GetTorrentWebSeeds()
         {
             await Client.LoginAsync("admin", "adminadmin");
@@ -393,6 +408,7 @@ namespace QBittorrent.Client.Tests
         }
 
         [Fact]
+        [PrintTestName]
         public async Task GetTorrentWebSeedsUnknown()
         {
             await Client.LoginAsync("admin", "adminadmin");
@@ -408,6 +424,7 @@ namespace QBittorrent.Client.Tests
         #region GetTorrentPiecesStatesAsync/GetTorrentPiecesHashesAsync
 
         [Fact]
+        [PrintTestName]
         public async Task GetTorrentPiecesAndStates()
         {
             await Client.LoginAsync("admin", "adminadmin");
@@ -442,6 +459,7 @@ namespace QBittorrent.Client.Tests
         }
 
         [Fact]
+        [PrintTestName]
         public async Task GetTorrentPiecesAndStatesUnknown()
         {
             await Client.LoginAsync("admin", "adminadmin");
@@ -462,6 +480,7 @@ namespace QBittorrent.Client.Tests
         #region GetGlobalTransferInfoAsync
 
         [Fact]
+        [PrintTestName]
         public async Task GetGlobalTransferInfo()
         {
             await Client.LoginAsync("admin", "adminadmin");
@@ -481,6 +500,7 @@ namespace QBittorrent.Client.Tests
         #region Pause/Resume
 
         [Fact]
+        [PrintTestName]
         public async Task Pause()
         {
             await Client.LoginAsync("admin", "adminadmin");
@@ -504,6 +524,7 @@ namespace QBittorrent.Client.Tests
         }
         
         [Fact]
+        [PrintTestName]
         public async Task Resume()
         {
             await Client.LoginAsync("admin", "adminadmin");
@@ -528,6 +549,7 @@ namespace QBittorrent.Client.Tests
         }
 
         [Fact]
+        [PrintTestName]
         public async Task PauseAll()
         {
             await Client.LoginAsync("admin", "adminadmin");
@@ -549,6 +571,7 @@ namespace QBittorrent.Client.Tests
         }
         
         [Fact]
+        [PrintTestName]
         public async Task ResumeAll()
         {
             await Client.LoginAsync("admin", "adminadmin");
@@ -574,6 +597,7 @@ namespace QBittorrent.Client.Tests
         #region SetTorrentCategoryAsync
 
         [Fact]
+        [PrintTestName]
         public async Task SetTorrentCategory()
         {
             await Client.LoginAsync("admin", "adminadmin");
@@ -603,6 +627,7 @@ namespace QBittorrent.Client.Tests
         }
         
         [Fact]
+        [PrintTestName]
         public async Task SetTorrentCategoryWithPreset()
         {
             await Client.LoginAsync("admin", "adminadmin");
@@ -636,6 +661,7 @@ namespace QBittorrent.Client.Tests
         #region Limits
 
         [Fact]
+        [PrintTestName]
         public async Task GlobalLimits()
         {
             const long downLimit = 2048 * 1024;
@@ -698,6 +724,7 @@ namespace QBittorrent.Client.Tests
         }
         
         [Fact]
+        [PrintTestName]
         public async Task TorrentLimitsInitiallyNotSet()
         {
             const long downLimit = 2048 * 1024;
@@ -777,6 +804,7 @@ namespace QBittorrent.Client.Tests
         }
         
         [Fact]
+        [PrintTestName]
         public async Task TorrentLimitsInitiallySet()
         {
             const int downPreset = 4 * 1024 * 1024;

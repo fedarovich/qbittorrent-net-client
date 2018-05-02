@@ -78,6 +78,10 @@ namespace QBittorrent.Client.Tests
                 new ContainerStartParameters());
             Assert.True(started, "started");
             Console.WriteLine($"\tStarted container {ContainerId}.");
+
+            Console.WriteLine("\tEnsuring qBittorrent availability...");
+            await Utils.Retry(() => Client.GetApiVersionAsync(), delayMs: 5000);
+            Console.WriteLine("\tqBittorrent is available!");
         }
 
         public async Task DisposeAsync()
@@ -118,8 +122,7 @@ namespace QBittorrent.Client.Tests
             await Assert.ThrowsAsync<HttpRequestException>(() => Client.GetTorrentListAsync());
         }
 
-#warning TODO: Fix this test.
-        [Fact(Skip = "This test often fails on the build agent for some reason. TODO: Find the reason.")]
+        [Fact]
         [PrintTestName]
         public async Task Logout()
         {

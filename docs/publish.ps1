@@ -15,7 +15,7 @@ if (Test-Path "$RepoPath") {
 }
 
 git clone "$RepoUri" "$RepoPath" -q
-Copy-Item -Path _site/* -Destination "$RepoPath" -Recurse
+Copy-Item -Path _site/* -Destination "$RepoPath" -Recurse -Force
 
 pushd "$RepoPath"
 

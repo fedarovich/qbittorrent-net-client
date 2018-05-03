@@ -6,14 +6,14 @@
           "files": [
             "src/QBittorrent.Client/QBittorrent.Client.csproj"
           ],
-		  "cwd": ".."
+          "cwd": ".."
         }
       ],
       "dest": "api",
       "disableGitFeatures": false,
-	  "properties": {
-		"TargetFramework": "netstandard2.0"
-	  }
+      "properties": {
+        "TargetFramework": "netstandard2.0"
+      }
     }
   ],
   "build": {
@@ -32,11 +32,11 @@
           "*.md"
         ]
       },
-	  {
-	    "files": [
-		  "fusion/**"
-		]
-	  }
+      {
+        "files": [
+          "fusion/**"
+        ]
+      }
     ],
     "resource": [
       {
@@ -57,6 +57,12 @@
       }
     ],
     "dest": "_site",
+    "globalMetadata": {
+      "_appTitle": "qBittorrent Client Library for .Net",
+      "_appFooter": "Copyright © 2018 Pavel Fedarovich",
+      "_appLogoPath": "images/icon.svg",
+      "_appFaviconPath": "images/favicon.png"
+    },
     "globalMetadataFiles": [],
     "fileMetadataFiles": [],
     "template": [
@@ -67,7 +73,7 @@
     "keepFileLink": false,
     "cleanupCacheHistory": false,
     "disableGitFeatures": false,
-	"xrefService": [
+    "xrefService": [
       "https://xref.docs.microsoft.com/query?uid={uid}"
     ]
   }

@@ -24,8 +24,19 @@ namespace QBittorrent.Client.Converters
 
             if (reader.TokenType == JsonToken.Integer)
             {
-                var seconds = Convert.ToInt32(reader.Value);
-                return new TimeSpan(0, 0, seconds);
+                long totalSeconds = Convert.ToInt64(reader.Value);
+                if (totalSeconds >= 0)
+                {
+                    return totalSeconds > TimeSpan.MaxValue.Ticks / TimeSpan.TicksPerSecond
+                        ? TimeSpan.MaxValue
+                        : new TimeSpan(totalSeconds * TimeSpan.TicksPerSecond);
+                }
+                else
+                {
+                    return totalSeconds < TimeSpan.MinValue.Ticks / TimeSpan.TicksPerSecond
+                        ? TimeSpan.MinValue
+                        : new TimeSpan(totalSeconds * TimeSpan.TicksPerSecond);
+                }
             }
 
             throw new JsonSerializationException($"Unexpected token {reader.TokenType} when parsing integer.");

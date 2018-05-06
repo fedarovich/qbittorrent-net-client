@@ -92,6 +92,38 @@ namespace QBittorrent.Client.Tests
 
         #endregion
 
+        #region Versions
+
+        [Fact]
+        public async Task GetApiVersion()
+        {
+            var version = await Client.GetApiVersionAsync();
+            version.Should().Be(DockerFixture.Env.ApiVersion);
+        }
+        
+        [Fact]
+        public async Task GetLegacyApiVersion()
+        {
+            var version = await Client.GetLegacyApiVersionAsync();
+            version.Should().Be(DockerFixture.Env.LegacyApiVersion);
+        }
+        
+        [Fact]
+        public async Task GetLegacyMinApiVersion()
+        {
+            var version = await Client.GetLegacyMinApiVersionAsync();
+            version.Should().Be(DockerFixture.Env.LegacyMinApiVersion);
+        }
+
+        [Fact]
+        public async Task GetQBittorrentVersion()
+        {
+            var version = await Client.GetQBittorrentVersionAsync();
+            version.Should().Be(DockerFixture.Env.QBittorrentVersion);
+        }
+        
+        #endregion
+        
         #region Login/Logout
         
         [Fact]

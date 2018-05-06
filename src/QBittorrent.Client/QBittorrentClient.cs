@@ -4,6 +4,7 @@ using System.Linq;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
 using JetBrains.Annotations;
@@ -127,8 +128,31 @@ namespace QBittorrent.Client
         /// Gets the current API version of the server.
         /// </summary>
         /// <param name="token">The cancellation token.</param>
+        /// <remarks>
+        /// <para>
+        /// For qBittorrent versions before 4.1.0 this method returns version <c>1.z</c>
+        /// where <c>z</c> is the value returned by <see cref="GetLegacyApiVersionAsync"/> method.
+        /// </para>
+        /// <para>
+        /// For qBittorrent version starting from 4.1.0 this method returns version <c>x.y</c>
+        /// where <c>x >= 2</c>. 
+        /// </para>
+        /// </remarks>
         /// <returns></returns>
-        public async Task<int> GetApiVersionAsync(CancellationToken token = default)
+        public async Task<Version> GetApiVersionAsync(CancellationToken token = default)
+        {
+            // TODO: Implement for qBittorrent 4.1.0+.
+
+            var legacyVersion = await GetLegacyApiVersionAsync(token).ConfigureAwait(false);
+            return new Version(1, legacyVersion);
+        }
+
+        /// <summary>
+        /// Gets the current API version of the server for qBittorrent versions up to 4.0.4.
+        /// </summary>
+        /// <param name="token">The cancellation token.</param>
+        /// <returns></returns>
+        public async Task<int> GetLegacyApiVersionAsync(CancellationToken token = default)
         {
             var uri = BuildUri("/version/api");
             var version = await _client.GetStringAsync(uri, token).ConfigureAwait(false);
@@ -140,7 +164,7 @@ namespace QBittorrent.Client
         /// </summary>
         /// <param name="token">The cancellation token.</param>
         /// <returns></returns>
-        public async Task<int> GetMinApiVersionAsync(CancellationToken token = default)
+        public async Task<int> GetLegacyMinApiVersionAsync(CancellationToken token = default)
         {
             var uri = BuildUri("/version/api_min");
             var version = await _client.GetStringAsync(uri, token).ConfigureAwait(false);
@@ -152,10 +176,12 @@ namespace QBittorrent.Client
         /// </summary>
         /// <param name="token">The cancellation token.</param>
         /// <returns></returns>
-        public Task<string> GetQBittorrentVersionAsync(CancellationToken token = default)
+        public async Task<Version> GetQBittorrentVersionAsync(CancellationToken token = default)
         {
             var uri = BuildUri("/version/qbittorrent");
-            return _client.GetStringAsync(uri, token);
+            var version = await _client.GetStringAsync(uri, token).ConfigureAwait(false);
+            var match = Regex.Match(version, @"\d+\.\d+(?:\.\d+(?:\.\d+)?)?");
+            return match.Success ? new Version(match.Value) : null;
         }
 
         /// <summary>

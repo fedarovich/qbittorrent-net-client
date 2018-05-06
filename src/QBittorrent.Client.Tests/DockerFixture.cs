@@ -18,12 +18,18 @@ namespace QBittorrent.Client.Tests
         public string ImageName { get; private set; }
 
         public DockerClient Client { get; private set;}
+        
+        public Env Env { get; private set; }
 
         public async Task InitializeAsync()
         {
             ImageName = Environment.GetEnvironmentVariable("QBT_IMAGE") ?? DefaultImageName;
             var os = Environment.GetEnvironmentVariable("QBT_OS") ?? DefaulOS;
 
+            var env = File.ReadAllText(
+                Path.Combine(Utils.StartupFolder, "docker", ImageName.Replace(':', '-'), os, "env.json"));
+            Env = JsonConvert.DeserializeObject<Env>(env);
+            
             var config = new DockerClientConfiguration(new Uri("http://localhost:2375"));
             Client = config.CreateClient();
 

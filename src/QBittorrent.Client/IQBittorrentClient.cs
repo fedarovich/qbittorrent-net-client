@@ -484,22 +484,39 @@ namespace QBittorrent.Client
         /// Gets the current API version of the server.
         /// </summary>
         /// <param name="token">The cancellation token.</param>
+        /// <remarks>
+        /// <para>
+        /// For qBittorrent versions before 4.1.0 this method returns version <c>1.z</c>
+        /// where <c>z</c> is the value returned by <see cref="GetLegacyApiVersionAsync"/> method.
+        /// </para>
+        /// <para>
+        /// For qBittorrent version starting from 4.1.0 this method returns version <c>x.y</c>
+        /// where <c>x >= 2</c>. 
+        /// </para>
+        /// </remarks>
         /// <returns></returns>
-        Task<int> GetApiVersionAsync(CancellationToken token = default);
+        Task<Version> GetApiVersionAsync(CancellationToken token = default);
+        
+        /// <summary>
+        /// Gets the current API version of the server for qBittorrent versions up to 4.0.4.
+        /// </summary>
+        /// <param name="token">The cancellation token.</param>
+        /// <returns></returns>
+        Task<int> GetLegacyApiVersionAsync(CancellationToken token = default);
 
         /// <summary>
         /// Get the minimum API version supported by server. Any application designed to work with an API version greater than or equal to the minimum API version is guaranteed to work.
         /// </summary>
         /// <param name="token">The cancellation token.</param>
         /// <returns></returns>
-        Task<int> GetMinApiVersionAsync(CancellationToken token = default);
+        Task<int> GetLegacyMinApiVersionAsync(CancellationToken token = default);
 
         /// <summary>
         /// Gets the qBittorrent version.
         /// </summary>
         /// <param name="token">The cancellation token.</param>
         /// <returns></returns>
-        Task<string> GetQBittorrentVersionAsync(CancellationToken token = default);
+        Task<Version> GetQBittorrentVersionAsync(CancellationToken token = default);
 
         /// <summary>
         /// Get the path to the folder where the downloaded files are saved by default.

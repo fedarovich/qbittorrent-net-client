@@ -48,6 +48,7 @@ namespace QBittorrent.Client.Tests
                 },
                 HostConfig = new HostConfig
                 {
+                    AutoRemove = true,
                     PortBindings = new Dictionary<string, IList<PortBinding>>
                     {
                         ["8080/tcp"] = new List<PortBinding>
@@ -75,9 +76,24 @@ namespace QBittorrent.Client.Tests
             Assert.True(started, "started");
             Console.WriteLine($"\tStarted container {ContainerId}.");
 
-            Console.WriteLine("\tEnsuring qBittorrent availability...");
-            await Utils.Retry(() => Client.GetApiVersionAsync(), delayMs: 5000);
-            Console.WriteLine("\tqBittorrent is available!");
+            try
+            {
+                Console.WriteLine("\tEnsuring qBittorrent availability...");
+                using (var tempClient = new QBittorrentClient(new Uri("http://localhost:8080")))
+                {
+                    await Utils.Retry(() => tempClient.LoginAsync("admin", "adminadmin"), delayMs: 5000);
+                }
+                Console.WriteLine("\tqBittorrent is available!");
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("\tqBittorrent is not available!");
+                Console.WriteLine($"\t{ex}");
+                Console.WriteLine($"\tStopping container {ContainerId}...");
+                await DockerFixture.Client.Containers.StopContainerAsync(ContainerId,
+                    new ContainerStopParameters { WaitBeforeKillSeconds = 10u });
+                throw;
+            }
         }
 
         public async Task DisposeAsync()
@@ -85,9 +101,7 @@ namespace QBittorrent.Client.Tests
             Console.WriteLine($"\tStopping container {ContainerId}...");
             await DockerFixture.Client.Containers.StopContainerAsync(ContainerId,
                 new ContainerStopParameters {WaitBeforeKillSeconds = 10u});
-            Console.WriteLine($"\tDeleting container {ContainerId}...");
-            await DockerFixture.Client.Containers.RemoveContainerAsync(ContainerId,
-                new ContainerRemoveParameters {Force = true});
+            await DockerFixture.Client.Containers.WaitContainerAsync(ContainerId);
         }
 
         #endregion

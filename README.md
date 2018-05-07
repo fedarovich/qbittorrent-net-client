@@ -9,7 +9,7 @@
 
 qBittorrent Client Library for .Net allows you to access qBittorrent remote web API from any .Net language.
 
-This library is compiled for .Net Standard 1.3+, so it can be in applications written for .Net Framework 4.6+ and .Net Core 1.0+.
+This library is compiled for .Net Standard 1.3+, so it can be used in applications written for .Net Framework 4.6+ and .Net Core 1.0+.
 
 ## Documentation
 

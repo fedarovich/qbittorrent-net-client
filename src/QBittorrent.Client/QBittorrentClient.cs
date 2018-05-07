@@ -23,6 +23,8 @@ namespace QBittorrent.Client
     /// <seealso cref="QBittorrentClientExtensions"/>
     public class QBittorrentClient : IQBittorrentClient, IDisposable
     {
+        private const int NewApiLegacyVersion = 18;
+
         private readonly Uri _uri;
         private readonly HttpClient _client;
 
@@ -141,10 +143,13 @@ namespace QBittorrent.Client
         /// <returns></returns>
         public async Task<Version> GetApiVersionAsync(CancellationToken token = default)
         {
-            // TODO: Implement for qBittorrent 4.1.0+.
-
             var legacyVersion = await GetLegacyApiVersionAsync(token).ConfigureAwait(false);
-            return new Version(1, legacyVersion);
+            if (legacyVersion < NewApiLegacyVersion)
+                return new Version(1, legacyVersion);
+
+            var uri = BuildUri("/api/v2/app/webapiVersion");
+            var version = await _client.GetStringAsync(uri, token).ConfigureAwait(false);
+            return new Version(version);
         }
 
         /// <summary>

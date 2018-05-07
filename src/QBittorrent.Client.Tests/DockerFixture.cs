@@ -28,6 +28,8 @@ namespace QBittorrent.Client.Tests
 
             var env = File.ReadAllText(
                 Path.Combine(Utils.StartupFolder, "docker", ImageName.Replace(':', '-'), os, "env.json"));
+            Console.WriteLine("Test Environment:");
+            Console.WriteLine(env);
             Env = JsonConvert.DeserializeObject<Env>(env);
             
             var config = new DockerClientConfiguration(new Uri("http://localhost:2375"));

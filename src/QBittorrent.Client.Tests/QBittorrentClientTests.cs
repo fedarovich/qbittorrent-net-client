@@ -48,7 +48,6 @@ namespace QBittorrent.Client.Tests
                 },
                 HostConfig = new HostConfig
                 {
-                    AutoRemove = true,
                     PortBindings = new Dictionary<string, IList<PortBinding>>
                     {
                         ["8080/tcp"] = new List<PortBinding>
@@ -102,6 +101,8 @@ namespace QBittorrent.Client.Tests
             await DockerFixture.Client.Containers.StopContainerAsync(ContainerId,
                 new ContainerStopParameters {WaitBeforeKillSeconds = 10u});
             await DockerFixture.Client.Containers.WaitContainerAsync(ContainerId);
+            await DockerFixture.Client.Containers.RemoveContainerAsync(ContainerId,
+                new ContainerRemoveParameters { Force = true });
         }
 
         #endregion

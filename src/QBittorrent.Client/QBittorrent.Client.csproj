@@ -18,7 +18,7 @@
   <PropertyGroup>
     <DocumentationFile>bin\$(Configuration)\$(TargetFramework)\QBittorrent.Client.xml</DocumentationFile>
     <Description>qBittorrent remote API client library</Description>
-    <PackageIconUrl>https://raw.githubusercontent.com/fedarovich/qbittorrent-net-client/master/resources/nuget.png</PackageIconUrl>
+    <PackageIconUrl>https://cdn.rawgit.com/fedarovich/qbittorrent-net-client/48c29a08825a8a315ac1c3c6591276166d613d64/resources/nuget.png</PackageIconUrl>
   </PropertyGroup>
 
   <ItemGroup>

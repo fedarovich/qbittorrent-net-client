@@ -18,6 +18,9 @@ namespace QBittorrent.Client.Tests
     [Collection(DockerCollection.Name)]
     public class QBittorrentClientTests : IAsyncLifetime, IDisposable
     {
+        private const string UserName = "admin";
+        private const string Password = "adminadmin";
+        
         private string ContainerId { get; set; }
 
         private DockerFixture DockerFixture { get; }
@@ -80,7 +83,7 @@ namespace QBittorrent.Client.Tests
                 Console.WriteLine("\tEnsuring qBittorrent availability...");
                 using (var tempClient = new QBittorrentClient(new Uri("http://localhost:8080")))
                 {
-                    await Utils.Retry(() => tempClient.LoginAsync("admin", "adminadmin"), delayMs: 5000);
+                    await Utils.Retry(() => tempClient.LoginAsync(UserName, Password), delayMs: 5000);
                 }
                 Console.WriteLine("\tqBittorrent is available!");
             }
@@ -110,13 +113,16 @@ namespace QBittorrent.Client.Tests
         #region Versions
 
         [Fact]
+        [PrintTestName]
         public async Task GetApiVersion()
         {
+            await Client.LoginAsync(UserName, Password);
             var version = await Client.GetApiVersionAsync();
             version.Should().Be(DockerFixture.Env.ApiVersion);
         }
         
         [Fact]
+        [PrintTestName]
         public async Task GetLegacyApiVersion()
         {
             var version = await Client.GetLegacyApiVersionAsync();
@@ -124,6 +130,7 @@ namespace QBittorrent.Client.Tests
         }
         
         [Fact]
+        [PrintTestName]
         public async Task GetLegacyMinApiVersion()
         {
             var version = await Client.GetLegacyMinApiVersionAsync();
@@ -131,6 +138,7 @@ namespace QBittorrent.Client.Tests
         }
 
         [Fact]
+        [PrintTestName]
         public async Task GetQBittorrentVersion()
         {
             var version = await Client.GetQBittorrentVersionAsync();
@@ -145,7 +153,7 @@ namespace QBittorrent.Client.Tests
         [PrintTestName]
         public async Task LoginCorrect()
         {
-            await Client.LoginAsync("admin", "adminadmin");
+            await Client.LoginAsync(UserName, Password);
             var list = await Client.GetTorrentListAsync();
             list.Should().BeEmpty();
         }
@@ -154,7 +162,7 @@ namespace QBittorrent.Client.Tests
         [PrintTestName]
         public async Task LoginIncorrect()
         {
-            await Client.LoginAsync("admin", "incorrect");
+            await Client.LoginAsync(UserName, "incorrect");
             await Assert.ThrowsAsync<HttpRequestException>(() => Client.GetTorrentListAsync());
         }
         
@@ -171,7 +179,7 @@ namespace QBittorrent.Client.Tests
         {
             try
             {
-                await Client.LoginAsync("admin", "adminadmin");
+                await Client.LoginAsync(UserName, Password);
                 var list = await Client.GetTorrentListAsync();
                 list.Should().BeEmpty();
 
@@ -198,7 +206,7 @@ namespace QBittorrent.Client.Tests
         [PrintTestName]
         public async Task AddTorrentsFromFiles()
         {
-            await Client.LoginAsync("admin", "adminadmin");
+            await Client.LoginAsync(UserName, Password);
             var list = await Client.GetTorrentListAsync();
             list.Should().BeEmpty();
 
@@ -224,7 +232,7 @@ namespace QBittorrent.Client.Tests
         [PrintTestName]
         public async Task AddTorrentsFromMagnetLinks()
         {
-            await Client.LoginAsync("admin", "adminadmin");
+            await Client.LoginAsync(UserName, Password);
             var list = await Client.GetTorrentListAsync();
             list.Should().BeEmpty();
 
@@ -249,7 +257,7 @@ namespace QBittorrent.Client.Tests
         [PrintTestName]
         public async Task AddTorrentsFromHttpLinks()
         {
-            await Client.LoginAsync("admin", "adminadmin");
+            await Client.LoginAsync(UserName, Password);
             var list = await Client.GetTorrentListAsync();
             list.Should().BeEmpty();
 
@@ -282,7 +290,7 @@ namespace QBittorrent.Client.Tests
         [PrintTestName]
         public async Task GetTorrentProperties()
         {
-            await Client.LoginAsync("admin", "adminadmin");
+            await Client.LoginAsync(UserName, Password);
 
             var torrentPath = Path.Combine(Utils.TorrentsFolder, "ubuntu-16.04.4-desktop-amd64.iso.torrent");
             var parser = new BencodeParser();
@@ -308,7 +316,7 @@ namespace QBittorrent.Client.Tests
         [PrintTestName]
         public async Task GetTorrentPropertiesUnknown()
         {
-            await Client.LoginAsync("admin", "adminadmin");
+            await Client.LoginAsync(UserName, Password);
             await Utils.Retry(async () =>
             {
                 var props = await Client.GetTorrentPropertiesAsync("0000000000000000000000000000000000000000");
@@ -324,7 +332,7 @@ namespace QBittorrent.Client.Tests
         [PrintTestName]
         public async Task GetTorrentContentsSingle()
         {
-            await Client.LoginAsync("admin", "adminadmin");
+            await Client.LoginAsync(UserName, Password);
 
             var torrentPath = Path.Combine(Utils.TorrentsFolder, "ubuntu-16.04.4-desktop-amd64.iso.torrent");
             var parser = new BencodeParser();
@@ -349,7 +357,7 @@ namespace QBittorrent.Client.Tests
         [PrintTestName]
         public async Task GetTorrentContentsMulti()
         {
-            await Client.LoginAsync("admin", "adminadmin");
+            await Client.LoginAsync(UserName, Password);
 
             var torrentPath = Path.Combine(Utils.TorrentsFolder, "ubuntu-14.04-pack.torrent");
             var parser = new BencodeParser();
@@ -382,7 +390,7 @@ namespace QBittorrent.Client.Tests
         [PrintTestName]
         public async Task GetTorrentContentsUnknown()
         {
-            await Client.LoginAsync("admin", "adminadmin");
+            await Client.LoginAsync(UserName, Password);
             await Utils.Retry(async () =>
             {
                 var contents = await Client.GetTorrentContentsAsync("0000000000000000000000000000000000000000");
@@ -398,7 +406,7 @@ namespace QBittorrent.Client.Tests
         [PrintTestName]
         public async Task GetTorrentTrackers()
         {
-            await Client.LoginAsync("admin", "adminadmin");
+            await Client.LoginAsync(UserName, Password);
 
             var torrentPath = Path.Combine(Utils.TorrentsFolder, "ubuntu-16.04.4-desktop-amd64.iso.torrent");
             var parser = new BencodeParser();
@@ -421,7 +429,7 @@ namespace QBittorrent.Client.Tests
         [PrintTestName]
         public async Task GetTorrentTrackersUnknown()
         {
-            await Client.LoginAsync("admin", "adminadmin");
+            await Client.LoginAsync(UserName, Password);
             await Utils.Retry(async () =>
             {
                 var trackers = await Client.GetTorrentTrackersAsync("0000000000000000000000000000000000000000");
@@ -437,7 +445,7 @@ namespace QBittorrent.Client.Tests
         [PrintTestName]
         public async Task GetTorrentWebSeeds()
         {
-            await Client.LoginAsync("admin", "adminadmin");
+            await Client.LoginAsync(UserName, Password);
 
             var torrentPath = Path.Combine(Utils.TorrentsFolder, "ubuntu-16.04.4-desktop-amd64.iso.torrent");
             var parser = new BencodeParser();
@@ -457,7 +465,7 @@ namespace QBittorrent.Client.Tests
         [PrintTestName]
         public async Task GetTorrentWebSeedsUnknown()
         {
-            await Client.LoginAsync("admin", "adminadmin");
+            await Client.LoginAsync(UserName, Password);
             await Utils.Retry(async () =>
             {
                 var webSeeds = await Client.GetTorrentWebSeedsAsync("0000000000000000000000000000000000000000");
@@ -473,7 +481,7 @@ namespace QBittorrent.Client.Tests
         [PrintTestName]
         public async Task GetTorrentPiecesAndStates()
         {
-            await Client.LoginAsync("admin", "adminadmin");
+            await Client.LoginAsync(UserName, Password);
 
             var torrentPath = Path.Combine(Utils.TorrentsFolder, "ubuntu-16.04.4-desktop-amd64.iso.torrent");
             var parser = new BencodeParser();
@@ -483,9 +491,12 @@ namespace QBittorrent.Client.Tests
             await Client.AddTorrentsAsync(addRequest);
 
             var torrentHash = torrent.OriginalInfoHash.ToLower();
-            var hashes = await Client.GetTorrentPiecesHashesAsync(torrentHash);
-            hashes.Should().NotBeNull().And.HaveCount(torrent.NumberOfPieces);
-            hashes.Should().Equal(GetHashes());
+            await Utils.Retry(async () =>
+            {
+                var hashes = await Client.GetTorrentPiecesHashesAsync(torrentHash);
+                hashes.Should().NotBeNull().And.HaveCount(torrent.NumberOfPieces);
+                hashes.Should().Equal(GetHashes());
+            });
 
             await Utils.Retry(async () =>
             {
@@ -508,7 +519,7 @@ namespace QBittorrent.Client.Tests
         [PrintTestName]
         public async Task GetTorrentPiecesAndStatesUnknown()
         {
-            await Client.LoginAsync("admin", "adminadmin");
+            await Client.LoginAsync(UserName, Password);
             await Utils.Retry(async () =>
             {
                 var hashes = await Client.GetTorrentPiecesHashesAsync("0000000000000000000000000000000000000000");
@@ -529,7 +540,7 @@ namespace QBittorrent.Client.Tests
         [PrintTestName]
         public async Task GetGlobalTransferInfo()
         {
-            await Client.LoginAsync("admin", "adminadmin");
+            await Client.LoginAsync(UserName, Password);
             var info = await Client.GetGlobalTransferInfoAsync();
             info.ConnectionStatus.Should().NotBe(ConnectionStatus.Disconnected);
             info.DhtNodes.Should().Be(0);
@@ -543,13 +554,99 @@ namespace QBittorrent.Client.Tests
 
         #endregion
         
+        #region GetPartialDataAsync/AddCategoryAsync/DeleteCategoryAsync/DeleteAsync
+
+        [Fact]
+        [PrintTestName]
+        public async Task GetPartialData()
+        {
+            await Client.LoginAsync(UserName, Password);
+            var list = await Client.GetTorrentListAsync();
+            list.Should().BeEmpty();
+
+            var parser = new BencodeParser();
+            var filesToAdd = Directory.GetFiles(Utils.TorrentsFolder, "*.torrent");
+            var torrents = filesToAdd
+                .Select(path => parser.Parse<Torrent>(path))
+                .ToList();
+            var hashes = torrents.Select(t => t.OriginalInfoHash.ToLower()).ToList();
+
+            await Client.AddTorrentsAsync(new AddTorrentFilesRequest(filesToAdd[0]) { Paused = true });
+
+            await Task.Delay(1000);
+
+            int responseId = 0;
+            var partialData = await Client.GetPartialDataAsync(responseId);
+            partialData.Should().NotBeNull();
+            partialData.FullUpdate.Should().BeTrue();
+            partialData.TorrentsChanged.Should().HaveCount(1);
+            partialData.TorrentsChanged.Should().Contain(p => p.Key.ToLower() == hashes[0]);
+            partialData.TorrentsRemoved.Should().BeNull();
+            partialData.CategoriesAdded.Should().BeEmpty();
+            partialData.CategoriesRemoved.Should().BeNull();
+            responseId = partialData.ResponseId;
+            var refreshInterval = partialData.ServerState.RefreshInterval ?? 1000;
+
+            await Task.Delay(refreshInterval);
+            
+            partialData = await Client.GetPartialDataAsync(responseId);
+            partialData.Should().NotBeNull();
+            partialData.FullUpdate.Should().BeFalse();
+            partialData.TorrentsChanged.Should().BeNull();
+            partialData.TorrentsRemoved.Should().BeNull();
+            partialData.CategoriesAdded.Should().BeNull();
+            partialData.CategoriesRemoved.Should().BeNull();
+            responseId = partialData.ResponseId;
+
+            await Client.AddTorrentsAsync(new AddTorrentFilesRequest(filesToAdd.Skip(1)) {Paused = true});
+            await Task.Delay(refreshInterval);
+
+            partialData = await Client.GetPartialDataAsync(responseId);
+            partialData.FullUpdate.Should().BeFalse();
+            partialData.TorrentsChanged.Should().HaveCount(2);
+            partialData.TorrentsChanged.Should().Contain(p => p.Key.ToLower() == hashes[1]);
+            partialData.TorrentsChanged.Should().Contain(p => p.Key.ToLower() == hashes[2]);
+            partialData.TorrentsRemoved.Should().BeNull();
+            partialData.CategoriesAdded.Should().BeNull();
+            partialData.CategoriesRemoved.Should().BeNull();
+            responseId = partialData.ResponseId;
+
+            await Client.AddCategoryAsync("a");
+            await Client.SetTorrentCategoryAsync(hashes[0], "b");
+            await Task.Delay(refreshInterval);
+            
+            partialData = await Client.GetPartialDataAsync(responseId);
+            partialData.FullUpdate.Should().BeFalse();
+            partialData.TorrentsChanged.Should().HaveCount(1);
+            partialData.TorrentsChanged.Should().Contain(p => p.Key.ToLower() == hashes[0] && p.Value.Category == "b");
+            partialData.TorrentsRemoved.Should().BeNull();
+            partialData.CategoriesAdded.Should().BeEquivalentTo("a", "b");
+            partialData.CategoriesRemoved.Should().BeNull();
+            responseId = partialData.ResponseId;
+
+            await Client.DeleteCategoryAsync("b");
+            await Client.DeleteAsync(hashes[1]);
+            await Task.Delay(refreshInterval);
+            
+            partialData = await Client.GetPartialDataAsync(responseId);
+            partialData.FullUpdate.Should().BeFalse();
+            partialData.TorrentsChanged.Should().HaveCountGreaterOrEqualTo(1);
+            partialData.TorrentsChanged.Should().Contain(p => p.Key.ToLower() == hashes[0] && p.Value.Category == "");
+            partialData.TorrentsRemoved.Should().HaveCount(1);
+            partialData.TorrentsRemoved.Should().Contain(hashes[1]);
+            partialData.CategoriesAdded.Should().BeNull();
+            partialData.CategoriesRemoved.Should().BeEquivalentTo("b");
+        }
+        
+        #endregion
+        
         #region Pause/Resume
 
         [Fact]
         [PrintTestName]
         public async Task Pause()
         {
-            await Client.LoginAsync("admin", "adminadmin");
+            await Client.LoginAsync(UserName, Password);
 
             var filesToAdd = Directory.GetFiles(Utils.TorrentsFolder, "*.torrent");
 
@@ -573,7 +670,7 @@ namespace QBittorrent.Client.Tests
         [PrintTestName]
         public async Task Resume()
         {
-            await Client.LoginAsync("admin", "adminadmin");
+            await Client.LoginAsync(UserName, Password);
 
             var filesToAdd = Directory.GetFiles(Utils.TorrentsFolder, "*.torrent");
 
@@ -598,7 +695,7 @@ namespace QBittorrent.Client.Tests
         [PrintTestName]
         public async Task PauseAll()
         {
-            await Client.LoginAsync("admin", "adminadmin");
+            await Client.LoginAsync(UserName, Password);
 
             var filesToAdd = Directory.GetFiles(Utils.TorrentsFolder, "*.torrent");
 
@@ -620,7 +717,7 @@ namespace QBittorrent.Client.Tests
         [PrintTestName]
         public async Task ResumeAll()
         {
-            await Client.LoginAsync("admin", "adminadmin");
+            await Client.LoginAsync(UserName, Password);
 
             var filesToAdd = Directory.GetFiles(Utils.TorrentsFolder, "*.torrent");
 
@@ -646,7 +743,7 @@ namespace QBittorrent.Client.Tests
         [PrintTestName]
         public async Task SetTorrentCategory()
         {
-            await Client.LoginAsync("admin", "adminadmin");
+            await Client.LoginAsync(UserName, Password);
 
             var file = Path.Combine(Utils.TorrentsFolder, "ubuntu-16.04.4-desktop-amd64.iso.torrent");
             
@@ -676,7 +773,7 @@ namespace QBittorrent.Client.Tests
         [PrintTestName]
         public async Task SetTorrentCategoryWithPreset()
         {
-            await Client.LoginAsync("admin", "adminadmin");
+            await Client.LoginAsync(UserName, Password);
 
             var file = Path.Combine(Utils.TorrentsFolder, "ubuntu-16.04.4-desktop-amd64.iso.torrent");
             
@@ -713,7 +810,7 @@ namespace QBittorrent.Client.Tests
             const long downLimit = 2048 * 1024;
             const long upLimit = 1024 * 1024;
             
-            await Client.LoginAsync("admin", "adminadmin");
+            await Client.LoginAsync(UserName, Password);
             
             var (down, up, info) = await Utils.WhenAll(
                 Client.GetGlobalDownloadLimitAsync(),
@@ -776,7 +873,7 @@ namespace QBittorrent.Client.Tests
             const long downLimit = 2048 * 1024;
             const long upLimit = 1024 * 1024;
             
-            await Client.LoginAsync("admin", "adminadmin");
+            await Client.LoginAsync(UserName, Password);
             
             var file = Path.Combine(Utils.TorrentsFolder, "ubuntu-16.04.4-desktop-amd64.iso.torrent");
             
@@ -858,7 +955,7 @@ namespace QBittorrent.Client.Tests
             const long downLimit = 2 * 1024 * 1024;
             const long upLimit = 1024 * 1024;
             
-            await Client.LoginAsync("admin", "adminadmin");
+            await Client.LoginAsync(UserName, Password);
             
             var file = Path.Combine(Utils.TorrentsFolder, "ubuntu-16.04.4-desktop-amd64.iso.torrent");
             
@@ -933,6 +1030,150 @@ namespace QBittorrent.Client.Tests
                 up.Should().Be(0);
                 props.DownloadLimit.Should().Be(null);
                 props.UploadLimit.Should().Be(null);
+            });
+        }
+
+        #endregion
+
+        #region ChangeTorrentPriorityAsync
+
+#warning TODO: Fix skipped test.
+        [Fact(Skip = "Failing. TODO: Clarify how priorities work.")]
+        [PrintTestName]
+        public async Task ChangeTorrentPriorityIncrease()
+        {
+            await Client.LoginAsync(UserName, Password);
+            var list = await Client.GetTorrentListAsync();
+            list.Should().BeEmpty();
+
+            var filesToAdd = Directory.GetFiles(Utils.TorrentsFolder, "*.torrent");
+            
+            var addRequest = new AddTorrentFilesRequest(filesToAdd) { Paused = true };
+            await Client.AddTorrentsAsync(addRequest);
+
+            var torrents = await Utils.Retry(async () =>
+            {
+                list = await Client.GetTorrentListAsync();
+                list.Should().HaveCount(filesToAdd.Length);
+                list.Select(t => t.Priority).Should().BeEquivalentTo(1, 2, 3);
+                return list;
+            });
+            var tp = torrents.ToDictionary(x => x.Priority);
+            await Client.ChangeTorrentPriorityAsync(tp[1].Hash, TorrentPriorityChange.Increase);
+            
+            await Utils.Retry(async () =>
+            {
+                list = await Client.GetTorrentListAsync();
+                var dict = list.ToDictionary(t => t.Hash);
+                dict[tp[1].Hash].Priority.Should().Be(2);
+                dict[tp[2].Hash].Priority.Should().Be(1);
+                dict[tp[3].Hash].Priority.Should().Be(3);
+                return list;
+            });
+        }
+        
+#warning TODO: Fix skipped test.
+        [Fact(Skip = "Failing. TODO: Clarify how priorities work.")]
+        [PrintTestName]
+        public async Task ChangeTorrentPriorityDecrease()
+        {
+            await Client.LoginAsync(UserName, Password);
+            var list = await Client.GetTorrentListAsync();
+            list.Should().BeEmpty();
+
+            var filesToAdd = Directory.GetFiles(Utils.TorrentsFolder, "*.torrent");
+            
+            var addRequest = new AddTorrentFilesRequest(filesToAdd) { Paused = true };
+            await Client.AddTorrentsAsync(addRequest);
+
+            var torrents = await Utils.Retry(async () =>
+            {
+                list = await Client.GetTorrentListAsync();
+                list.Should().HaveCount(filesToAdd.Length);
+                list.Select(t => t.Priority).Should().BeEquivalentTo(1, 2, 3);
+                return list;
+            });
+            var tp = torrents.ToDictionary(x => x.Priority);
+            await Client.ChangeTorrentPriorityAsync(tp[3].Hash, TorrentPriorityChange.Increase);
+            
+            await Utils.Retry(async () =>
+            {
+                list = await Client.GetTorrentListAsync();
+                var dict = list.ToDictionary(t => t.Hash);
+                dict[tp[1].Hash].Priority.Should().Be(1);
+                dict[tp[2].Hash].Priority.Should().Be(3);
+                dict[tp[3].Hash].Priority.Should().Be(2);
+                return list;
+            });
+        }
+        
+#warning TODO: Fix skipped test.
+        [Fact(Skip = "Failing. TODO: Clarify how priorities work.")]
+        [PrintTestName]
+        public async Task ChangeTorrentPriorityMaximal()
+        {
+            await Client.LoginAsync(UserName, Password);
+            var list = await Client.GetTorrentListAsync();
+            list.Should().BeEmpty();
+
+            var filesToAdd = Directory.GetFiles(Utils.TorrentsFolder, "*.torrent");
+            
+            var addRequest = new AddTorrentFilesRequest(filesToAdd) { Paused = true };
+            await Client.AddTorrentsAsync(addRequest);
+
+            var torrents = await Utils.Retry(async () =>
+            {
+                list = await Client.GetTorrentListAsync();
+                list.Should().HaveCount(filesToAdd.Length);
+                list.Select(t => t.Priority).Should().BeEquivalentTo(1, 2, 3);
+                return list;
+            });
+            var tp = torrents.ToDictionary(x => x.Priority);
+            await Client.ChangeTorrentPriorityAsync(tp[1].Hash, TorrentPriorityChange.Maximal);
+            
+            await Utils.Retry(async () =>
+            {
+                list = await Client.GetTorrentListAsync();
+                var dict = list.ToDictionary(t => t.Hash);
+                dict[tp[1].Hash].Priority.Should().Be(3);
+                dict[tp[2].Hash].Priority.Should().Be(1);
+                dict[tp[3].Hash].Priority.Should().Be(2);
+                return list;
+            });
+        }
+        
+#warning TODO: Fix skipped test.
+        [Fact(Skip = "Failing. TODO: Clarify how priorities work.")]
+        [PrintTestName]
+        public async Task ChangeTorrentPriorityMinimal()
+        {
+            await Client.LoginAsync(UserName, Password);
+            var list = await Client.GetTorrentListAsync();
+            list.Should().BeEmpty();
+
+            var filesToAdd = Directory.GetFiles(Utils.TorrentsFolder, "*.torrent");
+            
+            var addRequest = new AddTorrentFilesRequest(filesToAdd) { Paused = true };
+            await Client.AddTorrentsAsync(addRequest);
+
+            var torrents = await Utils.Retry(async () =>
+            {
+                list = await Client.GetTorrentListAsync();
+                list.Should().HaveCount(filesToAdd.Length);
+                list.Select(t => t.Priority).Should().BeEquivalentTo(1, 2, 3);
+                return list;
+            });
+            var tp = torrents.ToDictionary(x => x.Priority);
+            await Client.ChangeTorrentPriorityAsync(tp[3].Hash, TorrentPriorityChange.Minimal);
+            
+            await Utils.Retry(async () =>
+            {
+                list = await Client.GetTorrentListAsync();
+                var dict = list.ToDictionary(t => t.Hash);
+                dict[tp[1].Hash].Priority.Should().Be(2);
+                dict[tp[2].Hash].Priority.Should().Be(3);
+                dict[tp[3].Hash].Priority.Should().Be(1);
+                return list;
             });
         }
 

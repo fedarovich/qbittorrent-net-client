@@ -4,6 +4,8 @@
 [![license](https://img.shields.io/badge/license-MIT-blue.svg)](https://github.com/fedarovich/qbittorrent-net-client/blob/master/LICENSE)
 [![documentation](https://img.shields.io/badge/documentation-read-lightgrey.svg)](https://fedarovich.github.io/qbittorrent-net-client-docs)
 
+[![myget](https://img.shields.io/myget/fedarovich/v/QBittorrent.Client.svg?label=myget)](https://www.myget.org/feed/fedarovich/package/nuget/QBittorrent.Client)
+
 ***
 ## Description
 

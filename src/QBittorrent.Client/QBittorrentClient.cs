@@ -970,9 +970,9 @@ namespace QBittorrent.Client
                     case TorrentPriorityChange.Minimal:
                         return "/command/bottomPrio";
                     case TorrentPriorityChange.Increase:
-                        return "/command/decreasePrio";
-                    case TorrentPriorityChange.Decrease:
                         return "/command/increasePrio";
+                    case TorrentPriorityChange.Decrease:
+                        return "/command/decreasePrio";
                     case TorrentPriorityChange.Maximal:
                         return "/command/topPrio";
                     default:

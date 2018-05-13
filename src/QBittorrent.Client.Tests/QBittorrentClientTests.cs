@@ -1037,15 +1037,13 @@ namespace QBittorrent.Client.Tests
 
         #region ChangeTorrentPriorityAsync
 
-#warning TODO: Fix skipped test.
-        [Fact(Skip = "Failing. TODO: Clarify how priorities work.")]
+
+        [Fact]
         [PrintTestName]
         public async Task ChangeTorrentPriorityIncrease()
         {
             await Client.LoginAsync(UserName, Password);
-            var list = await Client.GetTorrentListAsync();
-            list.Should().BeEmpty();
-
+           
             var filesToAdd = Directory.GetFiles(Utils.TorrentsFolder, "*.torrent");
             
             var addRequest = new AddTorrentFilesRequest(filesToAdd) { Paused = true };
@@ -1053,34 +1051,30 @@ namespace QBittorrent.Client.Tests
 
             var torrents = await Utils.Retry(async () =>
             {
-                list = await Client.GetTorrentListAsync();
+                var list = await Client.GetTorrentListAsync(new TorrentListQuery { SortBy = "priority" });
                 list.Should().HaveCount(filesToAdd.Length);
-                list.Select(t => t.Priority).Should().BeEquivalentTo(1, 2, 3);
+                list.Select(t => t.Priority).Should().Equal(1, 2, 3);
                 return list;
             });
-            var tp = torrents.ToDictionary(x => x.Priority);
-            await Client.ChangeTorrentPriorityAsync(tp[1].Hash, TorrentPriorityChange.Increase);
+            
+            await Client.ChangeTorrentPriorityAsync(torrents[2].Hash, TorrentPriorityChange.Increase);
             
             await Utils.Retry(async () =>
             {
-                list = await Client.GetTorrentListAsync();
-                var dict = list.ToDictionary(t => t.Hash);
-                dict[tp[1].Hash].Priority.Should().Be(2);
-                dict[tp[2].Hash].Priority.Should().Be(1);
-                dict[tp[3].Hash].Priority.Should().Be(3);
+                var list = await Client.GetTorrentListAsync(new TorrentListQuery { SortBy = "priority" });
+                list.Should().HaveCount(filesToAdd.Length);
+                list.Select(t => t.Priority).Should().Equal(1, 2, 3);
+                list.Select(t => t.Hash).Should().Equal(torrents[0].Hash, torrents[2].Hash, torrents[1].Hash);
                 return list;
             });
         }
         
-#warning TODO: Fix skipped test.
-        [Fact(Skip = "Failing. TODO: Clarify how priorities work.")]
+        [Fact]
         [PrintTestName]
         public async Task ChangeTorrentPriorityDecrease()
         {
             await Client.LoginAsync(UserName, Password);
-            var list = await Client.GetTorrentListAsync();
-            list.Should().BeEmpty();
-
+           
             var filesToAdd = Directory.GetFiles(Utils.TorrentsFolder, "*.torrent");
             
             var addRequest = new AddTorrentFilesRequest(filesToAdd) { Paused = true };
@@ -1088,34 +1082,30 @@ namespace QBittorrent.Client.Tests
 
             var torrents = await Utils.Retry(async () =>
             {
-                list = await Client.GetTorrentListAsync();
+                var list = await Client.GetTorrentListAsync(new TorrentListQuery { SortBy = "priority" });
                 list.Should().HaveCount(filesToAdd.Length);
-                list.Select(t => t.Priority).Should().BeEquivalentTo(1, 2, 3);
+                list.Select(t => t.Priority).Should().Equal(1, 2, 3);
                 return list;
             });
-            var tp = torrents.ToDictionary(x => x.Priority);
-            await Client.ChangeTorrentPriorityAsync(tp[3].Hash, TorrentPriorityChange.Increase);
+            
+            await Client.ChangeTorrentPriorityAsync(torrents[0].Hash, TorrentPriorityChange.Decrease);
             
             await Utils.Retry(async () =>
             {
-                list = await Client.GetTorrentListAsync();
-                var dict = list.ToDictionary(t => t.Hash);
-                dict[tp[1].Hash].Priority.Should().Be(1);
-                dict[tp[2].Hash].Priority.Should().Be(3);
-                dict[tp[3].Hash].Priority.Should().Be(2);
+                var list = await Client.GetTorrentListAsync(new TorrentListQuery { SortBy = "priority" });
+                list.Should().HaveCount(filesToAdd.Length);
+                list.Select(t => t.Priority).Should().Equal(1, 2, 3);
+                list.Select(t => t.Hash).Should().Equal(torrents[1].Hash, torrents[0].Hash, torrents[2].Hash);
                 return list;
             });
         }
         
-#warning TODO: Fix skipped test.
-        [Fact(Skip = "Failing. TODO: Clarify how priorities work.")]
+        [Fact]
         [PrintTestName]
         public async Task ChangeTorrentPriorityMaximal()
         {
             await Client.LoginAsync(UserName, Password);
-            var list = await Client.GetTorrentListAsync();
-            list.Should().BeEmpty();
-
+           
             var filesToAdd = Directory.GetFiles(Utils.TorrentsFolder, "*.torrent");
             
             var addRequest = new AddTorrentFilesRequest(filesToAdd) { Paused = true };
@@ -1123,34 +1113,30 @@ namespace QBittorrent.Client.Tests
 
             var torrents = await Utils.Retry(async () =>
             {
-                list = await Client.GetTorrentListAsync();
+                var list = await Client.GetTorrentListAsync(new TorrentListQuery { SortBy = "priority" });
                 list.Should().HaveCount(filesToAdd.Length);
-                list.Select(t => t.Priority).Should().BeEquivalentTo(1, 2, 3);
+                list.Select(t => t.Priority).Should().Equal(1, 2, 3);
                 return list;
             });
-            var tp = torrents.ToDictionary(x => x.Priority);
-            await Client.ChangeTorrentPriorityAsync(tp[1].Hash, TorrentPriorityChange.Maximal);
+            
+            await Client.ChangeTorrentPriorityAsync(torrents[2].Hash, TorrentPriorityChange.Maximal);
             
             await Utils.Retry(async () =>
             {
-                list = await Client.GetTorrentListAsync();
-                var dict = list.ToDictionary(t => t.Hash);
-                dict[tp[1].Hash].Priority.Should().Be(3);
-                dict[tp[2].Hash].Priority.Should().Be(1);
-                dict[tp[3].Hash].Priority.Should().Be(2);
+                var list = await Client.GetTorrentListAsync(new TorrentListQuery { SortBy = "priority" });
+                list.Should().HaveCount(filesToAdd.Length);
+                list.Select(t => t.Priority).Should().Equal(1, 2, 3);
+                list.Select(t => t.Hash).Should().Equal(torrents[2].Hash, torrents[0].Hash, torrents[1].Hash);
                 return list;
             });
         }
         
-#warning TODO: Fix skipped test.
-        [Fact(Skip = "Failing. TODO: Clarify how priorities work.")]
+        [Fact]
         [PrintTestName]
         public async Task ChangeTorrentPriorityMinimal()
         {
             await Client.LoginAsync(UserName, Password);
-            var list = await Client.GetTorrentListAsync();
-            list.Should().BeEmpty();
-
+           
             var filesToAdd = Directory.GetFiles(Utils.TorrentsFolder, "*.torrent");
             
             var addRequest = new AddTorrentFilesRequest(filesToAdd) { Paused = true };
@@ -1158,21 +1144,20 @@ namespace QBittorrent.Client.Tests
 
             var torrents = await Utils.Retry(async () =>
             {
-                list = await Client.GetTorrentListAsync();
+                var list = await Client.GetTorrentListAsync(new TorrentListQuery { SortBy = "priority" });
                 list.Should().HaveCount(filesToAdd.Length);
-                list.Select(t => t.Priority).Should().BeEquivalentTo(1, 2, 3);
+                list.Select(t => t.Priority).Should().Equal(1, 2, 3);
                 return list;
             });
-            var tp = torrents.ToDictionary(x => x.Priority);
-            await Client.ChangeTorrentPriorityAsync(tp[3].Hash, TorrentPriorityChange.Minimal);
+            
+            await Client.ChangeTorrentPriorityAsync(torrents[0].Hash, TorrentPriorityChange.Minimal);
             
             await Utils.Retry(async () =>
             {
-                list = await Client.GetTorrentListAsync();
-                var dict = list.ToDictionary(t => t.Hash);
-                dict[tp[1].Hash].Priority.Should().Be(2);
-                dict[tp[2].Hash].Priority.Should().Be(3);
-                dict[tp[3].Hash].Priority.Should().Be(1);
+                var list = await Client.GetTorrentListAsync(new TorrentListQuery { SortBy = "priority" });
+                list.Should().HaveCount(filesToAdd.Length);
+                list.Select(t => t.Priority).Should().Equal(1, 2, 3);
+                list.Select(t => t.Hash).Should().Equal(torrents[1].Hash, torrents[2].Hash, torrents[0].Hash);
                 return list;
             });
         }

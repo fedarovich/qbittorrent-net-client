@@ -229,7 +229,7 @@ namespace QBittorrent.Client
             async Task<TorrentProperties> ExecuteAsync()
             {
                 var uri = BuildUri($"/query/propertiesGeneral/{hash}");
-                var json = await _client.GetStringAsync(uri, token).ConfigureAwait(false);
+                var json = await _client.GetStringAsync(uri, true, token).ConfigureAwait(false);
                 var result = JsonConvert.DeserializeObject<TorrentProperties>(json);
                 return result;
             }
@@ -251,7 +251,7 @@ namespace QBittorrent.Client
             async Task<IReadOnlyList<TorrentContent>> ExecuteAsync()
             {
                 var uri = BuildUri($"/query/propertiesFiles/{hash}");
-                var json = await _client.GetStringAsync(uri, token).ConfigureAwait(false);
+                var json = await _client.GetStringAsync(uri, true, token).ConfigureAwait(false);
                 var result = JsonConvert.DeserializeObject<TorrentContent[]>(json);
                 return result;
             }
@@ -273,7 +273,7 @@ namespace QBittorrent.Client
             async Task<IReadOnlyList<TorrentTracker>> ExecuteAsync()
             {
                 var uri = BuildUri($"/query/propertiesTrackers/{hash}");
-                var json = await _client.GetStringAsync(uri, token).ConfigureAwait(false);
+                var json = await _client.GetStringAsync(uri, true, token).ConfigureAwait(false);
                 var result = JsonConvert.DeserializeObject<TorrentTracker[]>(json);
                 return result;
             }
@@ -295,7 +295,7 @@ namespace QBittorrent.Client
             async Task<IReadOnlyList<Uri>> ExecuteAsync()
             {
                 var uri = BuildUri($"/query/propertiesWebSeeds/{hash}");
-                var json = await _client.GetStringAsync(uri, token).ConfigureAwait(false);
+                var json = await _client.GetStringAsync(uri, true, token).ConfigureAwait(false);
                 var result = JsonConvert.DeserializeObject<UrlItem[]>(json);
                 return result?.Select(x => x.Url).ToArray();
             }
@@ -317,7 +317,7 @@ namespace QBittorrent.Client
             async Task<IReadOnlyList<TorrentPieceState>> ExecuteAsync()
             {
                 var uri = BuildUri($"/query/getPieceStates/{hash}");
-                var json = await _client.GetStringAsync(uri, token).ConfigureAwait(false);
+                var json = await _client.GetStringAsync(uri, true, token).ConfigureAwait(false);
                 var result = JsonConvert.DeserializeObject<TorrentPieceState[]>(json);
                 return result;
             }
@@ -339,7 +339,7 @@ namespace QBittorrent.Client
             async Task<IReadOnlyList<string>> ExecuteAsync()
             {
                 var uri = BuildUri($"/query/getPieceHashes/{hash}");
-                var json = await _client.GetStringAsync(uri, token).ConfigureAwait(false);
+                var json = await _client.GetStringAsync(uri, true, token).ConfigureAwait(false);
                 var result = JsonConvert.DeserializeObject<string[]>(json);
                 return result;
             }
@@ -395,7 +395,7 @@ namespace QBittorrent.Client
                 var uri = BuildUri("/sync/torrent_peers",
                     ("rid", responseId.ToString()),
                     ("hash", hash));
-                var json = await _client.GetStringAsync(uri, token).ConfigureAwait(false);
+                var json = await _client.GetStringAsync(uri, true, token).ConfigureAwait(false);
                 var result = JsonConvert.DeserializeObject<PeerPartialData>(json);
                 return result;
             }

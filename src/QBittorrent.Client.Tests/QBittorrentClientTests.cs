@@ -219,7 +219,7 @@ namespace QBittorrent.Client.Tests
             
             var addRequest = new AddTorrentFilesRequest(filesToAdd) { Paused = true };
             await Client.AddTorrentsAsync(addRequest);
-
+            
             await Utils.Retry(async () =>
             {
                 list = await Client.GetTorrentListAsync();

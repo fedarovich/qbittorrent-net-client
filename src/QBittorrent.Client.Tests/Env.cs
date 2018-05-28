@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 
@@ -19,5 +20,8 @@ namespace QBittorrent.Client.Tests
         [JsonProperty("qb-version")]
         [JsonConverter(typeof(VersionConverter))]
         public Version QBittorrentVersion { get; set; }
+
+        [JsonProperty("binaries")]
+        public IDictionary<string, string> Binaries { get; set; }
     }
 }

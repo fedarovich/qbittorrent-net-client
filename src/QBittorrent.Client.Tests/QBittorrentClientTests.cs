@@ -1163,5 +1163,32 @@ namespace QBittorrent.Client.Tests
         }
 
         #endregion
+        
+        #region DeleteAsync
+
+        [Fact]
+        public async Task Delete()
+        {
+            await Client.LoginAsync(UserName, Password);
+           
+            var fileToAdd = Path.Combine(Utils.TorrentsFolder, "ubuntu-16.04.4-desktop-amd64.iso.torrent");
+            await Client.AddTorrentsAsync(new AddTorrentFilesRequest(fileToAdd));
+
+            var hash = await Utils.Retry(async () =>
+            {
+                var list = await Client.GetTorrentListAsync();
+                return list.Single().Hash;
+            });
+
+            await Client.DeleteAsync(hash, true);
+
+            await Utils.Retry(async () =>
+            {
+                var list = await Client.GetTorrentListAsync();
+                return list.Should().BeEmpty();
+            });
+        }
+        
+        #endregion
     }
 }

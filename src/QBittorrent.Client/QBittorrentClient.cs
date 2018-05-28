@@ -132,11 +132,11 @@ namespace QBittorrent.Client
         /// <param name="token">The cancellation token.</param>
         /// <remarks>
         /// <para>
-        /// For qBittorrent versions before 4.1.0 this method returns version <c>1.z</c>
-        /// where <c>z</c> is the value returned by <see cref="GetLegacyApiVersionAsync"/> method.
+        /// For qBittorrent versions before 4.1.0 this method returns version <c>1.x</c>
+        /// where <c>x</c> is the value returned by <see cref="GetLegacyApiVersionAsync"/> method.
         /// </para>
         /// <para>
-        /// For qBittorrent version starting from 4.1.0 this method returns version <c>x.y</c>
+        /// For qBittorrent version starting from 4.1.0 this method returns version <c>x.y</c> or <c>x.y.z</c>
         /// where <c>x >= 2</c>. 
         /// </para>
         /// </remarks>

@@ -1167,6 +1167,7 @@ namespace QBittorrent.Client.Tests
         #region DeleteAsync
 
         [Fact]
+        [PrintTestName]
         public async Task Delete()
         {
             await Client.LoginAsync(UserName, Password);
@@ -1186,6 +1187,341 @@ namespace QBittorrent.Client.Tests
             {
                 var list = await Client.GetTorrentListAsync();
                 return list.Should().BeEmpty();
+            });
+        }
+        
+        #endregion
+
+        #region SetLocationAsync
+
+        [SkippableFact]
+        [PrintTestName]
+        public async Task SetLocation()
+        {
+            Skip.If(Environment.OSVersion.Platform != PlatformID.Unix,
+                "This test is supported only on linux at the moment.");
+                
+            await Client.LoginAsync(UserName, Password);
+           
+            var fileToAdd = Path.Combine(Utils.TorrentsFolder, "ubuntu-16.04.4-desktop-amd64.iso.torrent");
+            await Client.AddTorrentsAsync(new AddTorrentFilesRequest(fileToAdd));
+
+            var defaultDir = await Client.GetDefaultSavePathAsync();
+            
+            var torrent = await Utils.Retry(async () =>
+            {
+                var list = await Client.GetTorrentListAsync();
+                return list.Single();
+            });
+         
+            torrent.SavePath.Should().Be(defaultDir);
+
+            await Client.SetLocationAsync(torrent.Hash, "/tmp/");
+            
+            await Utils.Retry(async () =>
+            {
+                var props = await Client.GetTorrentPropertiesAsync(torrent.Hash);
+                props.SavePath.Should().Be("/tmp/");
+            });
+        }
+
+        #endregion
+
+        #region RenameAsync
+
+        [Fact]
+        [PrintTestName]
+        public async Task Rename()
+        {              
+            await Client.LoginAsync(UserName, Password);
+           
+            var fileToAdd = Path.Combine(Utils.TorrentsFolder, "ubuntu-16.04.4-desktop-amd64.iso.torrent");
+            await Client.AddTorrentsAsync(new AddTorrentFilesRequest(fileToAdd));
+
+            var torrent = await Utils.Retry(async () =>
+            {
+                var list = await Client.GetTorrentListAsync();
+                return list.Single();
+            });
+
+            torrent.Name.Should().Be("ubuntu-16.04.4-desktop-amd64.iso");
+            
+            var newName = Guid.NewGuid().ToString("N");
+            await Client.RenameAsync(torrent.Hash, newName);
+            
+            await Utils.Retry(async () =>
+            {
+                var list = await Client.GetTorrentListAsync();
+                list.Single().Name.Should().Be(newName);
+            });
+        }
+
+        #endregion
+
+        #region AddTrackerAsync
+
+        [Fact]
+        [PrintTestName]
+        public async Task AddTracker()
+        {
+            await Client.LoginAsync(UserName, Password);
+           
+            var fileToAdd = Path.Combine(Utils.TorrentsFolder, "ubuntu-16.04.4-desktop-amd64.iso.torrent");
+            await Client.AddTorrentsAsync(new AddTorrentFilesRequest(fileToAdd));
+
+            var torrent = await Utils.Retry(async () =>
+            {
+                var list = await Client.GetTorrentListAsync();
+                return list.Single();
+            });
+
+            var tracker1 = new Uri("http://torrent.ubuntu.com:6969/announce");
+            var tracker2 = new Uri("http://ipv6.torrent.ubuntu.com:6969/announce");
+            
+            var trackers = await Client.GetTorrentTrackersAsync(torrent.Hash);
+            trackers.Select(t => t.Url).Should().BeEquivalentTo(tracker1, tracker2);
+            
+            var newTracker = new Uri("http://retracker.mgts.by:80/announce");
+            await Client.AddTrackerAsync(torrent.Hash, newTracker);
+
+            await Utils.Retry(async () =>
+            {
+                trackers = await Client.GetTorrentTrackersAsync(torrent.Hash);
+                trackers.Select(t => t.Url).Should().BeEquivalentTo(tracker1, tracker2, newTracker);
+            });
+        }
+
+        #endregion
+        
+        #region GetLogAsync
+
+        [Fact]
+        [PrintTestName]
+        public async Task GetLog()
+        {
+            await Client.LoginAsync(UserName, Password);
+            
+            var log = await Client.GetLogAsync();
+            log.Should().NotBeEmpty();
+            log.Select(x => x.Severity).Distinct().Count().Should().BeGreaterThan(1);
+        }
+
+        [Theory]
+        [InlineData(TorrentLogSeverity.Critical)]
+        [InlineData(TorrentLogSeverity.Info)]
+        [InlineData(TorrentLogSeverity.Normal)]
+        [InlineData(TorrentLogSeverity.Warning)]
+        [PrintTestName]
+        public async Task GetLogBySeverity(TorrentLogSeverity severity)
+        {
+            await Client.LoginAsync(UserName, Password);
+            
+            var log = await Client.GetLogAsync(severity: severity);
+            log.All(l => l.Severity == severity).Should().BeTrue();
+        }
+        
+        [Fact]
+        [PrintTestName]
+        public async Task GetLogAfterId()
+        {
+            await Client.LoginAsync(UserName, Password);
+            
+            var log = await Client.GetLogAsync(afterId: 3);
+            log.Min(l => l.Id).Should().Be(4);
+        }
+
+        #endregion
+        
+        #region Alternative Speed Limits
+
+        [Fact]
+        [PrintTestName]
+        public async Task AlternativeSpeedLimits()
+        {
+            await Client.LoginAsync(UserName, Password);
+
+            var asl = await Client.GetAlternativeSpeedLimitsEnabledAsync();
+            asl.Should().BeFalse();
+
+            await Client.ToggleAlternativeSpeedLimitsAsync();
+            await Task.Delay(1000);
+            asl = await Client.GetAlternativeSpeedLimitsEnabledAsync();
+            asl.Should().BeTrue();
+            
+            await Client.ToggleAlternativeSpeedLimitsAsync();
+            await Task.Delay(1000);
+            asl = await Client.GetAlternativeSpeedLimitsEnabledAsync();
+            asl.Should().BeFalse();
+        }
+        
+        #endregion
+        
+        #region Torrent Download Options
+        
+        [Fact]
+        [PrintTestName]
+        public async Task AutomaticTorrentManagement()
+        {
+            await Client.LoginAsync(UserName, Password);
+           
+            var fileToAdd = Path.Combine(Utils.TorrentsFolder, "ubuntu-16.04.4-desktop-amd64.iso.torrent");
+            await Client.AddTorrentsAsync(new AddTorrentFilesRequest(fileToAdd));
+
+            var torrent = await Utils.Retry(async () =>
+            {
+                var list = await Client.GetTorrentListAsync();
+                return list.Single();
+            });
+
+            torrent.AutomaticTorrentManagement.Should().Be(false);
+
+            await Client.SetAutomaticTorrentManagementAsync(torrent.Hash, true);
+            await Utils.Retry(async () =>
+            {
+                var list = await Client.GetTorrentListAsync();
+                list.Single().AutomaticTorrentManagement.Should().Be(true);
+            });
+            
+            await Client.SetAutomaticTorrentManagementAsync(torrent.Hash, false);
+            await Utils.Retry(async () =>
+            {
+                var list = await Client.GetTorrentListAsync();
+                list.Single().AutomaticTorrentManagement.Should().Be(false);
+            });
+        }
+        
+        [Fact]
+        [PrintTestName]
+        public async Task ForceStart()
+        {
+            await Client.LoginAsync(UserName, Password);
+           
+            var fileToAdd = Path.Combine(Utils.TorrentsFolder, "ubuntu-16.04.4-desktop-amd64.iso.torrent");
+            await Client.AddTorrentsAsync(new AddTorrentFilesRequest(fileToAdd));
+
+            var torrent = await Utils.Retry(async () =>
+            {
+                var list = await Client.GetTorrentListAsync();
+                return list.Single();
+            });
+
+            torrent.ForceStart.Should().Be(false);
+
+            await Client.SetForceStartAsync(torrent.Hash, true);
+            await Utils.Retry(async () =>
+            {
+                var list = await Client.GetTorrentListAsync();
+                list.Single().ForceStart.Should().Be(true);
+            });
+            
+            await Client.SetForceStartAsync(torrent.Hash, false);
+            await Utils.Retry(async () =>
+            {
+                var list = await Client.GetTorrentListAsync();
+                list.Single().ForceStart.Should().Be(false);
+            });
+        }
+        
+        [Fact]
+        [PrintTestName]
+        public async Task SuperSeeding()
+        {
+            await Client.LoginAsync(UserName, Password);
+           
+            var fileToAdd = Path.Combine(Utils.TorrentsFolder, "ubuntu-16.04.4-desktop-amd64.iso.torrent");
+            await Client.AddTorrentsAsync(new AddTorrentFilesRequest(fileToAdd));
+
+            var torrent = await Utils.Retry(async () =>
+            {
+                var list = await Client.GetTorrentListAsync();
+                return list.Single();
+            });
+
+            torrent.SuperSeeding.Should().Be(false);
+
+            await Client.SetSuperSeedingAsync(torrent.Hash, true);
+            await Utils.Retry(async () =>
+            {
+                var list = await Client.GetTorrentListAsync();
+                list.Single().SuperSeeding.Should().Be(true);
+            });
+            
+            await Client.SetSuperSeedingAsync(torrent.Hash, false);
+            await Utils.Retry(async () =>
+            {
+                var list = await Client.GetTorrentListAsync();
+                list.Single().SuperSeeding.Should().Be(false);
+            });
+        }
+        
+        [SkippableTheory]
+        [InlineData(false)]
+        [InlineData(true)]
+        [PrintTestName]
+        public async Task FirstLastPiecePrioritized(bool initial)
+        {
+            Skip.If(DockerFixture.Env.QBittorrentVersion == new System.Version(4, 0, 4),
+                "FirstLastPiecePrioritized is broken in qBittorrent 4.0.4");
+            
+            await Client.LoginAsync(UserName, Password);
+           
+            var fileToAdd = Path.Combine(Utils.TorrentsFolder, "ubuntu-16.04.4-desktop-amd64.iso.torrent");
+            await Client.AddTorrentsAsync(new AddTorrentFilesRequest(fileToAdd) {FirstLastPiecePrioritized = initial});
+
+            var torrent = await Utils.Retry(async () =>
+            {
+                var list = await Client.GetTorrentListAsync();
+                return list.Single();
+            });
+
+            torrent.FirstLastPiecePrioritized.Should().Be(initial);
+
+            await Client.ToggleFirstLastPiecePrioritizedAsync(torrent.Hash);
+            await Utils.Retry(async () =>
+            {
+                var list = await Client.GetTorrentListAsync();
+                list.Single().FirstLastPiecePrioritized.Should().Be(!initial);
+            });
+            
+            await Client.ToggleFirstLastPiecePrioritizedAsync(torrent.Hash);
+            await Utils.Retry(async () =>
+            {
+                var list = await Client.GetTorrentListAsync();
+                list.Single().FirstLastPiecePrioritized.Should().Be(initial);
+            });
+        }
+        
+        [Theory]
+        [InlineData(false)]
+        [InlineData(true)]
+        [PrintTestName]
+        public async Task SequentialDownload(bool initial)
+        {
+            await Client.LoginAsync(UserName, Password);
+           
+            var fileToAdd = Path.Combine(Utils.TorrentsFolder, "ubuntu-16.04.4-desktop-amd64.iso.torrent");
+            await Client.AddTorrentsAsync(new AddTorrentFilesRequest(fileToAdd) {SequentialDownload = initial});
+
+            var torrent = await Utils.Retry(async () =>
+            {
+                var list = await Client.GetTorrentListAsync();
+                return list.Single();
+            });
+
+            torrent.SequentialDownload.Should().Be(initial);
+
+            await Client.ToggleSequentialDownloadAsync(torrent.Hash);
+            await Utils.Retry(async () =>
+            {
+                var list = await Client.GetTorrentListAsync();
+                list.Single().SequentialDownload.Should().Be(!initial);
+            });
+            
+            await Client.ToggleSequentialDownloadAsync(torrent.Hash);
+            await Utils.Retry(async () =>
+            {
+                var list = await Client.GetTorrentListAsync();
+                list.Single().SequentialDownload.Should().Be(initial);
             });
         }
         

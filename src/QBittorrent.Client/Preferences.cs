@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
+using System.Text;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using QBittorrent.Client.Converters;
@@ -459,7 +460,9 @@ namespace QBittorrent.Client
         /// MD5 hash of WebUI password. 
         /// </summary>
         /// <remarks>
-        /// Hash is generated from the following string: <c>username:Web UI Access:plain_text_web_ui_password</c>
+        /// In the current versions of qBittorrent the password is encoded in local 8-bit encoding,
+        /// thus you must know which encoding is used on the server. But if your password contains only
+        /// ASCII characters, you can use <see cref="Encoding.ASCII"/> to get the characters.
         /// </remarks>
         [JsonProperty("web_ui_password")]
         [SuppressMessage("ReSharper", "InconsistentNaming")]

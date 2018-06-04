@@ -1,4 +1,8 @@
-﻿using System;
+﻿using JetBrains.Annotations;
+using Newtonsoft.Json;
+using QBittorrent.Client.Converters;
+using QBittorrent.Client.Extensions;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
@@ -7,10 +11,6 @@ using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
-using JetBrains.Annotations;
-using Newtonsoft.Json;
-using QBittorrent.Client.Converters;
-using QBittorrent.Client.Extensions;
 using static QBittorrent.Client.Utils;
 
 namespace QBittorrent.Client
@@ -1397,6 +1397,48 @@ namespace QBittorrent.Client
                 var uri = BuildUri("/command/toggleSequentialDownload");
                 var response = await _client.PostAsync(uri,
                     BuildForm(("hashes", hashesString)), token).ConfigureAwait(false);
+                using (response)
+                {
+                    response.EnsureSuccessStatusCode();
+                }
+            }
+        }
+
+        /// <summary>
+        /// Gets qBittorrent preferences.
+        /// </summary>
+        /// <param name="token">The cancellation token.</param>
+        /// <returns></returns>
+        public async Task<Preferences> GetPreferencesAsync(
+            CancellationToken token = default)
+        {
+            var uri = BuildUri("/query/preferences");
+            var response = await _client.GetStringAsync(uri, token).ConfigureAwait(false);
+            return JsonConvert.DeserializeObject<Preferences>(response);
+        }
+
+        /// <summary>
+        /// Gets qBittorrent preferences.
+        /// </summary>
+        /// <param name="preferences">
+        /// The prefences to set.
+        /// You can set only the properties you want to change and leave the other ones as <see langword="null"/>.
+        /// </param>
+        /// <param name="token">The cancellation token.</param>
+        /// <returns></returns>
+        public Task SetPreferencesAsync(
+            Preferences preferences,
+            CancellationToken token = default)
+        {
+            if (preferences == null)
+                throw new ArgumentNullException(nameof(preferences));
+            return Execute();
+
+            async Task Execute()
+            {
+                var uri = BuildUri("/query/setPreferences");
+                var json = JsonConvert.SerializeObject(preferences);
+                var response = await _client.PostAsync(uri, BuildForm(("json", json)), token).ConfigureAwait(false);
                 using (response)
                 {
                     response.EnsureSuccessStatusCode();

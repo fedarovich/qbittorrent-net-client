@@ -525,5 +525,26 @@ namespace QBittorrent.Client
         /// <returns></returns>
         Task<string> GetDefaultSavePathAsync(
             CancellationToken token = default);
+
+        /// <summary>
+        /// Gets qBittorrent preferences.
+        /// </summary>
+        /// <param name="token">The cancellation token.</param>
+        /// <returns></returns>
+        Task<Preferences> GetPreferencesAsync(
+            CancellationToken token = default);
+
+        /// <summary>
+        /// Gets qBittorrent preferences.
+        /// </summary>
+        /// <param name="preferences">
+        /// The prefences to set.
+        /// You can set only the properties you want to change and leave the other ones as <see langword="null"/>.
+        /// </param>
+        /// <param name="token">The cancellation token.</param>
+        /// <returns></returns>
+        Task SetPreferencesAsync(
+            Preferences preferences,
+            CancellationToken token = default);
     }
 }

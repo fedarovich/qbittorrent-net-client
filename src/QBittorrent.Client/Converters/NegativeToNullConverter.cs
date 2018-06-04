@@ -5,9 +5,20 @@ namespace QBittorrent.Client.Converters
 {
     internal class NegativeToNullConverter : JsonConverter
     {
+        private readonly bool _oneWayConvertion;
+
+        public NegativeToNullConverter() : this(false)
+        {
+        }
+
+        public NegativeToNullConverter(bool oneWayConvertion)
+        {
+            _oneWayConvertion = oneWayConvertion;
+        }
+
         public override void WriteJson(JsonWriter writer, object value, JsonSerializer serializer)
         {
-            if (value == null)
+            if (value == null && !_oneWayConvertion)
             {
                 writer.WriteValue(-1);
                 return;

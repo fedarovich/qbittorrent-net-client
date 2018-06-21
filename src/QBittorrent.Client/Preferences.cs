@@ -101,7 +101,7 @@ namespace QBittorrent.Client
         /// Password for SMTP authentication.
         /// </summary>
         [JsonProperty("mail_notification_password")]
-        public string Password { get; set; }
+        public string MailNotificationPassword { get; set; }
 
         /// <summary>
         /// True if external program should be run after torrent has finished downloading.

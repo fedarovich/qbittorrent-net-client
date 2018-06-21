@@ -1436,7 +1436,7 @@ namespace QBittorrent.Client
 
             async Task Execute()
             {
-                var uri = BuildUri("/query/setPreferences");
+                var uri = BuildUri("/command/setPreferences");
                 var json = JsonConvert.SerializeObject(preferences);
                 var response = await _client.PostAsync(uri, BuildForm(("json", json)), token).ConfigureAwait(false);
                 using (response)

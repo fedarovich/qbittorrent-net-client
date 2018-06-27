@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
+using System.Runtime.Serialization;
 using System.Text;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
@@ -13,6 +14,8 @@ namespace QBittorrent.Client
     [JsonObject(ItemNullValueHandling = NullValueHandling.Ignore)]
     public class Preferences
     {
+        private const string WebUiPasswordPropertyName = "web_ui_password";
+
         /// <summary>
         /// Currently selected language
         /// </summary>
@@ -457,14 +460,24 @@ namespace QBittorrent.Client
         public string WebUIUsername { get; set; }
 
         /// <summary>
+        /// WebUI password. 
+        /// </summary>
+        /// <remarks>
+        /// This property should be used for setting password.
+        /// If a <see cref="Preferences"/> object is retrieved as server response, this property will be <see langword="null"/>.
+        /// </remarks>
+        [JsonIgnore]
+        [SuppressMessage("ReSharper", "InconsistentNaming")]
+        public string WebUIPassword { get; set; }
+
+        /// <summary>
         /// MD5 hash of WebUI password. 
         /// </summary>
         /// <remarks>
-        /// In the current versions of qBittorrent the password is encoded in local 8-bit encoding,
-        /// thus you must know which encoding is used on the server. But if your password contains only
-        /// ASCII characters, you can use <see cref="Encoding.ASCII"/> to get the characters.
+        /// This property can be used to get the MD5 hash of the current WebUI password.
+        /// It is ignored when sending requests to the server.
         /// </remarks>
-        [JsonProperty("web_ui_password")]
+        [JsonIgnore]
         [SuppressMessage("ReSharper", "InconsistentNaming")]
         public string WebUIPasswordHash { get; set; }
 
@@ -597,5 +610,26 @@ namespace QBittorrent.Client
         /// </summary>
         [JsonExtensionData]
         public IDictionary<string, JToken> AdditionalData { get; set; }
+
+        [OnSerializing]
+        internal void OnSerializingMethod(StreamingContext context)
+        {
+            if (WebUIPassword != null)
+            {
+                AdditionalData[WebUiPasswordPropertyName] = WebUIPassword;
+            }
+        }
+
+        [OnDeserialized]
+        internal void OnDeserializedMethod(StreamingContext context)
+        {
+            if (AdditionalData != null 
+                && AdditionalData.TryGetValue(WebUiPasswordPropertyName, out var hashToken)
+                && hashToken.Type == JTokenType.String)
+            {
+                WebUIPasswordHash = hashToken.Value<string>();
+                AdditionalData.Remove(WebUiPasswordPropertyName);
+            }
+        }
     }
 }

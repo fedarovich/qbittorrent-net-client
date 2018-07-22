@@ -15,8 +15,10 @@ namespace QBittorrent.Client.Converters
             {
                 writer.WriteValue(value.CustomFolder);
             }
-
-            throw new JsonSerializationException("Invalid save location object.");
+            else
+            {
+                throw new JsonSerializationException("Invalid save location object.");
+            }
         }
 
         public override SaveLocation ReadJson(JsonReader reader, Type objectType, SaveLocation existingValue, bool hasExistingValue,

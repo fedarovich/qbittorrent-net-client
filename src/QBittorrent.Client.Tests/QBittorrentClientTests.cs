@@ -1603,7 +1603,6 @@ namespace QBittorrent.Client.Tests
         [InlineData(nameof(Preferences.DynamicDnsPassword), "", "testpassword")]
         [InlineData(nameof(Preferences.BannedIpAddresses), new string[0], new [] {"192.168.254.201", "2001:db8::ff00:42:8329"})]
         [InlineData(nameof(Preferences.AdditinalTrackers), new string[0], new [] {"http://test1.example.com", "http://test2.example.com"})]
-        [InlineData("", null, null, Skip = "Rider xunit runner issue")]
         [PrintTestName]
         public async Task SetPreference(string name, object oldValue, object newValue, 
             string[] ignoredProperties = null)

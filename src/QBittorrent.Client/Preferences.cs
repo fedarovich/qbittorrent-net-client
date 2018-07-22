@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Runtime.Serialization;
 using System.Text;
@@ -57,12 +58,6 @@ namespace QBittorrent.Client
         /// </summary>
         [JsonProperty("export_dir_fin")]
         public string ExportDirectoryForFinished { get; set; }
-
-        /// <summary>
-        /// True if .torrent file should be copied to export directory upon adding
-        /// </summary>
-        [JsonProperty("export_dir_enabled")]
-        public bool? ExportDirectoryEnabled { get; set; }
 
         /// <summary>
         /// True if e-mail notification should be enabled.
@@ -249,6 +244,7 @@ namespace QBittorrent.Client
         /// </summary>
         [JsonProperty("enable_utp")]
         [SuppressMessage("ReSharper", "InconsistentNaming")]
+        [Obsolete("Use BittorrentProtocol property for qBittorrent 4.x")]
         public bool? EnableUTP { get; set; }
 
         /// <summary>
@@ -392,6 +388,7 @@ namespace QBittorrent.Client
         /// True if proxy requires authentication; doesn't apply to SOCKS4 proxies.
         /// </summary>
         [JsonProperty("proxy_auth_enabled")]
+        [Obsolete("Use ProxyType instead.")]
         public bool? ProxyAuthenticationEnabled { get; set; }
 
         /// <summary>

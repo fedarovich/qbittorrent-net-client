@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -11,6 +12,7 @@ using BencodeNET.Torrents;
 using Docker.DotNet;
 using Docker.DotNet.Models;
 using FluentAssertions;
+using Newtonsoft.Json;
 using Xunit;
 
 namespace QBittorrent.Client.Tests
@@ -1523,6 +1525,215 @@ namespace QBittorrent.Client.Tests
                 var list = await Client.GetTorrentListAsync();
                 list.Single().SequentialDownload.Should().Be(initial);
             });
+        }
+        
+        #endregion
+        
+        #region Preferences
+
+        [Fact]
+        [PrintTestName]
+        public async Task GetPreferences()
+        {
+            await Client.LoginAsync(UserName, Password);
+            var prefs = await Client.GetPreferencesAsync();
+        }
+
+        [SkippableTheory]
+        [InlineData(nameof(Preferences.Locale), "C", "de")]
+        [InlineData(nameof(Preferences.SavePath), "/root/Downloads/", "/tmp/")]
+        [InlineData(nameof(Preferences.TempPathEnabled), false, true)]
+        [InlineData(nameof(Preferences.TempPath), "/root/Downloads/temp/", "/tmp/")]
+        [InlineData(nameof(Preferences.ExportDirectory), "", "/tmp/")]
+        [InlineData(nameof(Preferences.ExportDirectoryForFinished), "", "/tmp/")]
+        [InlineData(nameof(Preferences.MailNotificationEnabled), false, true)]
+        [InlineData(nameof(Preferences.MailNotificationEmailAddress), "", "test@example.com")]
+        [InlineData(nameof(Preferences.MailNotificationSmtpServer), "smtp.changeme.com", "smtp.example.com")]
+        [InlineData(nameof(Preferences.MailNotificationSslEnabled), false, true)]
+        [InlineData(nameof(Preferences.MailNotificationAuthenticationEnabled), false, true)]
+        [InlineData(nameof(Preferences.MailNotificationUsername), "", "testuser")]
+        [InlineData(nameof(Preferences.MailNotificationPassword), "", "testpassword")]
+        [InlineData(nameof(Preferences.AutorunEnabled), false, true)]
+        [InlineData(nameof(Preferences.AutorunProgram), "", "/bin/ls")]
+        [InlineData(nameof(Preferences.PreallocateAll), false, true)]
+        [InlineData(nameof(Preferences.QueueingEnabled), true, false)]
+        [InlineData(nameof(Preferences.MaxActiveDownloads), 3, 6)]
+        [InlineData(nameof(Preferences.MaxActiveUploads), 3, 7)]
+        [InlineData(nameof(Preferences.MaxActiveTorrents), 5, 10)]
+        [InlineData(nameof(Preferences.DoNotCountSlowTorrents), false, true)]
+        [InlineData(nameof(Preferences.MaxRatioAction), MaxRatioAction.Pause, MaxRatioAction.Remove)]
+        [InlineData(nameof(Preferences.AppendExtensionToIncompleteFiles), false, true)]
+        [InlineData(nameof(Preferences.ListenPort), 8999, 8888)]
+        [InlineData(nameof(Preferences.UpnpEnabled), true, false)]
+        [InlineData(nameof(Preferences.RandomPort), false, true, new [] {nameof(Preferences.ListenPort)})]
+        [InlineData(nameof(Preferences.DownloadLimit), 0, 40960)]
+        [InlineData(nameof(Preferences.UploadLimit), 0, 40960)]
+        [InlineData(nameof(Preferences.MaxConnections), 500, 600)]
+        [InlineData(nameof(Preferences.MaxConnectionsPerTorrent), 100, 200)]
+        [InlineData(nameof(Preferences.MaxUploads), -1, 10)]
+        [InlineData(nameof(Preferences.MaxUploadsPerTorrent), -1, 5)]
+        [InlineData(nameof(Preferences.LimitUTPRate), true, false)]
+        [InlineData(nameof(Preferences.LimitTcpOverhead), false, true)]
+        [InlineData(nameof(Preferences.AlternativeDownloadLimit), 10240, 20480)]
+        [InlineData(nameof(Preferences.AlternativeUploadLimit), 10240, 20480)]
+        [InlineData(nameof(Preferences.BittorrentProtocol), BittorrentProtocol.Both, BittorrentProtocol.Tcp)]
+        [InlineData(nameof(Preferences.BittorrentProtocol), BittorrentProtocol.Both, BittorrentProtocol.uTP)]
+        [InlineData(nameof(Preferences.SchedulerEnabled), false, true)]
+        [InlineData(nameof(Preferences.SchedulerDays), SchedulerDay.Every, SchedulerDay.Weekday)]
+        [InlineData(nameof(Preferences.DHT), true, false)]
+        [InlineData(nameof(Preferences.PeerExchange), true, false)]
+        [InlineData(nameof(Preferences.LocalPeerDiscovery), true, false)]
+        [InlineData(nameof(Preferences.Encryption), Encryption.Prefer, Encryption.ForceOn)]
+        [InlineData(nameof(Preferences.AnonymousMode), false, true)]
+        [InlineData(nameof(Preferences.ProxyType), default(ProxyType), ProxyType.Http)]
+        [InlineData(nameof(Preferences.ProxyAddress), "0.0.0.0", "192.168.254.200")]
+        [InlineData(nameof(Preferences.ProxyPort), 8080, 8888)]
+        [InlineData(nameof(Preferences.ProxyPeerConnections), false, true)]
+        [InlineData(nameof(Preferences.ForceProxy), true, false)]
+        [InlineData(nameof(Preferences.ProxyUsername), "", "testuser")]
+        [InlineData(nameof(Preferences.ProxyPassword), "", "testpassword")]
+        [InlineData(nameof(Preferences.IpFilterEnabled), false, true)]
+        [InlineData(nameof(Preferences.IpFilterPath), "", "/tmp/ipfilter.dat")]
+        [InlineData(nameof(Preferences.IpFilterTrackers), false, true)]
+        [InlineData(nameof(Preferences.WebUIUpnp), true, false)]
+        [InlineData(nameof(Preferences.DynamicDnsEnabled), false, true)]
+        [InlineData(nameof(Preferences.DynamicDnsService), DynamicDnsService.DynDNS, DynamicDnsService.NoIP)]
+        [InlineData(nameof(Preferences.DynamicDnsDomain), "changeme.dyndns.org", "test.example.com")]
+        [InlineData(nameof(Preferences.DynamicDnsUsername), "", "testuser")]
+        [InlineData(nameof(Preferences.DynamicDnsPassword), "", "testpassword")]
+        [InlineData(nameof(Preferences.BannedIpAddresses), new string[0], new [] {"192.168.254.201", "2001:db8::ff00:42:8329"})]
+        [InlineData(nameof(Preferences.AdditinalTrackers), new string[0], new [] {"http://test1.example.com", "http://test2.example.com"})]
+        [InlineData("", null, null, Skip = "Rider xunit runner issue")]
+        [PrintTestName]
+        public async Task SetPreference(string name, object oldValue, object newValue, 
+            string[] ignoredProperties = null)
+        {
+            Skip.If(Environment.OSVersion.Platform == PlatformID.Win32NT);
+            
+            var prop = typeof(Preferences).GetProperty(name);
+            ignoredProperties = ignoredProperties ?? new string[0];
+            
+            await Client.LoginAsync(UserName, Password);
+            
+            var oldPrefs = await Client.GetPreferencesAsync();
+            prop.GetValue(oldPrefs).Should().BeEquivalentTo(oldValue);
+          
+            var setPrefs = new Preferences();
+            prop.SetValue(setPrefs, newValue);
+            await Client.SetPreferencesAsync(setPrefs);
+
+            var newPrefs = await Client.GetPreferencesAsync();
+            prop.GetValue(newPrefs).Should().BeEquivalentTo(newValue);
+            newPrefs.Should().BeEquivalentTo(oldPrefs, options => options
+                .Excluding(ctx => ctx.SelectedMemberPath == name)
+                .Excluding(ctx => ignoredProperties.Contains(ctx.SelectedMemberPath)));
+        }
+
+        [SkippableFact]
+        public async Task SetPreferenceScanDir()
+        {
+            Skip.If(Environment.OSVersion.Platform == PlatformID.Win32NT);
+            
+            await Client.LoginAsync(UserName, Password);
+            
+            var oldPrefs = await Client.GetPreferencesAsync();
+            oldPrefs.ScanDirectories.Should().BeEmpty();
+            
+            var setPrefs = new Preferences
+            {
+                ScanDirectories = new Dictionary<string, SaveLocation>
+                {
+                    ["/scan/1"] = new SaveLocation("/root/Downloads/from_scan1"),
+                    ["/scan/2"] = new SaveLocation(StandardSaveLocation.Default),
+                    ["/scan/3"] = new SaveLocation(StandardSaveLocation.MonitoredFolder)
+                }
+            };           
+            await Client.SetPreferencesAsync(setPrefs);
+            
+            var newPrefs = await Client.GetPreferencesAsync();
+            newPrefs.ScanDirectories.Should().BeEquivalentTo(setPrefs.ScanDirectories);
+            newPrefs.Should().BeEquivalentTo(oldPrefs, options => options
+                .Excluding(p => p.ScanDirectories));
+        }
+        
+        [Fact]
+        public async Task SetPreferenceMaxRatio()
+        {
+            await Client.LoginAsync(UserName, Password);
+            
+            var oldPrefs = await Client.GetPreferencesAsync();
+            oldPrefs.MaxRatio.Should().Be(-1.0);
+            oldPrefs.MaxRatioEnabled.Should().BeFalse();
+            
+            var setPrefs = new Preferences
+            {
+                MaxRatioEnabled = true,
+                MaxRatio = 1.0
+            };
+            await Client.SetPreferencesAsync(setPrefs);
+            
+            var newPrefs = await Client.GetPreferencesAsync();
+            newPrefs.MaxRatio.Should().Be(1.0);
+            newPrefs.MaxRatioEnabled.Should().BeTrue();
+            newPrefs.Should().BeEquivalentTo(oldPrefs, options => options
+                .Excluding(p => p.MaxRatio)
+                .Excluding(p => p.MaxRatioEnabled));
+        }
+        
+        [Fact]
+        public async Task SetPreferenceMaxSeedingTime()
+        {
+            await Client.LoginAsync(UserName, Password);
+            
+            var oldPrefs = await Client.GetPreferencesAsync();
+            oldPrefs.MaxSeedingTime.Should().Be(-1);
+            oldPrefs.MaxSeedingTimeEnabled.Should().BeFalse();
+            
+            var setPrefs = new Preferences
+            {
+                MaxSeedingTimeEnabled = true,
+                MaxSeedingTime = 600
+            };
+            await Client.SetPreferencesAsync(setPrefs);
+            
+            var newPrefs = await Client.GetPreferencesAsync();
+            newPrefs.MaxSeedingTime.Should().Be(600);
+            newPrefs.MaxSeedingTimeEnabled.Should().BeTrue();
+            newPrefs.Should().BeEquivalentTo(oldPrefs, options => options
+                .Excluding(p => p.MaxSeedingTime)
+                .Excluding(p => p.MaxSeedingTimeEnabled));
+        }
+        
+        [Fact]
+        public async Task SetPreferenceSchedule()
+        {
+            await Client.LoginAsync(UserName, Password);
+            
+            var oldPrefs = await Client.GetPreferencesAsync();
+            oldPrefs.ScheduleFromHour.Should().Be(8);
+            oldPrefs.ScheduleFromMinute.Should().Be(0);
+            oldPrefs.ScheduleToHour.Should().Be(20);
+            oldPrefs.ScheduleToMinute.Should().Be(0);
+            oldPrefs.SchedulerEnabled.Should().BeFalse();
+            
+            var setPrefs = new Preferences
+            {
+                ScheduleFromHour = 7,
+                ScheduleFromMinute = 45,
+                ScheduleToHour = 21,
+                ScheduleToMinute = 15,
+                SchedulerEnabled = true
+            };
+            await Client.SetPreferencesAsync(setPrefs);
+            
+            var newPrefs = await Client.GetPreferencesAsync();
+            newPrefs.ScheduleFromHour.Should().Be(7);
+            newPrefs.ScheduleFromMinute.Should().Be(45);
+            newPrefs.ScheduleToHour.Should().Be(21);
+            newPrefs.ScheduleToMinute.Should().Be(15);
+            newPrefs.SchedulerEnabled.Should().BeTrue();
+            newPrefs.Should().BeEquivalentTo(oldPrefs, options => options
+                .Excluding(ctx => ctx.SelectedMemberPath.StartsWith("Schedule")));
         }
         
         #endregion

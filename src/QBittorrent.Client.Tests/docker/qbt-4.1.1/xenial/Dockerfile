@@ -10,7 +10,8 @@ RUN set -x \
     && apt install -y /install/qbittorrent-nox_4.1.1.99~201805272202-6377-ea5a290~ubuntu16.04.1_amd64.deb \
     && apt clean \
     && rm -rf /var/lib/apt/lists/* \
-    && rm -rf /install/* 
+    && rm -rf /install/* \
+    && mkdir /scan && mkdir /scan/1 && mkdir /scan/2 && mkdir /scan/3
 
 EXPOSE 8080 6881
 

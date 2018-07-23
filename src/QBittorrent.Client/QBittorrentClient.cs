@@ -103,7 +103,7 @@ namespace QBittorrent.Client
                 .ConfigureAwait(false);
             using (response)
             {
-                response.EnsureSuccessStatusCode();
+                response.EnsureSuccessStatusCodeEx();
             }
         }
 
@@ -118,7 +118,7 @@ namespace QBittorrent.Client
             var response = await _client.PostAsync(new Uri(_uri, "/logout"), BuildForm(), token).ConfigureAwait(false);
             using (response)
             {
-                response.EnsureSuccessStatusCode();
+                response.EnsureSuccessStatusCodeEx();
             }
         }
 
@@ -498,7 +498,7 @@ namespace QBittorrent.Client
 
             using (var response = await _client.PostAsync(uri, data, token).ConfigureAwait(false))
             {
-                response.EnsureSuccessStatusCode();
+                response.EnsureSuccessStatusCodeEx();
             }
         }
 
@@ -525,7 +525,7 @@ namespace QBittorrent.Client
                 var response = await _client.PostAsync(uri, BuildForm(("hash", hash)), token).ConfigureAwait(false);
                 using (response)
                 {
-                    response.EnsureSuccessStatusCode();
+                    response.EnsureSuccessStatusCodeEx();
                 }
             }
         }
@@ -542,7 +542,7 @@ namespace QBittorrent.Client
             var response = await _client.PostAsync(uri, BuildForm(), token).ConfigureAwait(false);
             using (response)
             {
-                response.EnsureSuccessStatusCode();
+                response.EnsureSuccessStatusCodeEx();
             }
         }
 
@@ -565,7 +565,7 @@ namespace QBittorrent.Client
                 var response = await _client.PostAsync(uri, BuildForm(("hash", hash)), token).ConfigureAwait(false);
                 using (response)
                 {
-                    response.EnsureSuccessStatusCode();
+                    response.EnsureSuccessStatusCodeEx();
                 }
             }
         }
@@ -582,7 +582,7 @@ namespace QBittorrent.Client
             var response = await _client.PostAsync(uri, BuildForm(), token).ConfigureAwait(false);
             using (response)
             {
-                response.EnsureSuccessStatusCode();
+                response.EnsureSuccessStatusCodeEx();
             }
         }
 
@@ -613,7 +613,7 @@ namespace QBittorrent.Client
                 var response = await _client.PostAsync(uri, BuildForm(("category", category)), token).ConfigureAwait(false);
                 using (response)
                 {
-                    response.EnsureSuccessStatusCode();
+                    response.EnsureSuccessStatusCodeEx();
                 }
             }
         }
@@ -641,7 +641,7 @@ namespace QBittorrent.Client
                     .ConfigureAwait(false);
                 using (response)
                 {
-                    response.EnsureSuccessStatusCode();
+                    response.EnsureSuccessStatusCodeEx();
                 }
             }
 
@@ -700,7 +700,7 @@ namespace QBittorrent.Client
                     ), token).ConfigureAwait(false);
                 using (response)
                 {
-                    response.EnsureSuccessStatusCode();
+                    response.EnsureSuccessStatusCodeEx();
                 }
             }
         }
@@ -732,7 +732,7 @@ namespace QBittorrent.Client
                     .ConfigureAwait(false);
                 using (response)
                 {
-                    response.EnsureSuccessStatusCode();
+                    response.EnsureSuccessStatusCodeEx();
 
                     var json = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
                     var dict = JsonConvert.DeserializeObject<Dictionary<string, long?>>(json, new NegativeToNullConverter());
@@ -771,7 +771,7 @@ namespace QBittorrent.Client
                     .ConfigureAwait(false);
                 using (response)
                 {
-                    response.EnsureSuccessStatusCode();
+                    response.EnsureSuccessStatusCodeEx();
                 }
             }
         }
@@ -799,7 +799,7 @@ namespace QBittorrent.Client
                     .ConfigureAwait(false);
                 using (response)
                 {
-                    response.EnsureSuccessStatusCode();
+                    response.EnsureSuccessStatusCodeEx();
 
                     var json = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
                     var dict = JsonConvert.DeserializeObject<Dictionary<string, long?>>(json, new NegativeToNullConverter());
@@ -838,7 +838,7 @@ namespace QBittorrent.Client
                     .ConfigureAwait(false);
                 using (response)
                 {
-                    response.EnsureSuccessStatusCode();
+                    response.EnsureSuccessStatusCodeEx();
                 }
             }
         }
@@ -854,7 +854,7 @@ namespace QBittorrent.Client
             var uri = BuildUri("/command/getGlobalDlLimit");
             using (var response = await _client.PostAsync(uri, null, token).ConfigureAwait(false))
             {
-                response.EnsureSuccessStatusCode();
+                response.EnsureSuccessStatusCodeEx();
                 var strValue = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
                 return long.TryParse(strValue, out long value) ? value : 0;
             }
@@ -881,7 +881,7 @@ namespace QBittorrent.Client
                 var response = await _client.PostAsync(uri, BuildForm(("limit", limit.ToString())), token).ConfigureAwait(false);
                 using (response)
                 {
-                    response.EnsureSuccessStatusCode();
+                    response.EnsureSuccessStatusCodeEx();
                 }
             }
         }
@@ -897,7 +897,7 @@ namespace QBittorrent.Client
             var uri = BuildUri("/command/getGlobalUpLimit");
             using (var response = await _client.PostAsync(uri, null, token).ConfigureAwait(false))
             {
-                response.EnsureSuccessStatusCode();
+                response.EnsureSuccessStatusCodeEx();
                 var strValue = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
                 return long.TryParse(strValue, out long value) ? value : 0;
             }
@@ -924,7 +924,7 @@ namespace QBittorrent.Client
                 var response = await _client.PostAsync(uri, BuildForm(("limit", limit.ToString())), token).ConfigureAwait(false);
                 using (response)
                 {
-                    response.EnsureSuccessStatusCode();
+                    response.EnsureSuccessStatusCodeEx();
                 }
             }
         }
@@ -959,7 +959,7 @@ namespace QBittorrent.Client
                     .ConfigureAwait(false);
                 using (response)
                 {
-                    response.EnsureSuccessStatusCode();
+                    response.EnsureSuccessStatusCodeEx();
                 }
             }
 
@@ -1016,7 +1016,7 @@ namespace QBittorrent.Client
                     .ConfigureAwait(false);
                 using (response)
                 {
-                    response.EnsureSuccessStatusCode();
+                    response.EnsureSuccessStatusCodeEx();
                 }
             }
         }
@@ -1052,7 +1052,7 @@ namespace QBittorrent.Client
                     .ConfigureAwait(false);
                 using (response)
                 {
-                    response.EnsureSuccessStatusCode();
+                    response.EnsureSuccessStatusCodeEx();
                 }
             }
         }
@@ -1087,7 +1087,7 @@ namespace QBittorrent.Client
                     ), token).ConfigureAwait(false);
                 using (response)
                 {
-                    response.EnsureSuccessStatusCode();
+                    response.EnsureSuccessStatusCodeEx();
                 }
             }
         }
@@ -1122,7 +1122,7 @@ namespace QBittorrent.Client
                     ), token).ConfigureAwait(false);
                 using (response)
                 {
-                    response.EnsureSuccessStatusCode();
+                    response.EnsureSuccessStatusCodeEx();
                 }
             }
         }
@@ -1154,7 +1154,7 @@ namespace QBittorrent.Client
                     ), token).ConfigureAwait(false);
                 using (response)
                 {
-                    response.EnsureSuccessStatusCode();
+                    response.EnsureSuccessStatusCodeEx();
                 }
             }
 
@@ -1206,7 +1206,7 @@ namespace QBittorrent.Client
                 var response = await _client.PostAsync(uri, BuildForm(("hash", hash)), token).ConfigureAwait(false);
                 using (response)
                 {
-                    response.EnsureSuccessStatusCode();
+                    response.EnsureSuccessStatusCodeEx();
                 }
             }
         }
@@ -1259,7 +1259,7 @@ namespace QBittorrent.Client
             var uri = BuildUri("/command/toggleAlternativeSpeedLimits");
             using (var result = await _client.PostAsync(uri, BuildForm(), token).ConfigureAwait(false))
             {
-                result.EnsureSuccessStatusCode();
+                result.EnsureSuccessStatusCodeEx();
             }
         }
 
@@ -1288,7 +1288,7 @@ namespace QBittorrent.Client
                     ), token).ConfigureAwait(false);
                 using (response)
                 {
-                    response.EnsureSuccessStatusCode();
+                    response.EnsureSuccessStatusCodeEx();
                 }
             }
         }
@@ -1318,7 +1318,7 @@ namespace QBittorrent.Client
                     ), token).ConfigureAwait(false);
                 using (response)
                 {
-                    response.EnsureSuccessStatusCode();
+                    response.EnsureSuccessStatusCodeEx();
                 }
             }
         }
@@ -1348,7 +1348,7 @@ namespace QBittorrent.Client
                     ), token).ConfigureAwait(false);
                 using (response)
                 {
-                    response.EnsureSuccessStatusCode();
+                    response.EnsureSuccessStatusCodeEx();
                 }
             }
         }
@@ -1374,7 +1374,7 @@ namespace QBittorrent.Client
                     BuildForm(("hashes", hashesString)), token).ConfigureAwait(false);
                 using (response)
                 {
-                    response.EnsureSuccessStatusCode();
+                    response.EnsureSuccessStatusCodeEx();
                 }
             }
         }
@@ -1399,7 +1399,7 @@ namespace QBittorrent.Client
                     BuildForm(("hashes", hashesString)), token).ConfigureAwait(false);
                 using (response)
                 {
-                    response.EnsureSuccessStatusCode();
+                    response.EnsureSuccessStatusCodeEx();
                 }
             }
         }
@@ -1441,7 +1441,7 @@ namespace QBittorrent.Client
                 var response = await _client.PostAsync(uri, BuildForm(("json", json)), token).ConfigureAwait(false);
                 using (response)
                 {
-                    response.EnsureSuccessStatusCode();
+                    response.EnsureSuccessStatusCodeEx();
                 }
             }
         }

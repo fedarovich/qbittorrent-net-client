@@ -27,7 +27,7 @@ namespace QBittorrent.Client.Extensions
                 if (returnEmptyIfNotFound && response.StatusCode == HttpStatusCode.NotFound)
                     return string.Empty;
                 
-                response.EnsureSuccessStatusCode();
+                response.EnsureSuccessStatusCodeEx();
                 HttpContent content = response.Content;
                 if (content != null)
                 {
@@ -35,6 +35,19 @@ namespace QBittorrent.Client.Extensions
                 }
 
                 return string.Empty;
+            }
+        }
+
+        public static void EnsureSuccessStatusCodeEx(this HttpResponseMessage message)
+        {
+            try
+            {
+                // Call original EnsureSuccessStatusCode to get the same behavior and retrieve the error message.
+                message.EnsureSuccessStatusCode();
+            }
+            catch (HttpRequestException ex)
+            {
+                throw new QBittorrentClientRequestException(ex.Message, message.StatusCode);
             }
         }
     }

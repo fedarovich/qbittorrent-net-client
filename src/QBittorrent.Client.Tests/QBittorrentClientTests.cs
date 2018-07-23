@@ -165,14 +165,14 @@ namespace QBittorrent.Client.Tests
         public async Task LoginIncorrect()
         {
             await Client.LoginAsync(UserName, "incorrect");
-            await Assert.ThrowsAsync<HttpRequestException>(() => Client.GetTorrentListAsync());
+            await Assert.ThrowsAsync<QBittorrentClientRequestException>(() => Client.GetTorrentListAsync());
         }
         
         [Fact]
         [PrintTestName]
         public async Task NoLogin()
         {
-            await Assert.ThrowsAsync<HttpRequestException>(() => Client.GetTorrentListAsync());
+            await Assert.ThrowsAsync<QBittorrentClientRequestException>(() => Client.GetTorrentListAsync());
         }
 
         [Fact]
@@ -191,7 +191,7 @@ namespace QBittorrent.Client.Tests
 
                 await Task.Delay(1000);
 
-                await Assert.ThrowsAsync<HttpRequestException>(() => Client.GetTorrentListAsync());
+                await Assert.ThrowsAsync<QBittorrentClientRequestException>(() => Client.GetTorrentListAsync());
             }
             catch (Exception e)
             {

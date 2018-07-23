@@ -1,9 +1,11 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Linq;
 using System.Net.Http;
+using System.Security.Cryptography;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -13,11 +15,21 @@ using Docker.DotNet;
 using Docker.DotNet.Models;
 using FluentAssertions;
 using Newtonsoft.Json;
+using Org.BouncyCastle.Asn1;
+using Org.BouncyCastle.Asn1.X509;
+using Org.BouncyCastle.Crypto;
+using Org.BouncyCastle.Crypto.Generators;
+using Org.BouncyCastle.Crypto.Prng;
+using Org.BouncyCastle.Math;
+using Org.BouncyCastle.OpenSsl;
+using Org.BouncyCastle.Security;
+using Org.BouncyCastle.X509;
 using Xunit;
 
 namespace QBittorrent.Client.Tests
 {
     [Collection(DockerCollection.Name)]
+    [SuppressMessage("ReSharper", "InconsistentNaming")]
     public class QBittorrentClientTests : IAsyncLifetime, IDisposable
     {
         private const string UserName = "admin";
@@ -49,7 +61,8 @@ namespace QBittorrent.Client.Tests
                 Image = DockerFixture.ImageName,
                 ExposedPorts = new Dictionary<string, EmptyStruct>
                 {
-                    ["8080/tcp"] = new EmptyStruct()
+                    ["8080/tcp"] = new EmptyStruct(),
+                    ["9090/tcp"] = new EmptyStruct()
                 },
                 HostConfig = new HostConfig
                 {
@@ -61,6 +74,14 @@ namespace QBittorrent.Client.Tests
                             {
                                 HostIP = Utils.IsWindows ? null : "0.0.0.0",
                                 HostPort = "8080"
+                            }
+                        },
+                        ["9090/tcp"] = new List<PortBinding>
+                        {
+                            new PortBinding
+                            {
+                                HostIP = Utils.IsWindows ? null : "0.0.0.0",
+                                HostPort = "9090"
                             }
                         }
                     }
@@ -1629,6 +1650,7 @@ namespace QBittorrent.Client.Tests
         }
 
         [SkippableFact]
+        [PrintTestName]
         public async Task SetPreferenceScanDir()
         {
             Skip.If(Environment.OSVersion.Platform == PlatformID.Win32NT);
@@ -1656,6 +1678,7 @@ namespace QBittorrent.Client.Tests
         }
         
         [Fact]
+        [PrintTestName]
         public async Task SetPreferenceMaxRatio()
         {
             await Client.LoginAsync(UserName, Password);
@@ -1680,6 +1703,7 @@ namespace QBittorrent.Client.Tests
         }
         
         [Fact]
+        [PrintTestName]
         public async Task SetPreferenceMaxSeedingTime()
         {
             await Client.LoginAsync(UserName, Password);
@@ -1704,6 +1728,7 @@ namespace QBittorrent.Client.Tests
         }
         
         [Fact]
+        [PrintTestName]
         public async Task SetPreferenceSchedule()
         {
             await Client.LoginAsync(UserName, Password);
@@ -1733,6 +1758,183 @@ namespace QBittorrent.Client.Tests
             newPrefs.SchedulerEnabled.Should().BeTrue();
             newPrefs.Should().BeEquivalentTo(oldPrefs, options => options
                 .Excluding(ctx => ctx.SelectedMemberPath.StartsWith("Schedule")));
+        }
+        
+        [Fact]
+        [PrintTestName]
+        public async Task SetPreferenceWebUICredentials()
+        {
+            await Client.LoginAsync(UserName, Password);
+            
+            var oldPrefs = await Client.GetPreferencesAsync();
+            oldPrefs.WebUIUsername.Should().Be(UserName);
+            oldPrefs.WebUIPasswordHash.Should().Be(Hash(Password));
+            
+            var setPrefs = new Preferences
+            {
+                WebUIUsername = "testuser",
+                WebUIPassword = "testpassword"
+            };
+            await Client.SetPreferencesAsync(setPrefs);
+            
+            var newClient = new QBittorrentClient(new Uri("http://localhost:8080/"));
+            await newClient.LoginAsync("testuser", "testpassword");
+
+            var newPrefs = await newClient.GetPreferencesAsync();
+            newPrefs.WebUIUsername.Should().Be(setPrefs.WebUIUsername);
+            newPrefs.WebUIPasswordHash.Should().Be(Hash(setPrefs.WebUIPassword));
+            newPrefs.Should().BeEquivalentTo(oldPrefs, options => options
+                .Excluding(p => p.WebUIUsername)
+                .Excluding(p => p.WebUIPasswordHash));
+            
+            string Hash(string password)
+            {
+                using (var md5 = MD5.Create())
+                {
+                    return string.Concat(md5.ComputeHash(Encoding.ASCII.GetBytes(password)).Select(b => b.ToString("x2")));
+                }
+            }
+        }
+        
+        [Fact]
+        [PrintTestName]
+        public async Task SetPreferenceWebUIPort()
+        {
+            await Client.LoginAsync(UserName, Password);
+            
+            var oldPrefs = await Client.GetPreferencesAsync();
+            oldPrefs.WebUIDomain.Should().Be("*");
+            oldPrefs.WebUIPort.Should().Be(8080);
+            
+            var setPrefs = new Preferences
+            {
+                WebUIDomain = "localhost",
+                WebUIPort = 9090
+            };
+            await Client.SetPreferencesAsync(setPrefs);
+            
+            var newClient = new QBittorrentClient(new Uri("http://localhost:9090/"));
+            await newClient.LoginAsync(UserName, Password);
+
+            var newPrefs = await newClient.GetPreferencesAsync();
+            newPrefs.WebUIDomain.Should().Be(setPrefs.WebUIDomain);            
+            newPrefs.WebUIPort.Should().Be(setPrefs.WebUIPort);   
+            newPrefs.Should().BeEquivalentTo(oldPrefs, options => options
+                .Excluding(p => p.WebUIDomain)
+                .Excluding(p => p.WebUIPort));
+        }
+        
+        [Fact]
+        [PrintTestName]
+        public async Task SetPreferenceWebUIHttps()
+        {
+            await Client.LoginAsync(UserName, Password);
+            
+            var oldPrefs = await Client.GetPreferencesAsync();
+            oldPrefs.WebUIHttps.Should().BeFalse();
+            oldPrefs.WebUISslCertificate.Should().BeEmpty();
+            oldPrefs.WebUISslKey.Should().BeEmpty();
+
+            var (cert, key) = CreateCertificate();
+            
+            var setPrefs = new Preferences
+            {
+                WebUIHttps = true,
+                WebUISslCertificate = cert,
+                WebUISslKey = key,
+                WebUIPort = 9090
+            };
+            await Client.SetPreferencesAsync(setPrefs);
+            
+            var handler = new HttpClientHandler
+            {
+                ServerCertificateCustomValidationCallback = delegate { return true; }
+            };
+            var newClient = new QBittorrentClient(new Uri("https://localhost:9090/"), handler, true);
+            await newClient.LoginAsync(UserName, Password);
+
+            var newPrefs = await newClient.GetPreferencesAsync();
+            newPrefs.WebUIHttps.Should().BeTrue();
+            newPrefs.WebUISslCertificate.Should().Be(setPrefs.WebUISslCertificate);
+            newPrefs.WebUISslKey.Should().Be(setPrefs.WebUISslKey);
+            newPrefs.WebUIPort.Should().Be(setPrefs.WebUIPort);   
+            newPrefs.Should().BeEquivalentTo(oldPrefs, options => options
+                .Excluding(p => p.WebUIHttps)
+                .Excluding(p => p.WebUISslCertificate)
+                .Excluding(p => p.WebUISslKey)
+                .Excluding(p => p.WebUIPort));
+        }
+        
+        [Fact]
+        [PrintTestName]
+        public async Task SetPreferenceWebUIHttpsWithInvalidCertificate()
+        {
+            await Client.LoginAsync(UserName, Password);
+            
+            var oldPrefs = await Client.GetPreferencesAsync();
+            oldPrefs.WebUIHttps.Should().BeFalse();
+            oldPrefs.WebUISslCertificate.Should().BeEmpty();
+            oldPrefs.WebUISslKey.Should().BeEmpty();
+
+            var (cert, key) = CreateCertificate();
+            
+            var setPrefs = new Preferences
+            {
+                WebUIHttps = true,
+                WebUISslCertificate = cert,
+                WebUISslKey = key,
+                WebUIPort = 9090
+            };
+            await Client.SetPreferencesAsync(setPrefs);
+
+            var newClient = new QBittorrentClient(new Uri("https://localhost:9090/"));
+            await Assert.ThrowsAsync<HttpRequestException>(() => newClient.LoginAsync(UserName, Password));
+        }
+
+        private (string cert, string key) CreateCertificate()
+        {
+            var kpgen = new RsaKeyPairGenerator();
+
+            kpgen.Init(new KeyGenerationParameters(new SecureRandom(new CryptoApiRandomGenerator()), 1024));
+
+            var kp = kpgen.GenerateKeyPair();
+
+            var gen = new X509V3CertificateGenerator();
+
+            var certName = new X509Name("CN=localhost");
+            var serialNo = BigInteger.ProbablePrime(120, new Random());
+
+            gen.SetSerialNumber(serialNo);
+            gen.SetSubjectDN(certName);
+            gen.SetIssuerDN(certName);
+            gen.SetNotAfter(DateTime.Now.AddYears(100));
+            gen.SetNotBefore(DateTime.Now.Subtract(new TimeSpan(7, 0, 0, 0)));
+            gen.SetSignatureAlgorithm("SHA1WithRSA");
+            gen.SetPublicKey(kp.Public);
+
+            gen.AddExtension(
+                X509Extensions.AuthorityKeyIdentifier.Id,
+                false,
+                new AuthorityKeyIdentifier(
+                    SubjectPublicKeyInfoFactory.CreateSubjectPublicKeyInfo(kp.Public),
+                    new GeneralNames(new GeneralName(certName)),
+                    serialNo));
+
+            gen.AddExtension(
+                X509Extensions.ExtendedKeyUsage.Id,
+                false,
+                new ExtendedKeyUsage(new ArrayList() { new DerObjectIdentifier("1.3.6.1.5.5.7.3.1") }));
+
+            var newCert = gen.Generate(kp.Private);
+            return (WritePem(newCert), WritePem(kp.Private));
+            
+            string WritePem<T>(T data)
+            {
+                var stringWriter = new StringWriter();
+                var pemWriter = new PemWriter(stringWriter);
+                pemWriter.WriteObject(data);
+                return stringWriter.ToString();
+            }
         }
         
         #endregion

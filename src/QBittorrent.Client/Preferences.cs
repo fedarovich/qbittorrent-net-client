@@ -613,6 +613,7 @@ namespace QBittorrent.Client
         {
             if (WebUIPassword != null)
             {
+                AdditionalData = AdditionalData ?? new Dictionary<string, JToken>();
                 AdditionalData[WebUiPasswordPropertyName] = WebUIPassword;
             }
         }

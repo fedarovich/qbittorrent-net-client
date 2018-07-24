@@ -48,7 +48,7 @@ namespace QBittorrent.Client
         public IDictionary<string, SaveLocation> ScanDirectories { get; set; }
 
         /// <summary>
-        /// Path to directory to copy .torrent files if <see cref="ExportDirectoryEnabled"/> is <see langword="true"/>.
+        /// Path to directory to copy .torrent files.
         /// </summary>
         [JsonProperty("export_dir")]
         public string ExportDirectory { get; set; }

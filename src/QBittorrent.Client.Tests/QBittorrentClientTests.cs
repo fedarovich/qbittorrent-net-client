@@ -19,6 +19,7 @@ using Org.BouncyCastle.Asn1;
 using Org.BouncyCastle.Asn1.X509;
 using Org.BouncyCastle.Crypto;
 using Org.BouncyCastle.Crypto.Generators;
+using Org.BouncyCastle.Crypto.Operators;
 using Org.BouncyCastle.Crypto.Prng;
 using Org.BouncyCastle.Math;
 using Org.BouncyCastle.OpenSsl;
@@ -1640,13 +1641,16 @@ namespace QBittorrent.Client.Tests
           
             var setPrefs = new Preferences();
             prop.SetValue(setPrefs, newValue);
-            await Client.SetPreferencesAsync(setPrefs);
+            await Utils.Retry(() => Client.SetPreferencesAsync(setPrefs));
 
-            var newPrefs = await Client.GetPreferencesAsync();
-            prop.GetValue(newPrefs).Should().BeEquivalentTo(newValue);
-            newPrefs.Should().BeEquivalentTo(oldPrefs, options => options
-                .Excluding(ctx => ctx.SelectedMemberPath == name)
-                .Excluding(ctx => ignoredProperties.Contains(ctx.SelectedMemberPath)));
+            await Utils.Retry(async () =>
+            {
+                var newPrefs = await Client.GetPreferencesAsync();
+                prop.GetValue(newPrefs).Should().BeEquivalentTo(newValue);
+                newPrefs.Should().BeEquivalentTo(oldPrefs, options => options
+                    .Excluding(ctx => ctx.SelectedMemberPath == name)
+                    .Excluding(ctx => ignoredProperties.Contains(ctx.SelectedMemberPath)));
+            });
         }
 
         [SkippableFact]
@@ -1893,40 +1897,40 @@ namespace QBittorrent.Client.Tests
 
         private (string cert, string key) CreateCertificate()
         {
-            var kpgen = new RsaKeyPairGenerator();
+            var secureRandom = new SecureRandom(new CryptoApiRandomGenerator());
 
-            kpgen.Init(new KeyGenerationParameters(new SecureRandom(new CryptoApiRandomGenerator()), 1024));
+            var keyPairGenerator = new RsaKeyPairGenerator();
+            keyPairGenerator.Init(new KeyGenerationParameters(secureRandom, 1024));
+            var keyPair = keyPairGenerator.GenerateKeyPair();
 
-            var kp = kpgen.GenerateKeyPair();
-
-            var gen = new X509V3CertificateGenerator();
+            var certGenerator = new X509V3CertificateGenerator();
 
             var certName = new X509Name("CN=localhost");
             var serialNo = BigInteger.ProbablePrime(120, new Random());
 
-            gen.SetSerialNumber(serialNo);
-            gen.SetSubjectDN(certName);
-            gen.SetIssuerDN(certName);
-            gen.SetNotAfter(DateTime.Now.AddYears(100));
-            gen.SetNotBefore(DateTime.Now.Subtract(new TimeSpan(7, 0, 0, 0)));
-            gen.SetSignatureAlgorithm("SHA1WithRSA");
-            gen.SetPublicKey(kp.Public);
+            certGenerator.SetSerialNumber(serialNo);
+            certGenerator.SetSubjectDN(certName);
+            certGenerator.SetIssuerDN(certName);
+            certGenerator.SetNotAfter(DateTime.Now.AddYears(100));
+            certGenerator.SetNotBefore(DateTime.Now.Subtract(new TimeSpan(7, 0, 0, 0)));
+            certGenerator.SetPublicKey(keyPair.Public);
 
-            gen.AddExtension(
+            certGenerator.AddExtension(
                 X509Extensions.AuthorityKeyIdentifier.Id,
                 false,
                 new AuthorityKeyIdentifier(
-                    SubjectPublicKeyInfoFactory.CreateSubjectPublicKeyInfo(kp.Public),
+                    SubjectPublicKeyInfoFactory.CreateSubjectPublicKeyInfo(keyPair.Public),
                     new GeneralNames(new GeneralName(certName)),
                     serialNo));
 
-            gen.AddExtension(
+            certGenerator.AddExtension(
                 X509Extensions.ExtendedKeyUsage.Id,
                 false,
-                new ExtendedKeyUsage(new ArrayList() { new DerObjectIdentifier("1.3.6.1.5.5.7.3.1") }));
+                new ExtendedKeyUsage(KeyPurposeID.IdKPServerAuth));
 
-            var newCert = gen.Generate(kp.Private);
-            return (WritePem(newCert), WritePem(kp.Private));
+            var signatureFactory = new Asn1SignatureFactory("SHA1WITHRSA", keyPair.Private, secureRandom);
+            var newCert = certGenerator.Generate(signatureFactory);
+            return (WritePem(newCert), WritePem(keyPair.Private));
             
             string WritePem<T>(T data)
             {

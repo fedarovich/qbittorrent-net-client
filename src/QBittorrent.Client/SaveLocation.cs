@@ -65,8 +65,14 @@ namespace QBittorrent.Client
             }
         }
 
+        /// <summary>
+        /// Determines whether two specified save locations are equal.
+        /// </summary>
         public static bool operator ==(SaveLocation left, SaveLocation right) => left.Equals(right);
 
+        /// <summary>
+        /// Determines whether two specified save locations are different.
+        /// </summary>
         public static bool operator !=(SaveLocation left, SaveLocation right) => !left.Equals(right);
 
         /// <inheritdoc />

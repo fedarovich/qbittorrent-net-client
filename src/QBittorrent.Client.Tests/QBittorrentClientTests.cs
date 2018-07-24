@@ -1392,7 +1392,7 @@ namespace QBittorrent.Client.Tests
             await Client.LoginAsync(UserName, Password);
            
             var fileToAdd = Path.Combine(Utils.TorrentsFolder, "ubuntu-16.04.4-desktop-amd64.iso.torrent");
-            await Client.AddTorrentsAsync(new AddTorrentFilesRequest(fileToAdd));
+            await Utils.Retry(() => Client.AddTorrentsAsync(new AddTorrentFilesRequest(fileToAdd)));
 
             var torrent = await Utils.Retry(async () =>
             {
@@ -1424,7 +1424,7 @@ namespace QBittorrent.Client.Tests
             await Client.LoginAsync(UserName, Password);
            
             var fileToAdd = Path.Combine(Utils.TorrentsFolder, "ubuntu-16.04.4-desktop-amd64.iso.torrent");
-            await Client.AddTorrentsAsync(new AddTorrentFilesRequest(fileToAdd));
+            await Utils.Retry(() => Client.AddTorrentsAsync(new AddTorrentFilesRequest(fileToAdd)));
 
             var torrent = await Utils.Retry(async () =>
             {
@@ -1456,7 +1456,7 @@ namespace QBittorrent.Client.Tests
             await Client.LoginAsync(UserName, Password);
            
             var fileToAdd = Path.Combine(Utils.TorrentsFolder, "ubuntu-16.04.4-desktop-amd64.iso.torrent");
-            await Client.AddTorrentsAsync(new AddTorrentFilesRequest(fileToAdd));
+            await Utils.Retry(() => Client.AddTorrentsAsync(new AddTorrentFilesRequest(fileToAdd)));
 
             var torrent = await Utils.Retry(async () =>
             {
@@ -1493,7 +1493,7 @@ namespace QBittorrent.Client.Tests
             await Client.LoginAsync(UserName, Password);
            
             var fileToAdd = Path.Combine(Utils.TorrentsFolder, "ubuntu-16.04.4-desktop-amd64.iso.torrent");
-            await Client.AddTorrentsAsync(new AddTorrentFilesRequest(fileToAdd) {FirstLastPiecePrioritized = initial});
+            await Utils.Retry(() => Client.AddTorrentsAsync(new AddTorrentFilesRequest(fileToAdd) {FirstLastPiecePrioritized = initial}));
 
             var torrent = await Utils.Retry(async () =>
             {
@@ -1527,7 +1527,7 @@ namespace QBittorrent.Client.Tests
             await Client.LoginAsync(UserName, Password);
            
             var fileToAdd = Path.Combine(Utils.TorrentsFolder, "ubuntu-16.04.4-desktop-amd64.iso.torrent");
-            await Client.AddTorrentsAsync(new AddTorrentFilesRequest(fileToAdd) {SequentialDownload = initial});
+            await Utils.Retry(() => Client.AddTorrentsAsync(new AddTorrentFilesRequest(fileToAdd) {SequentialDownload = initial}));
 
             var torrent = await Utils.Retry(async () =>
             {

@@ -4,7 +4,10 @@ using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Linq;
+using System.Net;
 using System.Net.Http;
+using System.Net.NetworkInformation;
+using System.Net.Sockets;
 using System.Security.Cryptography;
 using System.Text;
 using System.Threading;
@@ -1766,6 +1769,48 @@ namespace QBittorrent.Client.Tests
         
         [Fact]
         [PrintTestName]
+        public async Task SetPreferenceBypassAuthentication()
+        {
+            await Client.LoginAsync(UserName, Password);
+            
+            var oldPrefs = await Client.GetPreferencesAsync();
+            oldPrefs.BypassLocalAuthentication.Should().BeFalse();
+            oldPrefs.BypassAuthenticationSubnetWhitelistEnabled.Should().BeFalse();
+            oldPrefs.BypassAuthenticationSubnetWhitelist.Should().BeEmpty();
+            
+            var setPrefs = new Preferences
+            {
+                BypassLocalAuthentication = true,
+                BypassAuthenticationSubnetWhitelistEnabled = true,
+                BypassAuthenticationSubnetWhitelist = GetNetworks().ToList()
+            };
+            await Client.SetPreferencesAsync(setPrefs);
+            
+            var newClient = new QBittorrentClient(new Uri("http://localhost:8080/"));
+            
+            var newPrefs = await newClient.GetPreferencesAsync();
+            newPrefs.BypassLocalAuthentication.Should().BeTrue();
+            newPrefs.BypassAuthenticationSubnetWhitelistEnabled.Should().BeTrue();
+            newPrefs.BypassAuthenticationSubnetWhitelist.Should().BeEquivalentTo(setPrefs.BypassAuthenticationSubnetWhitelist);  
+            newPrefs.Should().BeEquivalentTo(newPrefs, options => options
+                .Excluding(p => p.BypassLocalAuthentication)
+                .Excluding(p => p.BypassAuthenticationSubnetWhitelist)
+                .Excluding(p => p.BypassAuthenticationSubnetWhitelistEnabled));
+
+            IEnumerable<string> GetNetworks()
+            {
+                var addresses =
+                    from ni in NetworkInterface.GetAllNetworkInterfaces()
+                    where ni.OperationalStatus == OperationalStatus.Up
+                    from unicast in ni.GetIPProperties().UnicastAddresses
+                    where unicast.Address.AddressFamily == AddressFamily.InterNetwork
+                    select IPNetwork.Parse(unicast.Address, unicast.IPv4Mask).ToString();
+                return addresses.Distinct();
+            }
+        }
+        
+        [Fact]
+        [PrintTestName]
         public async Task SetPreferenceWebUICredentials()
         {
             await Client.LoginAsync(UserName, Password);
@@ -1802,7 +1847,7 @@ namespace QBittorrent.Client.Tests
         
         [Fact]
         [PrintTestName]
-        public async Task SetPreferenceWebUIPort()
+        public async Task SetPreferenceWebUIDomainAndPort()
         {
             await Client.LoginAsync(UserName, Password);
             

@@ -11,6 +11,7 @@ using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
+using QBittorrent.Client.Internal;
 using static QBittorrent.Client.Utils;
 
 namespace QBittorrent.Client
@@ -27,6 +28,8 @@ namespace QBittorrent.Client
 
         private readonly Uri _uri;
         private readonly HttpClient _client;
+
+        private IUrlProvider _urlProvider;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="QBittorrentClient"/> class.
@@ -94,7 +97,8 @@ namespace QBittorrent.Client
                     string password,
                     CancellationToken token = default)
         {
-            var response = await _client.PostAsync(new Uri(_uri, "/login"),
+            var uri = await BuildUri(p => p.Login()).ConfigureAwait(false);
+            var response = await _client.PostAsync(uri,
                 BuildForm(
                     ("username", username),
                     ("password", password)
@@ -115,7 +119,8 @@ namespace QBittorrent.Client
         public async Task LogoutAsync(
                     CancellationToken token = default)
         {
-            var response = await _client.PostAsync(new Uri(_uri, "/logout"), BuildForm(), token).ConfigureAwait(false);
+            var uri = await BuildUri(p => p.Logout()).ConfigureAwait(false);
+            var response = await _client.PostAsync(uri, BuildForm(), token).ConfigureAwait(false);
             using (response)
             {
                 response.EnsureSuccessStatusCodeEx();
@@ -183,7 +188,7 @@ namespace QBittorrent.Client
         /// <returns></returns>
         public async Task<Version> GetQBittorrentVersionAsync(CancellationToken token = default)
         {
-            var uri = BuildUri("/version/qbittorrent");
+            var uri = await BuildUri(p => p.QBittorrentVersion()).ConfigureAwait(false);
             var version = await _client.GetStringAsync(uri, token).ConfigureAwait(false);
             var match = Regex.Match(version, @"\d+\.\d+(?:\.\d+(?:\.\d+)?)?");
             return match.Success ? new Version(match.Value) : null;
@@ -200,13 +205,14 @@ namespace QBittorrent.Client
             CancellationToken token = default)
         {
             query = query ?? new TorrentListQuery();
-            var uri = BuildUri("/query/torrents",
-                ("filter", query.Filter.ToString().ToLowerInvariant()),
-                ("category", query.Category),
-                ("sort", query.SortBy),
-                ("reverse", query.ReverseSort.ToLowerString()),
-                ("limit", query.Limit?.ToString()),
-                ("offset", query.Offset?.ToString()));
+            var uri = await BuildUri(p => p.GetTorrentList(
+                    query.Filter,
+                    query.Category,
+                    query.SortBy,
+                    query.ReverseSort,
+                    query.Limit,
+                    query.Offset))
+                .ConfigureAwait(false);
 
             var json = await _client.GetStringAsync(uri, token).ConfigureAwait(false);
             var result = JsonConvert.DeserializeObject<TorrentInfo[]>(json);
@@ -228,7 +234,7 @@ namespace QBittorrent.Client
 
             async Task<TorrentProperties> ExecuteAsync()
             {
-                var uri = BuildUri($"/query/propertiesGeneral/{hash}");
+                var uri = await BuildUri(p => p.GetTorrentProperties(hash)).ConfigureAwait(false);
                 var json = await _client.GetStringAsync(uri, true, token).ConfigureAwait(false);
                 var result = JsonConvert.DeserializeObject<TorrentProperties>(json);
                 return result;
@@ -250,7 +256,7 @@ namespace QBittorrent.Client
 
             async Task<IReadOnlyList<TorrentContent>> ExecuteAsync()
             {
-                var uri = BuildUri($"/query/propertiesFiles/{hash}");
+                var uri = await BuildUri(p => p.GetTorrentContents(hash)).ConfigureAwait(false);
                 var json = await _client.GetStringAsync(uri, true, token).ConfigureAwait(false);
                 var result = JsonConvert.DeserializeObject<TorrentContent[]>(json);
                 return result;
@@ -272,7 +278,7 @@ namespace QBittorrent.Client
 
             async Task<IReadOnlyList<TorrentTracker>> ExecuteAsync()
             {
-                var uri = BuildUri($"/query/propertiesTrackers/{hash}");
+                var uri = await BuildUri(p => p.GetTorrentTrackers(hash));
                 var json = await _client.GetStringAsync(uri, true, token).ConfigureAwait(false);
                 var result = JsonConvert.DeserializeObject<TorrentTracker[]>(json);
                 return result;
@@ -294,7 +300,7 @@ namespace QBittorrent.Client
 
             async Task<IReadOnlyList<Uri>> ExecuteAsync()
             {
-                var uri = BuildUri($"/query/propertiesWebSeeds/{hash}");
+                var uri = await BuildUri(p => p.GetTorrentWebSeeds(hash)).ConfigureAwait(false);
                 var json = await _client.GetStringAsync(uri, true, token).ConfigureAwait(false);
                 var result = JsonConvert.DeserializeObject<UrlItem[]>(json);
                 return result?.Select(x => x.Url).ToArray();
@@ -316,7 +322,7 @@ namespace QBittorrent.Client
 
             async Task<IReadOnlyList<TorrentPieceState>> ExecuteAsync()
             {
-                var uri = BuildUri($"/query/getPieceStates/{hash}");
+                var uri = await BuildUri(p => p.GetTorrentPiecesStates(hash)).ConfigureAwait(false);
                 var json = await _client.GetStringAsync(uri, true, token).ConfigureAwait(false);
                 var result = JsonConvert.DeserializeObject<TorrentPieceState[]>(json);
                 return result;
@@ -338,7 +344,7 @@ namespace QBittorrent.Client
 
             async Task<IReadOnlyList<string>> ExecuteAsync()
             {
-                var uri = BuildUri($"/query/getPieceHashes/{hash}");
+                var uri = await BuildUri(p => p.GetTorrentPiecesHashes(hash)).ConfigureAwait(false);
                 var json = await _client.GetStringAsync(uri, true, token).ConfigureAwait(false);
                 var result = JsonConvert.DeserializeObject<string[]>(json);
                 return result;
@@ -353,7 +359,7 @@ namespace QBittorrent.Client
         public async Task<GlobalTransferInfo> GetGlobalTransferInfoAsync(
             CancellationToken token = default)
         {
-            var uri = BuildUri("/query/transferInfo");
+            var uri = await BuildUri(p => p.GetGlobalTransferInfo()).ConfigureAwait(false);
             var json = await _client.GetStringAsync(uri, token).ConfigureAwait(false);
             var result = JsonConvert.DeserializeObject<GlobalTransferInfo>(json);
             return result;
@@ -369,7 +375,7 @@ namespace QBittorrent.Client
             int responseId = 0,
             CancellationToken token = default)
         {
-            var uri = BuildUri("/sync/maindata", ("rid", responseId.ToString()));
+            var uri = await BuildUri(p => p.GetPartialData(responseId)).ConfigureAwait(false);
             var json = await _client.GetStringAsync(uri, token).ConfigureAwait(false);
             var result = JsonConvert.DeserializeObject<PartialData>(json);
             return result;
@@ -392,9 +398,7 @@ namespace QBittorrent.Client
             
             async Task<PeerPartialData> ExecuteAsync()
             {
-                var uri = BuildUri("/sync/torrent_peers",
-                    ("rid", responseId.ToString()),
-                    ("hash", hash));
+                var uri = await BuildUri(p => p.GetPeerPartialData(hash, responseId)).ConfigureAwait(false);
                 var json = await _client.GetStringAsync(uri, true, token).ConfigureAwait(false);
                 var result = JsonConvert.DeserializeObject<PeerPartialData>(json);
                 return result;
@@ -406,11 +410,11 @@ namespace QBittorrent.Client
         /// </summary>
         /// <param name="token">The cancellation token.</param>
         /// <returns></returns>
-        public Task<string> GetDefaultSavePathAsync(
+        public async Task<string> GetDefaultSavePathAsync(
             CancellationToken token = default)
         {
-            var uri = BuildUri("/command/getSavePath");
-            return _client.GetStringAsync(uri, token);
+            var uri = await BuildUri(p => p.GetDefaultSavePath()).ConfigureAwait(false);
+            return await _client.GetStringAsync(uri, token).ConfigureAwait(false);
         }
 
         #endregion
@@ -434,7 +438,7 @@ namespace QBittorrent.Client
 
             async Task ExecuteAsync()
             {
-                var uri = BuildUri("/command/upload");
+                var uri = await BuildUri(p => p.AddTorrentFiles()).ConfigureAwait(false);
                 var data = new MultipartFormDataContent();
                 foreach (var file in request.TorrentFiles)
                 {
@@ -462,7 +466,7 @@ namespace QBittorrent.Client
 
             async Task ExecuteAsync()
             {
-                var uri = BuildUri("/command/download");
+                var uri = await BuildUri(p => p.AddTorrentUrls()).ConfigureAwait(false);
                 var urls = string.Join("\n", request.TorrentUrls.Select(url => url.AbsoluteUri));
                 var data = new MultipartFormDataContent().AddValue("urls", urls);
                 await AddTorrentsCoreAsync(uri, data, request, token).ConfigureAwait(false);
@@ -521,7 +525,7 @@ namespace QBittorrent.Client
 
             async Task ExecuteAsync()
             {
-                var uri = BuildUri("/command/pause");
+                var uri = await BuildUri(p => p.Pause()).ConfigureAwait(false);
                 var response = await _client.PostAsync(uri, BuildForm(("hash", hash)), token).ConfigureAwait(false);
                 using (response)
                 {
@@ -538,7 +542,7 @@ namespace QBittorrent.Client
         public async Task PauseAllAsync(
             CancellationToken token = default)
         {
-            var uri = BuildUri("/command/pauseAll");
+            var uri = await BuildUri(p => p.PauseAll()).ConfigureAwait(false);
             var response = await _client.PostAsync(uri, BuildForm(), token).ConfigureAwait(false);
             using (response)
             {
@@ -561,7 +565,7 @@ namespace QBittorrent.Client
 
             async Task ExecuteAsync()
             {
-                var uri = BuildUri("/command/resume");
+                var uri = await BuildUri(p => p.Resume()).ConfigureAwait(false);
                 var response = await _client.PostAsync(uri, BuildForm(("hash", hash)), token).ConfigureAwait(false);
                 using (response)
                 {
@@ -578,7 +582,7 @@ namespace QBittorrent.Client
         public async Task ResumeAllAsync(
             CancellationToken token = default)
         {
-            var uri = BuildUri("/command/resumeAll");
+            var uri = await BuildUri(p => p.ResumeAll()).ConfigureAwait(false);
             var response = await _client.PostAsync(uri, BuildForm(), token).ConfigureAwait(false);
             using (response)
             {
@@ -609,7 +613,7 @@ namespace QBittorrent.Client
 
             async Task ExecuteAsync()
             {
-                var uri = BuildUri("/command/addCategory");
+                var uri = await BuildUri(p => p.AddCategory()).ConfigureAwait(false);
                 var response = await _client.PostAsync(uri, BuildForm(("category", category)), token).ConfigureAwait(false);
                 using (response)
                 {
@@ -633,7 +637,7 @@ namespace QBittorrent.Client
 
             async Task ExecuteAsync()
             {
-                var uri = BuildUri("/command/removeCategories");
+                var uri = await BuildUri(p => p.DeleteCategories()).ConfigureAwait(false);
                 var response = await _client.PostAsync(
                         uri,
                         BuildForm(("categories", names)),
@@ -692,7 +696,7 @@ namespace QBittorrent.Client
 
             async Task ExecuteAsync()
             {
-                var uri = BuildUri("/command/setCategory");
+                var uri = await BuildUri(p => p.SetCategory()).ConfigureAwait(false);
                 var response = await _client.PostAsync(uri,
                     BuildForm(
                         ("hashes", string.Join("|", hashes)),
@@ -1469,6 +1473,20 @@ namespace QBittorrent.Client
                     .Select(t => $"{Uri.EscapeDataString(t.key)}={Uri.EscapeDataString(t.value)}"))
             };
             return builder.Uri;
+        }
+
+        private async Task<Uri> BuildUri(Func<IUrlProvider, Uri> builder)
+        {
+            var provider = Interlocked.CompareExchange(ref _urlProvider, null, null);
+            if (provider == null)
+            {
+                // TODO: Select provider based on API version.
+                var version = await GetLegacyApiVersionAsync().ConfigureAwait(false);
+                provider = new Api1UrlProvider(_uri);
+                provider = Interlocked.CompareExchange(ref _urlProvider, provider, null);
+            }
+
+            return builder(provider);
         }
 
         private struct UrlItem

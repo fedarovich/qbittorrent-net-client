@@ -1482,8 +1482,8 @@ namespace QBittorrent.Client
             {
                 // TODO: Select provider based on API version.
                 var version = await GetLegacyApiVersionAsync().ConfigureAwait(false);
-                provider = new Api1UrlProvider(_uri);
-                provider = Interlocked.CompareExchange(ref _urlProvider, provider, null);
+                var newProvider = new Api1UrlProvider(_uri);
+                provider = Interlocked.CompareExchange(ref _urlProvider, newProvider, null) ?? newProvider;
             }
 
             return builder(provider);

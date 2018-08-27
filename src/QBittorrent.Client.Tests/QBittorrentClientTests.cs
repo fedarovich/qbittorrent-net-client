@@ -291,9 +291,9 @@ namespace QBittorrent.Client.Tests
             var links = new []
             {
                 new Uri(
-                    "http://releases.ubuntu.com/17.10/ubuntu-17.10.1-desktop-amd64.iso.torrent?_ga=2.234486046.1639235846.1523865053-1922367372.1523865053"),
+                    "https://fedarovich.blob.core.windows.net/qbittorrent-test/torrents/ubuntu-17.10.1-desktop-amd64.iso.torrent"),
                 new Uri(
-                    "http://releases.ubuntu.com/16.04/ubuntu-16.04.4-desktop-amd64.iso.torrent?_ga=2.234486046.1639235846.1523865053-1922367372.1523865053"),
+                    "https://fedarovich.blob.core.windows.net/qbittorrent-test/torrents/ubuntu-16.04.4-desktop-amd64.iso.torrent"),
             };
             var addRequest = new AddTorrentUrlsRequest(links) { Paused = true };
             await Client.AddTorrentsAsync(addRequest);

@@ -1481,12 +1481,33 @@ namespace QBittorrent.Client
             if (provider == null)
             {
                 // TODO: Select provider based on API version.
-                var version = await GetLegacyApiVersionAsync().ConfigureAwait(false);
+                var version = await Retry(() => GetLegacyApiVersionAsync());
                 var newProvider = new Api1UrlProvider(_uri);
                 provider = Interlocked.CompareExchange(ref _urlProvider, newProvider, null) ?? newProvider;
             }
 
             return builder(provider);
+
+            async Task<T> Retry<T>(Func<Task<T>> action)
+            {
+                int attempts = 5;
+                int delayMs = 50;
+
+                while (true)
+                {
+                    try
+                    {
+                        return await action().ConfigureAwait(false);
+                    }
+                    catch
+                    {
+                        if (--attempts <= 0)
+                            throw;
+                        await Task.Delay(delayMs).ConfigureAwait(false);
+                        delayMs *= 2; // Increasing retry intervals: 50ms, 100ms, 200ms, 400ms
+                    }
+                }
+            }
         }
 
         private struct UrlItem

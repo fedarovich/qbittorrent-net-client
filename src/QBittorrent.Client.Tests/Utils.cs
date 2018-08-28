@@ -24,14 +24,14 @@ namespace QBittorrent.Client.Tests
             {
                 try
                 {
-                    await action();
+                    await action().ConfigureAwait(false);
                     return;
                 }
                 catch
                 {
                     if (--attempts <= 0)
                         throw;
-                    await Task.Delay(delayMs);
+                    await Task.Delay(delayMs).ConfigureAwait(false);
                 }
             }
         }
@@ -42,13 +42,13 @@ namespace QBittorrent.Client.Tests
             {
                 try
                 {
-                    return await func();
+                    return await func().ConfigureAwait(false);
                 }
                 catch
                 {
                     if (--attempts <= 0)
                         throw;
-                    await Task.Delay(delayMs);
+                    await Task.Delay(delayMs).ConfigureAwait(false);
                 }
             }
         }

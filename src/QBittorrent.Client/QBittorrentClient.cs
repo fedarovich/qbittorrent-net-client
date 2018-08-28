@@ -63,6 +63,7 @@ namespace QBittorrent.Client
         {
             _uri = uri ?? throw new ArgumentNullException(nameof(uri));
             _client = client ?? throw new ArgumentNullException(nameof(client));
+            _client.DefaultRequestHeaders.ExpectContinue = true;
         }
 
         #region Properties

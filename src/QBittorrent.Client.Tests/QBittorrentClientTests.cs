@@ -570,13 +570,20 @@ namespace QBittorrent.Client.Tests
             await Client.LoginAsync(UserName, Password);
             var info = await Client.GetGlobalTransferInfoAsync();
             info.ConnectionStatus.Should().NotBe(ConnectionStatus.Disconnected);
-            info.DhtNodes.Should().Be(0);
-            info.DownloadedData.Should().Be(0);
-            info.DownloadSpeed.Should().Be(0);
-            info.DownloadSpeedLimit.Should().Be(0);
-            info.UploadedData.Should().Be(0);
-            info.UploadSpeed.Should().Be(0);
-            info.UploadSpeedLimit.Should().Be(0);
+            info.Should().BeEquivalentTo(
+                new GlobalTransferInfo
+                {
+                    DhtNodes = 0,
+                    DownloadedData = 0,
+                    DownloadSpeed = 0,
+                    DownloadSpeedLimit = 0,
+                    UploadedData = 0,
+                    UploadSpeed = 0,
+                    UploadSpeedLimit = 0
+                },
+                options => options
+                    .Excluding(g => g.ConnectionStatus)
+                    .Excluding(g => g.AdditionalData));
         }
 
         #endregion

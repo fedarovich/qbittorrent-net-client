@@ -98,7 +98,7 @@ namespace QBittorrent.Client
                     string password,
                     CancellationToken token = default)
         {
-            var uri = await BuildUri(p => p.Login()).ConfigureAwait(false);
+            var uri = await BuildUriAsync(p => p.Login(), token).ConfigureAwait(false);
             var response = await _client.PostAsync(uri,
                 BuildForm(
                     ("username", username),
@@ -120,7 +120,7 @@ namespace QBittorrent.Client
         public async Task LogoutAsync(
                     CancellationToken token = default)
         {
-            var uri = await BuildUri(p => p.Logout()).ConfigureAwait(false);
+            var uri = await BuildUriAsync(p => p.Logout(), token).ConfigureAwait(false);
             var response = await _client.PostAsync(uri, BuildForm(), token).ConfigureAwait(false);
             using (response)
             {
@@ -189,7 +189,7 @@ namespace QBittorrent.Client
         /// <returns></returns>
         public async Task<Version> GetQBittorrentVersionAsync(CancellationToken token = default)
         {
-            var uri = await BuildUri(p => p.QBittorrentVersion()).ConfigureAwait(false);
+            var uri = await BuildUriAsync(p => p.QBittorrentVersion(), token).ConfigureAwait(false);
             var version = await _client.GetStringAsync(uri, token).ConfigureAwait(false);
             var match = Regex.Match(version, @"\d+\.\d+(?:\.\d+(?:\.\d+)?)?");
             return match.Success ? new Version(match.Value) : null;
@@ -206,13 +206,13 @@ namespace QBittorrent.Client
             CancellationToken token = default)
         {
             query = query ?? new TorrentListQuery();
-            var uri = await BuildUri(p => p.GetTorrentList(
+            var uri = await BuildUriAsync(p => p.GetTorrentList(
                     query.Filter,
                     query.Category,
                     query.SortBy,
                     query.ReverseSort,
                     query.Limit,
-                    query.Offset))
+                    query.Offset), token)
                 .ConfigureAwait(false);
 
             var json = await _client.GetStringAsync(uri, token).ConfigureAwait(false);
@@ -235,7 +235,7 @@ namespace QBittorrent.Client
 
             async Task<TorrentProperties> ExecuteAsync()
             {
-                var uri = await BuildUri(p => p.GetTorrentProperties(hash)).ConfigureAwait(false);
+                var uri = await BuildUriAsync(p => p.GetTorrentProperties(hash), token).ConfigureAwait(false);
                 var json = await _client.GetStringAsync(uri, true, token).ConfigureAwait(false);
                 var result = JsonConvert.DeserializeObject<TorrentProperties>(json);
                 return result;
@@ -257,7 +257,7 @@ namespace QBittorrent.Client
 
             async Task<IReadOnlyList<TorrentContent>> ExecuteAsync()
             {
-                var uri = await BuildUri(p => p.GetTorrentContents(hash)).ConfigureAwait(false);
+                var uri = await BuildUriAsync(p => p.GetTorrentContents(hash), token).ConfigureAwait(false);
                 var json = await _client.GetStringAsync(uri, true, token).ConfigureAwait(false);
                 var result = JsonConvert.DeserializeObject<TorrentContent[]>(json);
                 return result;
@@ -279,7 +279,7 @@ namespace QBittorrent.Client
 
             async Task<IReadOnlyList<TorrentTracker>> ExecuteAsync()
             {
-                var uri = await BuildUri(p => p.GetTorrentTrackers(hash));
+                var uri = await BuildUriAsync(p => p.GetTorrentTrackers(hash), token);
                 var json = await _client.GetStringAsync(uri, true, token).ConfigureAwait(false);
                 var result = JsonConvert.DeserializeObject<TorrentTracker[]>(json);
                 return result;
@@ -301,7 +301,7 @@ namespace QBittorrent.Client
 
             async Task<IReadOnlyList<Uri>> ExecuteAsync()
             {
-                var uri = await BuildUri(p => p.GetTorrentWebSeeds(hash)).ConfigureAwait(false);
+                var uri = await BuildUriAsync(p => p.GetTorrentWebSeeds(hash), token).ConfigureAwait(false);
                 var json = await _client.GetStringAsync(uri, true, token).ConfigureAwait(false);
                 var result = JsonConvert.DeserializeObject<UrlItem[]>(json);
                 return result?.Select(x => x.Url).ToArray();
@@ -323,7 +323,7 @@ namespace QBittorrent.Client
 
             async Task<IReadOnlyList<TorrentPieceState>> ExecuteAsync()
             {
-                var uri = await BuildUri(p => p.GetTorrentPiecesStates(hash)).ConfigureAwait(false);
+                var uri = await BuildUriAsync(p => p.GetTorrentPiecesStates(hash), token).ConfigureAwait(false);
                 var json = await _client.GetStringAsync(uri, true, token).ConfigureAwait(false);
                 var result = JsonConvert.DeserializeObject<TorrentPieceState[]>(json);
                 return result;
@@ -345,7 +345,7 @@ namespace QBittorrent.Client
 
             async Task<IReadOnlyList<string>> ExecuteAsync()
             {
-                var uri = await BuildUri(p => p.GetTorrentPiecesHashes(hash)).ConfigureAwait(false);
+                var uri = await BuildUriAsync(p => p.GetTorrentPiecesHashes(hash), token).ConfigureAwait(false);
                 var json = await _client.GetStringAsync(uri, true, token).ConfigureAwait(false);
                 var result = JsonConvert.DeserializeObject<string[]>(json);
                 return result;
@@ -360,7 +360,7 @@ namespace QBittorrent.Client
         public async Task<GlobalTransferInfo> GetGlobalTransferInfoAsync(
             CancellationToken token = default)
         {
-            var uri = await BuildUri(p => p.GetGlobalTransferInfo()).ConfigureAwait(false);
+            var uri = await BuildUriAsync(p => p.GetGlobalTransferInfo(), token).ConfigureAwait(false);
             var json = await _client.GetStringAsync(uri, token).ConfigureAwait(false);
             var result = JsonConvert.DeserializeObject<GlobalTransferInfo>(json);
             return result;
@@ -376,7 +376,7 @@ namespace QBittorrent.Client
             int responseId = 0,
             CancellationToken token = default)
         {
-            var uri = await BuildUri(p => p.GetPartialData(responseId)).ConfigureAwait(false);
+            var uri = await BuildUriAsync(p => p.GetPartialData(responseId), token).ConfigureAwait(false);
             var json = await _client.GetStringAsync(uri, token).ConfigureAwait(false);
             var result = JsonConvert.DeserializeObject<PartialData>(json);
             return result;
@@ -399,7 +399,7 @@ namespace QBittorrent.Client
             
             async Task<PeerPartialData> ExecuteAsync()
             {
-                var uri = await BuildUri(p => p.GetPeerPartialData(hash, responseId)).ConfigureAwait(false);
+                var uri = await BuildUriAsync(p => p.GetPeerPartialData(hash, responseId), token).ConfigureAwait(false);
                 var json = await _client.GetStringAsync(uri, true, token).ConfigureAwait(false);
                 var result = JsonConvert.DeserializeObject<PeerPartialData>(json);
                 return result;
@@ -414,7 +414,7 @@ namespace QBittorrent.Client
         public async Task<string> GetDefaultSavePathAsync(
             CancellationToken token = default)
         {
-            var uri = await BuildUri(p => p.GetDefaultSavePath()).ConfigureAwait(false);
+            var uri = await BuildUriAsync(p => p.GetDefaultSavePath(), token).ConfigureAwait(false);
             return await _client.GetStringAsync(uri, token).ConfigureAwait(false);
         }
 
@@ -439,7 +439,7 @@ namespace QBittorrent.Client
 
             async Task ExecuteAsync()
             {
-                var uri = await BuildUri(p => p.AddTorrentFiles()).ConfigureAwait(false);
+                var uri = await BuildUriAsync(p => p.AddTorrentFiles(), token).ConfigureAwait(false);
                 var data = new MultipartFormDataContent();
                 foreach (var file in request.TorrentFiles)
                 {
@@ -467,7 +467,7 @@ namespace QBittorrent.Client
 
             async Task ExecuteAsync()
             {
-                var uri = await BuildUri(p => p.AddTorrentUrls()).ConfigureAwait(false);
+                var uri = await BuildUriAsync(p => p.AddTorrentUrls(), token).ConfigureAwait(false);
                 var urls = string.Join("\n", request.TorrentUrls.Select(url => url.AbsoluteUri));
                 var data = new MultipartFormDataContent().AddValue("urls", urls);
                 await AddTorrentsCoreAsync(uri, data, request, token).ConfigureAwait(false);
@@ -526,7 +526,7 @@ namespace QBittorrent.Client
 
             async Task ExecuteAsync()
             {
-                var uri = await BuildUri(p => p.Pause()).ConfigureAwait(false);
+                var uri = await BuildUriAsync(p => p.Pause(), token).ConfigureAwait(false);
                 var response = await _client.PostAsync(uri, BuildForm(("hash", hash)), token).ConfigureAwait(false);
                 using (response)
                 {
@@ -543,7 +543,7 @@ namespace QBittorrent.Client
         public async Task PauseAllAsync(
             CancellationToken token = default)
         {
-            var uri = await BuildUri(p => p.PauseAll()).ConfigureAwait(false);
+            var uri = await BuildUriAsync(p => p.PauseAll(), token).ConfigureAwait(false);
             var response = await _client.PostAsync(uri, BuildForm(), token).ConfigureAwait(false);
             using (response)
             {
@@ -566,7 +566,7 @@ namespace QBittorrent.Client
 
             async Task ExecuteAsync()
             {
-                var uri = await BuildUri(p => p.Resume()).ConfigureAwait(false);
+                var uri = await BuildUriAsync(p => p.Resume(), token).ConfigureAwait(false);
                 var response = await _client.PostAsync(uri, BuildForm(("hash", hash)), token).ConfigureAwait(false);
                 using (response)
                 {
@@ -583,7 +583,7 @@ namespace QBittorrent.Client
         public async Task ResumeAllAsync(
             CancellationToken token = default)
         {
-            var uri = await BuildUri(p => p.ResumeAll()).ConfigureAwait(false);
+            var uri = await BuildUriAsync(p => p.ResumeAll(), token).ConfigureAwait(false);
             var response = await _client.PostAsync(uri, BuildForm(), token).ConfigureAwait(false);
             using (response)
             {
@@ -614,7 +614,7 @@ namespace QBittorrent.Client
 
             async Task ExecuteAsync()
             {
-                var uri = await BuildUri(p => p.AddCategory()).ConfigureAwait(false);
+                var uri = await BuildUriAsync(p => p.AddCategory(), token).ConfigureAwait(false);
                 var response = await _client.PostAsync(uri, BuildForm(("category", category)), token).ConfigureAwait(false);
                 using (response)
                 {
@@ -638,7 +638,7 @@ namespace QBittorrent.Client
 
             async Task ExecuteAsync()
             {
-                var uri = await BuildUri(p => p.DeleteCategories()).ConfigureAwait(false);
+                var uri = await BuildUriAsync(p => p.DeleteCategories(), token).ConfigureAwait(false);
                 var response = await _client.PostAsync(
                         uri,
                         BuildForm(("categories", names)),
@@ -697,7 +697,7 @@ namespace QBittorrent.Client
 
             async Task ExecuteAsync()
             {
-                var uri = await BuildUri(p => p.SetCategory()).ConfigureAwait(false);
+                var uri = await BuildUriAsync(p => p.SetCategory(), token).ConfigureAwait(false);
                 var response = await _client.PostAsync(uri,
                     BuildForm(
                         ("hashes", string.Join("|", hashes)),
@@ -729,7 +729,7 @@ namespace QBittorrent.Client
 
             async Task<IReadOnlyDictionary<string, long?>> ExecuteAsync()
             {
-                var uri = BuildUri("/command/getTorrentsDlLimit");
+                var uri = await BuildUriAsync(p => p.GetTorrentDownloadLimit(), token).ConfigureAwait(false);
                 var response = await _client.PostAsync(
                         uri,
                         BuildForm(("hashes", hashesString)),
@@ -766,7 +766,7 @@ namespace QBittorrent.Client
 
             async Task ExecuteAsync()
             {
-                var uri = BuildUri("/command/setTorrentsDlLimit");
+                var uri = await BuildUriAsync(p => p.SetTorrentDownloadLimit(), token).ConfigureAwait(false);
                 var response = await _client.PostAsync(
                         uri,
                         BuildForm(
@@ -796,7 +796,7 @@ namespace QBittorrent.Client
 
             async Task<IReadOnlyDictionary<string, long?>> ExecuteAsync()
             {
-                var uri = BuildUri("/command/getTorrentsUpLimit");
+                var uri = await BuildUriAsync(p => p.GetTorrentUploadLimit(), token).ConfigureAwait(false);
                 var response = await _client.PostAsync(
                         uri,
                         BuildForm(("hashes", hashesString)),
@@ -833,7 +833,7 @@ namespace QBittorrent.Client
 
             async Task ExecuteAsync()
             {
-                var uri = BuildUri("/command/setTorrentsUpLimit");
+                var uri = await BuildUriAsync(p => p.SetTorrentUploadLimit(), token).ConfigureAwait(false);
                 var response = await _client.PostAsync(
                         uri,
                         BuildForm(
@@ -856,7 +856,7 @@ namespace QBittorrent.Client
         public async Task<long?> GetGlobalDownloadLimitAsync(
             CancellationToken token = default)
         {
-            var uri = BuildUri("/command/getGlobalDlLimit");
+            var uri = await BuildUriAsync(p => p.GetGlobalDownloadLimit(), token).ConfigureAwait(false);
             using (var response = await _client.PostAsync(uri, null, token).ConfigureAwait(false))
             {
                 response.EnsureSuccessStatusCodeEx();
@@ -882,7 +882,7 @@ namespace QBittorrent.Client
 
             async Task ExecuteAsync()
             {
-                var uri = BuildUri("/command/setGlobalDlLimit");
+                var uri = await BuildUriAsync(p => p.SetGlobalDownloadLimit(), token).ConfigureAwait(false);
                 var response = await _client.PostAsync(uri, BuildForm(("limit", limit.ToString())), token).ConfigureAwait(false);
                 using (response)
                 {
@@ -899,7 +899,7 @@ namespace QBittorrent.Client
         public async Task<long?> GetGlobalUploadLimitAsync(
             CancellationToken token = default)
         {
-            var uri = BuildUri("/command/getGlobalUpLimit");
+            var uri = await BuildUriAsync(p => p.GetGlobalUploadLimit(), token).ConfigureAwait(false);
             using (var response = await _client.PostAsync(uri, null, token).ConfigureAwait(false))
             {
                 response.EnsureSuccessStatusCodeEx();
@@ -925,7 +925,7 @@ namespace QBittorrent.Client
 
             async Task ExecuteAsync()
             {
-                var uri = BuildUri("/command/setGlobalUpLimit");
+                var uri = await BuildUriAsync(p => p.SetGlobalUploadLimit(), token).ConfigureAwait(false);
                 var response = await _client.PostAsync(uri, BuildForm(("limit", limit.ToString())), token).ConfigureAwait(false);
                 using (response)
                 {
@@ -951,12 +951,14 @@ namespace QBittorrent.Client
             CancellationToken token = default)
         {
             var hashesString = JoinHashes(hashes);
-            var path = GetPath();
+            if (!Enum.IsDefined(typeof(TorrentPriorityChange), change))
+                throw new ArgumentOutOfRangeException(nameof(change), change, null);
+
             return ExecuteAsync();
 
             async Task ExecuteAsync()
             {
-                var uri = BuildUri(path);
+                var uri = await BuildUriAsync(GetUrl, token).ConfigureAwait(false);
                 var response = await _client.PostAsync(
                         uri,
                         BuildForm(("hashes", hashesString)),
@@ -968,18 +970,18 @@ namespace QBittorrent.Client
                 }
             }
 
-            string GetPath()
+            Uri GetUrl(IUrlProvider provider)
             {
                 switch (change)
                 {
                     case TorrentPriorityChange.Minimal:
-                        return "/command/bottomPrio";
+                        return provider.MinTorrentPriority();
                     case TorrentPriorityChange.Increase:
-                        return "/command/increasePrio";
+                        return provider.IncTorrentPriority();
                     case TorrentPriorityChange.Decrease:
-                        return "/command/decreasePrio";
+                        return provider.DecTorrentPriority();
                     case TorrentPriorityChange.Maximal:
-                        return "/command/topPrio";
+                        return provider.MaxTorrentPriority();
                     default:
                         throw new ArgumentOutOfRangeException(nameof(change), change, null);
                 }
@@ -1010,7 +1012,7 @@ namespace QBittorrent.Client
 
             async Task ExecuteAsync()
             {
-                var uri = BuildUri("/command/setFilePrio");
+                var uri = await BuildUriAsync(p => p.SetFilePriority(), token).ConfigureAwait(false);
                 var response = await _client.PostAsync(
                         uri,
                         BuildForm(
@@ -1047,9 +1049,7 @@ namespace QBittorrent.Client
 
             async Task ExecuteAsync()
             {
-                var uri = deleteDownloadedData
-                    ? BuildUri("/command/deletePerm")
-                    : BuildUri("/command/delete");
+                var uri = await BuildUriAsync(p => p.DeleteTorrent(deleteDownloadedData), token).ConfigureAwait(false);
                 var response = await _client.PostAsync(
                         uri,
                         BuildForm(("hashes", hashesString)),
@@ -1084,7 +1084,7 @@ namespace QBittorrent.Client
 
             async Task ExecuteAsync()
             {
-                var uri = BuildUri("/command/setLocation");
+                var uri = await BuildUriAsync(p => p.SetLocation(), token).ConfigureAwait(false);
                 var response = await _client.PostAsync(uri,
                     BuildForm(
                         ("hashes", hashesString),
@@ -1119,7 +1119,7 @@ namespace QBittorrent.Client
 
             async Task ExecuteAsync()
             {
-                var uri = BuildUri("/command/rename");
+                var uri = await BuildUriAsync(p => p.Rename(), token).ConfigureAwait(false);
                 var response = await _client.PostAsync(uri,
                     BuildForm(
                         ("hash", hash),
@@ -1151,7 +1151,7 @@ namespace QBittorrent.Client
 
             async Task ExecuteAsync()
             {
-                var uri = BuildUri("/command/addTrackers");
+                var uri = await BuildUriAsync(p => p.AddTrackers(), token).ConfigureAwait(false);
                 var response = await _client.PostAsync(uri,
                     BuildForm(
                         ("hash", hash),
@@ -1207,7 +1207,7 @@ namespace QBittorrent.Client
 
             async Task ExecuteAsync()
             {
-                var uri = BuildUri("/command/recheck");
+                var uri = await BuildUriAsync(p => p.Recheck(), token).ConfigureAwait(false);
                 var response = await _client.PostAsync(uri, BuildForm(("hash", hash)), token).ConfigureAwait(false);
                 using (response)
                 {
@@ -1228,14 +1228,7 @@ namespace QBittorrent.Client
             int afterId = -1,
             CancellationToken token = default)
         {
-            var uri = BuildUri("/query/getLog",
-                ("normal", severity.HasFlag(TorrentLogSeverity.Normal).ToLowerString()),
-                ("info", severity.HasFlag(TorrentLogSeverity.Info).ToLowerString()),
-                ("warning", severity.HasFlag(TorrentLogSeverity.Warning).ToLowerString()),
-                ("critical", severity.HasFlag(TorrentLogSeverity.Critical).ToLowerString()),
-                ("last_known_id", afterId.ToString())
-            );
-
+            var uri = await BuildUriAsync(p => p.GetLog(severity, afterId), token).ConfigureAwait(false);
             var json = await _client.GetStringAsync(uri, token).ConfigureAwait(false);
             return JsonConvert.DeserializeObject<IEnumerable<TorrentLogEntry>>(json);
         }
@@ -1248,7 +1241,7 @@ namespace QBittorrent.Client
         public async Task<bool> GetAlternativeSpeedLimitsEnabledAsync(
             CancellationToken token = default)
         {
-            var uri = BuildUri("/command/alternativeSpeedLimitsEnabled");
+            var uri = await BuildUriAsync(p => p.GetAlternativeSpeedLimitsEnabled(), token).ConfigureAwait(false);
             var result = await _client.GetStringAsync(uri, token).ConfigureAwait(false);
             return result == "1";
         }
@@ -1261,7 +1254,7 @@ namespace QBittorrent.Client
         public async Task ToggleAlternativeSpeedLimitsAsync(
             CancellationToken token = default)
         {
-            var uri = BuildUri("/command/toggleAlternativeSpeedLimits");
+            var uri = await BuildUriAsync(p => p.ToggleAlternativeSpeedLimits(), token).ConfigureAwait(false);
             using (var result = await _client.PostAsync(uri, BuildForm(), token).ConfigureAwait(false))
             {
                 result.EnsureSuccessStatusCodeEx();
@@ -1285,7 +1278,7 @@ namespace QBittorrent.Client
 
             async Task ExecuteAsync()
             {
-                var uri = BuildUri("/command/setAutoTMM");
+                var uri = await BuildUriAsync(p => p.SetAutomaticTorrentManagement(), token).ConfigureAwait(false);
                 var response = await _client.PostAsync(uri,
                     BuildForm(
                         ("hashes", hashesString),
@@ -1315,7 +1308,7 @@ namespace QBittorrent.Client
 
             async Task ExecuteAsync()
             {
-                var uri = BuildUri("/command/setForceStart");
+                var uri = await BuildUriAsync(p => p.SetForceStart(), token).ConfigureAwait(false);
                 var response = await _client.PostAsync(uri,
                     BuildForm(
                         ("hashes", hashesString),
@@ -1345,7 +1338,7 @@ namespace QBittorrent.Client
 
             async Task ExecuteAsync()
             {
-                var uri = BuildUri("/command/setSuperSeeding");
+                var uri = await BuildUriAsync(p => p.SetSuperSeeding(), token).ConfigureAwait(false);
                 var response = await _client.PostAsync(uri,
                     BuildForm(
                         ("hashes", hashesString),
@@ -1374,7 +1367,7 @@ namespace QBittorrent.Client
 
             async Task ExecuteAsync()
             {
-                var uri = BuildUri("/command/toggleFirstLastPiecePrio");
+                var uri = await BuildUriAsync(p => p.ToggleFirstLastPiecePrioritized(), token).ConfigureAwait(false);
                 var response = await _client.PostAsync(uri,
                     BuildForm(("hashes", hashesString)), token).ConfigureAwait(false);
                 using (response)
@@ -1399,7 +1392,7 @@ namespace QBittorrent.Client
 
             async Task ExecuteAsync()
             {
-                var uri = BuildUri("/command/toggleSequentialDownload");
+                var uri = await BuildUriAsync(p => p.ToggleSequentialDownload(), token).ConfigureAwait(false);
                 var response = await _client.PostAsync(uri,
                     BuildForm(("hashes", hashesString)), token).ConfigureAwait(false);
                 using (response)
@@ -1417,7 +1410,7 @@ namespace QBittorrent.Client
         public async Task<Preferences> GetPreferencesAsync(
             CancellationToken token = default)
         {
-            var uri = BuildUri("/query/preferences");
+            var uri = await BuildUriAsync(p => p.GetPreferences(), token).ConfigureAwait(false);
             var response = await _client.GetStringAsync(uri, token).ConfigureAwait(false);
             return JsonConvert.DeserializeObject<Preferences>(response);
         }
@@ -1441,7 +1434,7 @@ namespace QBittorrent.Client
 
             async Task Execute()
             {
-                var uri = BuildUri("/command/setPreferences");
+                var uri = await BuildUriAsync(p => p.SetPreferences(), token).ConfigureAwait(false);
                 var json = JsonConvert.SerializeObject(preferences);
                 var response = await _client.PostAsync(uri, BuildForm(("json", json)), token).ConfigureAwait(false);
                 using (response)
@@ -1476,39 +1469,18 @@ namespace QBittorrent.Client
             return builder.Uri;
         }
 
-        private async Task<Uri> BuildUri(Func<IUrlProvider, Uri> builder)
+        private async Task<Uri> BuildUriAsync(Func<IUrlProvider, Uri> builder, CancellationToken token = default)
         {
             var provider = Interlocked.CompareExchange(ref _urlProvider, null, null);
             if (provider == null)
             {
                 // TODO: Select provider based on API version.
-                var version = await Retry(() => GetLegacyApiVersionAsync());
+                var version = await GetLegacyApiVersionAsync(token).ConfigureAwait(false);
                 var newProvider = new Api1UrlProvider(_uri);
                 provider = Interlocked.CompareExchange(ref _urlProvider, newProvider, null) ?? newProvider;
             }
 
             return builder(provider);
-
-            async Task<T> Retry<T>(Func<Task<T>> action)
-            {
-                int attempts = 5;
-                int delayMs = 50;
-
-                while (true)
-                {
-                    try
-                    {
-                        return await action().ConfigureAwait(false);
-                    }
-                    catch
-                    {
-                        if (--attempts <= 0)
-                            throw;
-                        await Task.Delay(delayMs).ConfigureAwait(false);
-                        delayMs *= 2; // Increasing retry intervals: 50ms, 100ms, 200ms, 400ms
-                    }
-                }
-            }
         }
 
         private struct UrlItem

@@ -1,6 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Text;
 using QBittorrent.Client.Extensions;
 
 namespace QBittorrent.Client.Internal
@@ -74,144 +72,68 @@ namespace QBittorrent.Client.Internal
 
         public Uri SetCategory() => Create("/command/setCategory");
 
-        public Uri GetTorrentDownloadLimit()
+        public Uri GetTorrentDownloadLimit() => Create("/command/getTorrentsDlLimit");
+
+        public Uri SetTorrentDownloadLimit() => Create("/command/setTorrentsDlLimit");
+
+        public Uri GetTorrentUploadLimit() => Create("/command/getTorrentsUpLimit");
+
+        public Uri SetTorrentUploadLimit() => Create("/command/setTorrentsUpLimit");
+
+        public Uri GetGlobalDownloadLimit() => Create("/command/getGlobalDlLimit");
+
+        public Uri SetGlobalDownloadLimit() => Create("/command/setGlobalDlLimit");
+
+        public Uri GetGlobalUploadLimit() => Create("/command/getGlobalUpLimit");
+
+        public Uri SetGlobalUploadLimit() => Create("/command/setGlobalUpLimit");
+
+        public Uri MinTorrentPriority() => Create("/command/bottomPrio");
+
+        public Uri MaxTorrentPriority() => Create("/command/topPrio");
+
+        public Uri IncTorrentPriority() => Create("/command/increasePrio");
+
+        public Uri DecTorrentPriority() => Create("/command/decreasePrio");
+
+        public Uri SetFilePriority() => Create("/command/setFilePrio");
+
+        public Uri DeleteTorrent(bool withFiles) => withFiles ? Create("/command/deletePerm") : Create("/command/delete");
+
+        public Uri SetLocation() => Create("/command/setLocation");
+
+        public Uri Rename() => Create("/command/rename");
+
+        public Uri AddTrackers() => Create("/command/addTrackers");
+
+        public Uri Recheck() => Create("/command/recheck");
+
+        public Uri GetLog(TorrentLogSeverity severity, int afterId)
         {
-            throw new NotImplementedException();
+            return Create("/query/getLog",
+                ("normal", severity.HasFlag(TorrentLogSeverity.Normal).ToLowerString()),
+                ("info", severity.HasFlag(TorrentLogSeverity.Info).ToLowerString()),
+                ("warning", severity.HasFlag(TorrentLogSeverity.Warning).ToLowerString()),
+                ("critical", severity.HasFlag(TorrentLogSeverity.Critical).ToLowerString()),
+                ("last_known_id", afterId.ToString()));
         }
 
-        public Uri SetTorrentDownloadLimit()
-        {
-            throw new NotImplementedException();
-        }
+        public Uri GetAlternativeSpeedLimitsEnabled() => Create("/command/alternativeSpeedLimitsEnabled");
 
-        public Uri GetTorrentUploadLimit()
-        {
-            throw new NotImplementedException();
-        }
+        public Uri ToggleAlternativeSpeedLimits() => Create("/command/toggleAlternativeSpeedLimits");
 
-        public Uri SetTorrentUploadLimit()
-        {
-            throw new NotImplementedException();
-        }
+        public Uri SetAutomaticTorrentManagement() => Create("/command/setAutoTMM");
 
-        public Uri GetGlobalDownloadLimit()
-        {
-            throw new NotImplementedException();
-        }
+        public Uri SetForceStart() => Create("/command/setForceStart");
 
-        public Uri SetGlobalDownloadLimit()
-        {
-            throw new NotImplementedException();
-        }
+        public Uri SetSuperSeeding() => Create("/command/setSuperSeeding");
 
-        public Uri GetGlobalUploadLimit()
-        {
-            throw new NotImplementedException();
-        }
+        public Uri ToggleFirstLastPiecePrioritized() => Create("/command/toggleFirstLastPiecePrio");
 
-        public Uri SetGlobalUploadLimit()
-        {
-            throw new NotImplementedException();
-        }
+        public Uri ToggleSequentialDownload() => Create("/command/toggleSequentialDownload");
 
-        public Uri MinTorrentPriority()
-        {
-            throw new NotImplementedException();
-        }
+        public Uri GetPreferences() => Create("/query/preferences");
 
-        public Uri MaxTorrentPriority()
-        {
-            throw new NotImplementedException();
-        }
-
-        public Uri IncTorrentPriority()
-        {
-            throw new NotImplementedException();
-        }
-
-        public Uri DecTorrentPriority()
-        {
-            throw new NotImplementedException();
-        }
-
-        public Uri SetFilePriority()
-        {
-            throw new NotImplementedException();
-        }
-
-        public Uri DeleteTorrent()
-        {
-            throw new NotImplementedException();
-        }
-
-        public Uri SetLocation()
-        {
-            throw new NotImplementedException();
-        }
-
-        public Uri Rename()
-        {
-            throw new NotImplementedException();
-        }
-
-        public Uri SetTrackers()
-        {
-            throw new NotImplementedException();
-        }
-
-        public Uri Recheck()
-        {
-            throw new NotImplementedException();
-        }
-
-        public Uri GetLog()
-        {
-            throw new NotImplementedException();
-        }
-
-        public Uri GetAlternativeSpeedLimitsEnabled()
-        {
-            throw new NotImplementedException();
-        }
-
-        public Uri ToggleAlternativeSpeedLimits()
-        {
-            throw new NotImplementedException();
-        }
-
-        public Uri SetAutomaticTorrentManagement()
-        {
-            throw new NotImplementedException();
-        }
-
-        public Uri SetForceStart()
-        {
-            throw new NotImplementedException();
-        }
-
-        public Uri SetSuperSeeding()
-        {
-            throw new NotImplementedException();
-        }
-
-        public Uri ToggleFirstLastPiecePrioritized()
-        {
-            throw new NotImplementedException();
-        }
-
-        public Uri ToggleSequentialDownload()
-        {
-            throw new NotImplementedException();
-        }
-
-        public Uri GetPreferences()
-        {
-            throw new NotImplementedException();
-        }
-
-        public Uri SetPreferences()
-        {
-            throw new NotImplementedException();
-        }
+        public Uri SetPreferences() => Create("/command/setPreferences");
     }
 }

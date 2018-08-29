@@ -83,17 +83,17 @@ namespace QBittorrent.Client.Internal
 
         Uri SetFilePriority();
 
-        Uri DeleteTorrent();
+        Uri DeleteTorrent(bool withFiles);
 
         Uri SetLocation();
 
         Uri Rename();
 
-        Uri SetTrackers();
+        Uri AddTrackers();
 
         Uri Recheck();
 
-        Uri GetLog();
+        Uri GetLog(TorrentLogSeverity severity, int afterId);
 
         Uri GetAlternativeSpeedLimitsEnabled();
 

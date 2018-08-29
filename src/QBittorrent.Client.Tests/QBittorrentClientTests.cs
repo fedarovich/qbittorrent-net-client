@@ -573,7 +573,6 @@ namespace QBittorrent.Client.Tests
             info.Should().BeEquivalentTo(
                 new GlobalTransferInfo
                 {
-                    DhtNodes = 0,
                     DownloadedData = 0,
                     DownloadSpeed = 0,
                     DownloadSpeedLimit = 0,
@@ -583,7 +582,8 @@ namespace QBittorrent.Client.Tests
                 },
                 options => options
                     .Excluding(g => g.ConnectionStatus)
-                    .Excluding(g => g.AdditionalData));
+                    .Excluding(g => g.AdditionalData)
+                    .Excluding(g => g.DhtNodes));
         }
 
         #endregion

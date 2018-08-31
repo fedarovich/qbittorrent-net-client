@@ -30,6 +30,7 @@ namespace QBittorrent.Client
         private readonly HttpClient _client;
 
         private IUrlProvider _urlProvider;
+        private int _legacyVersion;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="QBittorrentClient"/> class.
@@ -165,9 +166,13 @@ namespace QBittorrent.Client
         /// <returns></returns>
         public async Task<int> GetLegacyApiVersionAsync(CancellationToken token = default)
         {
+            int version = Interlocked.CompareExchange(ref _legacyVersion, 0, 0);
+            if (version > 0)
+                return version;
+
             var uri = BuildUri("/version/api");
-            var version = await _client.GetStringAsync(uri, token).ConfigureAwait(false);
-            return Convert.ToInt32(version);
+            version = Convert.ToInt32(await _client.GetStringAsync(uri, token).ConfigureAwait(false));
+            return version;
         }
 
         /// <summary>
@@ -544,7 +549,9 @@ namespace QBittorrent.Client
             CancellationToken token = default)
         {
             var uri = await BuildUriAsync(p => p.PauseAll(), token).ConfigureAwait(false);
-            var response = await _client.PostAsync(uri, BuildForm(), token).ConfigureAwait(false);
+            var response = await GetLegacyApiVersionAsync(token) < NewApiLegacyVersion
+                ? await _client.PostAsync(uri, BuildForm(), token).ConfigureAwait(false)
+                : await _client.PostAsync(uri, BuildForm(("hash", "all")), token).ConfigureAwait(false);
             using (response)
             {
                 response.EnsureSuccessStatusCodeEx();
@@ -584,7 +591,9 @@ namespace QBittorrent.Client
             CancellationToken token = default)
         {
             var uri = await BuildUriAsync(p => p.ResumeAll(), token).ConfigureAwait(false);
-            var response = await _client.PostAsync(uri, BuildForm(), token).ConfigureAwait(false);
+            var response = await GetLegacyApiVersionAsync(token) < NewApiLegacyVersion
+                ? await _client.PostAsync(uri, BuildForm(), token).ConfigureAwait(false)
+                : await _client.PostAsync(uri, BuildForm(("hash", "all")), token).ConfigureAwait(false);
             using (response)
             {
                 response.EnsureSuccessStatusCodeEx();
@@ -1050,11 +1059,26 @@ namespace QBittorrent.Client
             async Task ExecuteAsync()
             {
                 var uri = await BuildUriAsync(p => p.DeleteTorrent(deleteDownloadedData), token).ConfigureAwait(false);
-                var response = await _client.PostAsync(
-                        uri,
-                        BuildForm(("hashes", hashesString)),
-                        token)
-                    .ConfigureAwait(false);
+                HttpResponseMessage response;
+                if (await GetLegacyApiVersionAsync(token) < NewApiLegacyVersion)
+                {
+                    response = await _client.PostAsync(
+                            uri,
+                            BuildForm(("hashes", hashesString)),
+                            token)
+                        .ConfigureAwait(false);
+                }
+                else
+                {
+                    response = await _client.PostAsync(
+                            uri,
+                            BuildForm(
+                                ("hashes", hashesString),
+                                ("deleteFiles", deleteDownloadedData.ToLowerString())),
+                            token)
+                        .ConfigureAwait(false);
+                }
+
                 using (response)
                 {
                     response.EnsureSuccessStatusCodeEx();
@@ -1474,9 +1498,10 @@ namespace QBittorrent.Client
             var provider = Interlocked.CompareExchange(ref _urlProvider, null, null);
             if (provider == null)
             {
-                // TODO: Select provider based on API version.
                 var version = await GetLegacyApiVersionAsync(token).ConfigureAwait(false);
-                var newProvider = new Api1UrlProvider(_uri);
+                var newProvider = version < NewApiLegacyVersion 
+                    ? (IUrlProvider)new Api1UrlProvider(_uri) 
+                    : (IUrlProvider)new Api2UrlProvider(_uri);
                 provider = Interlocked.CompareExchange(ref _urlProvider, newProvider, null) ?? newProvider;
             }
 

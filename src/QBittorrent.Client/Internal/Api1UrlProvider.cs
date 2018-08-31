@@ -135,5 +135,7 @@ namespace QBittorrent.Client.Internal
         public Uri GetPreferences() => Create("/query/preferences");
 
         public Uri SetPreferences() => Create("/command/setPreferences");
+
+        public Uri ShutdownApplication() => Create("/command/shutdown");
     }
 }

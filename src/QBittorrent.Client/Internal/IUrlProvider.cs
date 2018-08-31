@@ -112,5 +112,7 @@ namespace QBittorrent.Client.Internal
         Uri GetPreferences();
 
         Uri SetPreferences();
+
+        Uri ShutdownApplication();
     }
 }

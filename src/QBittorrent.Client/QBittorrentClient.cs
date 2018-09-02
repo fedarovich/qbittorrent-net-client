@@ -551,7 +551,7 @@ namespace QBittorrent.Client
             var uri = await BuildUriAsync(p => p.PauseAll(), token).ConfigureAwait(false);
             var response = await GetLegacyApiVersionAsync(token) < NewApiLegacyVersion
                 ? await _client.PostAsync(uri, BuildForm(), token).ConfigureAwait(false)
-                : await _client.PostAsync(uri, BuildForm(("hash", "all")), token).ConfigureAwait(false);
+                : await _client.PostAsync(uri, BuildForm(("hashes", "all")), token).ConfigureAwait(false);
             using (response)
             {
                 response.EnsureSuccessStatusCodeEx();
@@ -593,7 +593,7 @@ namespace QBittorrent.Client
             var uri = await BuildUriAsync(p => p.ResumeAll(), token).ConfigureAwait(false);
             var response = await GetLegacyApiVersionAsync(token) < NewApiLegacyVersion
                 ? await _client.PostAsync(uri, BuildForm(), token).ConfigureAwait(false)
-                : await _client.PostAsync(uri, BuildForm(("hash", "all")), token).ConfigureAwait(false);
+                : await _client.PostAsync(uri, BuildForm(("hashes", "all")), token).ConfigureAwait(false);
             using (response)
             {
                 response.EnsureSuccessStatusCodeEx();

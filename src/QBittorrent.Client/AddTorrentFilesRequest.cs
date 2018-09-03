@@ -6,8 +6,8 @@ namespace QBittorrent.Client
     /// <summary>
     /// Request to add new torrents using torrent files.
     /// </summary>
-    /// <seealso cref="QBittorrent.Client.AddTorrentRequest" />
-    public class AddTorrentFilesRequest : AddTorrentRequest
+    /// <seealso cref="AddTorrentRequestBase" />
+    public class AddTorrentFilesRequest : AddTorrentRequestBase
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="AddTorrentFilesRequest"/> class.

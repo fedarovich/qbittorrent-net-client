@@ -1,12 +1,9 @@
-﻿using System.Collections.Generic;
-using System.Linq;
-
-namespace QBittorrent.Client
+﻿namespace QBittorrent.Client
 {
     /// <summary>
     /// The base class for add torrent requests.
     /// </summary>
-    public abstract class AddTorrentRequest
+    public abstract class AddTorrentRequestBase
     {
         /// <summary>
         /// Download folder

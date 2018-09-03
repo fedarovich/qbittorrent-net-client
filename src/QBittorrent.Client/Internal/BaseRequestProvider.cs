@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Net.Http;
 using System.Text;
 using QBittorrent.Client.Extensions;
@@ -18,15 +19,41 @@ namespace QBittorrent.Client.Internal
         }
 
         public virtual (Uri url, HttpContent request) Logout() => BuildForm(Url.Logout());
-        
-        public virtual (Uri url, HttpContent request) AddTorrentFiles()
+
+        public virtual (Uri url, HttpContent request) AddTorrents(AddTorrentFilesRequest request)
         {
-            throw new NotImplementedException();
+            var data = AddTorrentsCore(request);
+            foreach (var file in request.TorrentFiles)
+            {
+                data.AddFile("torrents", file, "application/x-bittorrent");
+            }
+
+            return (Url.AddTorrentFiles(), data);
         }
 
-        public virtual (Uri url, HttpContent request) AddTorrentUrls()
+        public virtual (Uri url, HttpContent request) AddTorrents(AddTorrentUrlsRequest request)
         {
-            throw new NotImplementedException();
+            var urls = string.Join("\n", request.TorrentUrls.Select(url => url.AbsoluteUri));
+            var data = AddTorrentsCore(request)
+                .AddValue("urls", urls);
+
+            return (Url.AddTorrentUrls(), data);
+        }
+
+        protected virtual MultipartFormDataContent AddTorrentsCore(AddTorrentRequestBase request)
+        {
+            return new MultipartFormDataContent()
+                .AddNonEmptyString("savepath", request.DownloadFolder)
+                .AddNonEmptyString("cookie", request.Cookie)
+                .AddNonEmptyString("category", request.Category)
+                .AddValue("skip_checking", request.SkipHashChecking)
+                .AddValue("paused", request.Paused)
+                .AddNotNullValue("root_folder", request.CreateRootFolder)
+                .AddNonEmptyString("rename", request.Rename)
+                .AddNotNullValue("upLimit", request.UploadLimit)
+                .AddNotNullValue("dlLimit", request.DownloadLimit)
+                .AddValue("sequentialDownload", request.SequentialDownload)
+                .AddValue("firstLastPiecePrio", request.FirstLastPiecePrioritized);
         }
 
         public abstract (Uri url, HttpContent request) Pause(IEnumerable<string> hashes);
@@ -203,11 +230,7 @@ namespace QBittorrent.Client.Internal
                 ("urls", urls));
         }
 
-        public virtual (Uri url, HttpContent request) Recheck(string hash)
-        {
-            return BuildForm(Url.Recheck(),
-                ("hash", hash));
-        }
+        public abstract (Uri url, HttpContent request) Recheck(IEnumerable<string> hashes);
 
         public virtual (Uri url, HttpContent request) ToggleAlternativeSpeedLimits()
         {

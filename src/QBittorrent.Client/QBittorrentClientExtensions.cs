@@ -3,7 +3,7 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using JetBrains.Annotations;
-using static QBittorrent.Client.Utils;
+using static QBittorrent.Client.Internal.Utils;
 
 namespace QBittorrent.Client
 {

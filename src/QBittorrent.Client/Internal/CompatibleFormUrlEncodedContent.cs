@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Net.Http;
 using System.Text;
 
-namespace QBittorrent.Client
+namespace QBittorrent.Client.Internal
 {
     internal class CompatibleFormUrlEncodedContent : StringContent
     {

@@ -168,6 +168,7 @@ namespace QBittorrent.Client.Tests
         [PrintTestName]
         public async Task GetQBittorrentVersion()
         {
+            await Client.LoginAsync(UserName, Password);
             var version = await Client.GetQBittorrentVersionAsync();
             version.Should().Be(DockerFixture.Env.QBittorrentVersion);
         }

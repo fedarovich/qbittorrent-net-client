@@ -2,10 +2,9 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.CompilerServices;
-using System.Text;
 using JetBrains.Annotations;
 
-namespace QBittorrent.Client
+namespace QBittorrent.Client.Internal
 {
     internal static class Utils
     {
@@ -41,32 +40,6 @@ namespace QBittorrent.Client
             }
 
             hashes = list;
-        }
-
-        [ContractAnnotation("null => halt")]
-        internal static string JoinHashes(IEnumerable<string> hashes)
-        {
-            if (hashes == null)
-                throw new ArgumentNullException(nameof(hashes));
-
-            var builder = new StringBuilder(4096);
-            foreach (var hash in hashes)
-            {
-                if (hash == null || !HashIsValid(hash))
-                    throw new ArgumentException("The values must be hexadecimal representations of SHA-1 hashes.", nameof(hashes));
-
-                if (builder.Length > 0)
-                {
-                    builder.Append('|');
-                }
-
-                builder.Append(hash);
-            }
-
-            if (builder.Length == 0)
-                throw new ArgumentException("The list of hashes cannot be empty.", nameof(hashes));
-
-            return builder.ToString();
         }
     }
 }

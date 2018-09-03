@@ -6,7 +6,7 @@ using QBittorrent.Client.Extensions;
 
 namespace QBittorrent.Client.Internal
 {
-    internal class Api2RequestProvider : BaseRequestProvider
+    internal sealed class Api2RequestProvider : BaseRequestProvider
     {
         internal Api2RequestProvider(Uri baseUri)
         {
@@ -44,6 +44,12 @@ namespace QBittorrent.Client.Internal
             return BuildForm(Url.DeleteTorrents(withFiles),
                 ("hashes", JoinHashes(hashes)),
                 ("deleteFiles", withFiles.ToLowerString()));
+        }
+
+        public override (Uri url, HttpContent request) Recheck(IEnumerable<string> hashes)
+        {
+            return BuildForm(Url.Recheck(),
+                ("hashes", JoinHashes(hashes)));
         }
     }
 }

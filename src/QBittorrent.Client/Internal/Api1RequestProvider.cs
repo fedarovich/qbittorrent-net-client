@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
-using System.Text;
 
 namespace QBittorrent.Client.Internal
 {
@@ -55,6 +54,19 @@ namespace QBittorrent.Client.Internal
         {
             return BuildForm(Url.DeleteTorrents(withFiles),
                 ("hashes", JoinHashes(hashes)));
+        }
+
+        public override (Uri url, HttpContent request) Recheck(IEnumerable<string> hashes)
+        {
+            var hashList = hashes.ToList();
+            if (hashList.Count == 0)
+                throw new InvalidOperationException("Exactly one hash must be provided.");
+
+            if (hashList.Count > 1)
+                throw new NotSupportedException("API 1.x does not support rechecking several torrents at once.");
+
+            return BuildForm(Url.Recheck(),
+                ("hash", hashList[0]));
         }
     }
 }

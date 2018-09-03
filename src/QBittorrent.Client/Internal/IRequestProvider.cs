@@ -13,9 +13,9 @@ namespace QBittorrent.Client.Internal
 
         (Uri url, HttpContent request) Logout();
 
-        (Uri url, HttpContent request) AddTorrentFiles();
+        (Uri url, HttpContent request) AddTorrents(AddTorrentFilesRequest request);
 
-        (Uri url, HttpContent request) AddTorrentUrls();
+        (Uri url, HttpContent request) AddTorrents(AddTorrentUrlsRequest request);
 
         (Uri url, HttpContent request) Pause(IEnumerable<string> hashes);
 
@@ -65,7 +65,7 @@ namespace QBittorrent.Client.Internal
 
         (Uri url, HttpContent request) AddTrackers(string hash, IEnumerable<Uri> trackers);
 
-        (Uri url, HttpContent request) Recheck(string hash);
+        (Uri url, HttpContent request) Recheck(IEnumerable<string> hashes);
 
         (Uri url, HttpContent request) ToggleAlternativeSpeedLimits();
 

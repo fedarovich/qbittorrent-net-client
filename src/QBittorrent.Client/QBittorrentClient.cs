@@ -12,7 +12,7 @@ using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
 using QBittorrent.Client.Internal;
-using static QBittorrent.Client.Utils;
+using static QBittorrent.Client.Internal.Utils;
 
 namespace QBittorrent.Client
 {
@@ -29,8 +29,8 @@ namespace QBittorrent.Client
         private readonly Uri _uri;
         private readonly HttpClient _client;
 
-        private Cached<int> _legacyVersion;
-        private Cached<IRequestProvider> _requestProvider;
+        private readonly Cached<int> _legacyVersion;
+        private readonly Cached<IRequestProvider> _requestProvider;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="QBittorrentClient"/> class.
@@ -431,19 +431,7 @@ namespace QBittorrent.Client
             if (request == null)
                 throw new ArgumentNullException(nameof(request));
 
-            return ExecuteAsync();
-
-            async Task ExecuteAsync()
-            {
-                var uri = await BuildUriAsync(p => p.AddTorrentFiles(), token).ConfigureAwait(false);
-                var data = new MultipartFormDataContent();
-                foreach (var file in request.TorrentFiles)
-                {
-                    data.AddFile("torrents", file, "application/x-bittorrent");
-                }
-
-                await AddTorrentsCoreAsync(uri, data, request, token).ConfigureAwait(false);
-            }
+            return PostAsync(p => p.AddTorrents(request), token);
         }
 
         /// <summary>
@@ -459,48 +447,7 @@ namespace QBittorrent.Client
             if (request == null)
                 throw new ArgumentNullException(nameof(request));
 
-            return ExecuteAsync();
-
-            async Task ExecuteAsync()
-            {
-                var uri = await BuildUriAsync(p => p.AddTorrentUrls(), token).ConfigureAwait(false);
-                var urls = string.Join("\n", request.TorrentUrls.Select(url => url.AbsoluteUri));
-                var data = new MultipartFormDataContent().AddValue("urls", urls);
-                await AddTorrentsCoreAsync(uri, data, request, token).ConfigureAwait(false);
-            }
-        }
-
-        /// <summary>
-        /// Adds the torrents.
-        /// </summary>
-        /// <param name="uri">The URI.</param>
-        /// <param name="data">The data.</param>
-        /// <param name="request">The request.</param>
-        /// <param name="token">The cancellation token.</param>
-        /// <returns></returns>
-        protected async Task AddTorrentsCoreAsync(
-            Uri uri,
-            MultipartFormDataContent data,
-            AddTorrentRequest request,
-            CancellationToken token)
-        {
-            data
-                .AddNonEmptyString("savepath", request.DownloadFolder)
-                .AddNonEmptyString("cookie", request.Cookie)
-                .AddNonEmptyString("category", request.Category)
-                .AddValue("skip_checking", request.SkipHashChecking)
-                .AddValue("paused", request.Paused)
-                .AddNotNullValue("root_folder", request.CreateRootFolder)
-                .AddNonEmptyString("rename", request.Rename)
-                .AddNotNullValue("upLimit", request.UploadLimit)
-                .AddNotNullValue("dlLimit", request.DownloadLimit)
-                .AddValue("sequentialDownload", request.SequentialDownload)
-                .AddValue("firstLastPiecePrio", request.FirstLastPiecePrioritized);
-
-            using (var response = await _client.PostAsync(uri, data, token).ConfigureAwait(false))
-            {
-                response.EnsureSuccessStatusCodeEx();
-            }
+            return PostAsync(p => p.AddTorrents(request), token);
         }
 
         #endregion
@@ -893,52 +840,31 @@ namespace QBittorrent.Client
             CancellationToken token = default)
         {
             ValidateHash(hash);
-            var urls = GetUrls();
+            ValidateUrls(ref trackers);
 
-            return ExecuteAsync();
+            return PostAsync(p => p.AddTrackers(hash, trackers), token);
 
-            // TODO: Refactor
-
-            async Task ExecuteAsync()
-            {
-                var uri = await BuildUriAsync(p => p.AddTrackers(), token).ConfigureAwait(false);
-                var response = await _client.PostAsync(uri,
-                    BuildForm(
-                        ("hash", hash),
-                        ("urls", urls)
-                    ), token).ConfigureAwait(false);
-                using (response)
-                {
-                    response.EnsureSuccessStatusCodeEx();
-                }
-            }
-
-            string GetUrls()
+            void ValidateUrls(ref IEnumerable<Uri> urls)
             {
                 if (trackers == null)
                     throw new ArgumentNullException(nameof(trackers));
 
-                var builder = new StringBuilder(4096);
-                foreach (var tracker in trackers)
+                var list = new List<Uri>();
+                foreach (var url in urls)
                 {
                     // ReSharper disable once ConditionIsAlwaysTrueOrFalse
-                    if (tracker == null)
+                    if (url == null)
                         throw new ArgumentException("The collection must not contain nulls.", nameof(trackers));
-                    if (!tracker.IsAbsoluteUri)
+                    if (!url.IsAbsoluteUri)
                         throw new ArgumentException("The collection must contain absolute URIs.", nameof(trackers));
 
-                    if (builder.Length > 0)
-                    {
-                        builder.Append('\n');
-                    }
-
-                    builder.Append(tracker.AbsoluteUri);
+                    list.Add(url);
                 }
 
-                if (builder.Length == 0)
+                if (list.Count == 0)
                     throw new ArgumentException("The collection must contain at least one URI.", nameof(trackers));
 
-                return builder.ToString();
+                urls = list;
             }
         }
 
@@ -952,20 +878,8 @@ namespace QBittorrent.Client
             string hash,
             CancellationToken token = default)
         {
-            // TODO: Refactor. Recheck supports multiple torrents in API 2.x
-
             ValidateHash(hash);
-            return ExecuteAsync();
-
-            async Task ExecuteAsync()
-            {
-                var uri = await BuildUriAsync(p => p.Recheck(), token).ConfigureAwait(false);
-                var response = await _client.PostAsync(uri, BuildForm(("hash", hash)), token).ConfigureAwait(false);
-                using (response)
-                {
-                    response.EnsureSuccessStatusCodeEx();
-                }
-            }
+            return PostAsync(p => p.Recheck(new[] {hash}), token);
         }
 
         /// <summary>

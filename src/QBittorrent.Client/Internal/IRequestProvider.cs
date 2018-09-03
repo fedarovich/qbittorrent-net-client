@@ -57,7 +57,7 @@ namespace QBittorrent.Client.Internal
 
         (Uri url, HttpContent request) SetFilePriority(string hash, int fileId, TorrentContentPriority priority);
 
-        (Uri url, HttpContent request) DeleteTorrent(IEnumerable<string> hashes, bool withFiles);
+        (Uri url, HttpContent request) DeleteTorrents(IEnumerable<string> hashes, bool withFiles);
 
         (Uri url, HttpContent request) SetLocation(IEnumerable<string> hashes, string newLocation);
 

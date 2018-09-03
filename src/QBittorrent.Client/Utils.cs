@@ -26,6 +26,23 @@ namespace QBittorrent.Client
                 throw new ArgumentException("The parameter must be a hexadecimal representation of SHA-1 hash.", nameof(hash));
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        [ContractAnnotation("null => halt")]
+        internal static void ValidateHashes(ref IEnumerable<string> hashes)
+        {
+            if (hashes == null)
+                throw new ArgumentNullException(nameof(hashes));
+
+            var list = new List<string>();
+            foreach (var hash in hashes)
+            {
+                ValidateHash(hash);
+                list.Add(hash);
+            }
+
+            hashes = list;
+        }
+
         [ContractAnnotation("null => halt")]
         internal static string JoinHashes(IEnumerable<string> hashes)
         {

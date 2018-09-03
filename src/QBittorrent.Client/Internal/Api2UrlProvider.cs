@@ -95,7 +95,7 @@ namespace QBittorrent.Client.Internal
 
         public Uri SetFilePriority() => Create("/api/v2/torrents/filePrio");
 
-        public Uri DeleteTorrent(bool withFiles) => Create("/api/v2/torrents/delete");
+        public Uri DeleteTorrents(bool withFiles) => Create("/api/v2/torrents/delete");
 
         public Uri SetLocation() => Create("/api/v2/torrents/setLocation");
 

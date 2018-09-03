@@ -83,7 +83,7 @@ namespace QBittorrent.Client.Internal
 
         Uri SetFilePriority();
 
-        Uri DeleteTorrent(bool withFiles);
+        Uri DeleteTorrents(bool withFiles);
 
         Uri SetLocation();
 

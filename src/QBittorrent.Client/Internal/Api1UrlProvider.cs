@@ -98,7 +98,7 @@ namespace QBittorrent.Client.Internal
 
         public Uri SetFilePriority() => Create("/command/setFilePrio");
 
-        public Uri DeleteTorrent(bool withFiles) => withFiles ? Create("/command/deletePerm") : Create("/command/delete");
+        public Uri DeleteTorrents(bool withFiles) => withFiles ? Create("/command/deletePerm") : Create("/command/delete");
 
         public Uri SetLocation() => Create("/command/setLocation");
 

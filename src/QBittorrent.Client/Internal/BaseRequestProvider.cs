@@ -158,7 +158,7 @@ namespace QBittorrent.Client.Internal
                 ("priority", priority.ToString("D")));
         }
 
-        public abstract (Uri url, HttpContent request) DeleteTorrent(IEnumerable<string> hashes, bool withFiles);
+        public abstract (Uri url, HttpContent request) DeleteTorrents(IEnumerable<string> hashes, bool withFiles);
 
         public virtual (Uri url, HttpContent request) SetLocation(IEnumerable<string> hashes, string newLocation)
         {

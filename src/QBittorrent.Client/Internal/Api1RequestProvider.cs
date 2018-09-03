@@ -51,9 +51,9 @@ namespace QBittorrent.Client.Internal
             return BuildForm(Url.ResumeAll());
         }
 
-        public override (Uri url, HttpContent request) DeleteTorrent(IEnumerable<string> hashes, bool withFiles)
+        public override (Uri url, HttpContent request) DeleteTorrents(IEnumerable<string> hashes, bool withFiles)
         {
-            return BuildForm(Url.DeleteTorrent(withFiles),
+            return BuildForm(Url.DeleteTorrents(withFiles),
                 ("hashes", JoinHashes(hashes)));
         }
     }

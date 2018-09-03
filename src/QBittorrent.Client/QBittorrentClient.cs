@@ -37,7 +37,17 @@ namespace QBittorrent.Client
         /// </summary>
         /// <param name="uri">qBittorrent remote server URI.</param>
         public QBittorrentClient([NotNull] Uri uri)
-            : this(uri, new HttpClient())
+            : this(uri, ApiLevel.Auto, new HttpClient())
+        {
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="QBittorrentClient"/> class.
+        /// </summary>
+        /// <param name="uri">qBittorrent remote server URI.</param>
+        /// <param name="apiLevel">qBittorrent API level.</param>
+        public QBittorrentClient([NotNull] Uri uri, ApiLevel apiLevel)
+            : this(uri, apiLevel, new HttpClient())
         {
         }
 
@@ -48,7 +58,19 @@ namespace QBittorrent.Client
         /// <param name="handler">Custom HTTP message handler.</param>
         /// <param name="disposeHandler">The value indicating whether the <paramref name="handler"/> must be disposed when disposing this object.</param>
         public QBittorrentClient([NotNull] Uri uri, HttpMessageHandler handler, bool disposeHandler)
-            : this(uri, new HttpClient(handler, disposeHandler))
+            : this(uri, ApiLevel.Auto, new HttpClient(handler, disposeHandler))
+        {
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="QBittorrentClient"/> class.
+        /// </summary>
+        /// <param name="uri">qBittorrent remote server URI.</param>
+        /// <param name="apiLevel">qBittorrent API level.</param>
+        /// <param name="handler">Custom HTTP message handler.</param>
+        /// <param name="disposeHandler">The value indicating whether the <paramref name="handler"/> must be disposed when disposing this object.</param>
+        public QBittorrentClient([NotNull] Uri uri, ApiLevel apiLevel, HttpMessageHandler handler, bool disposeHandler)
+            : this(uri, apiLevel, new HttpClient(handler, disposeHandler))
         {
         }
 
@@ -56,21 +78,37 @@ namespace QBittorrent.Client
         /// Initializes a new instance of the <see cref="QBittorrentClient"/> class.
         /// </summary>
         /// <param name="uri">The qBittorrent remote server URI.</param>
+        /// <param name="apiLevel">The qBittorrent API level.</param>
         /// <param name="client">Custom <see cref="HttpClient"/> instance.</param>
         /// <exception cref="ArgumentNullException">
         /// <paramref name="uri"/> or <paramref name="client"/> is <see langword="null"/>.
         /// </exception>
-        private QBittorrentClient([NotNull] Uri uri, [NotNull] HttpClient client)
+        private QBittorrentClient([NotNull] Uri uri, ApiLevel apiLevel, [NotNull] HttpClient client)
         {
             _uri = uri ?? throw new ArgumentNullException(nameof(uri));
             _client = client ?? throw new ArgumentNullException(nameof(client));
             _client.DefaultRequestHeaders.ExpectContinue = true;
 
             _legacyVersion = new Cached<int>(GetLegacyApiVersionPrivateAsync);
-            _requestProvider = new Cached<IRequestProvider>(async token =>
-                await GetLegacyApiVersionAsync(token).ConfigureAwait(false) < NewApiLegacyVersion
-                    ? (IRequestProvider) new Api1RequestProvider(uri)
-                    : (IRequestProvider) new Api2RequestProvider(uri));
+            _requestProvider = new Cached<IRequestProvider>(GetRequestProvider());
+
+            Func<CancellationToken, Task<IRequestProvider>> GetRequestProvider()
+            {
+                switch (apiLevel)
+                {
+                    case ApiLevel.Auto:
+                        return async token =>
+                            await GetLegacyApiVersionAsync(token).ConfigureAwait(false) < NewApiLegacyVersion
+                                ? (IRequestProvider) new Api1RequestProvider(uri)
+                                : (IRequestProvider) new Api2RequestProvider(uri);
+                    case ApiLevel.V1:
+                        return token => Task.FromResult<IRequestProvider>(new Api1RequestProvider(uri));
+                    case ApiLevel.V2:
+                        return token => Task.FromResult<IRequestProvider>(new Api2RequestProvider(uri));
+                    default:
+                        throw new ArgumentOutOfRangeException(nameof(apiLevel), apiLevel, null);
+                }
+            }
         }
 
         #region Properties

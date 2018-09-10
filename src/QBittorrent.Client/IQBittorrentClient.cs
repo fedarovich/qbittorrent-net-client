@@ -12,6 +12,7 @@ namespace QBittorrent.Client
     /// </summary>
     /// <seealso cref="QBittorrentClient"/>
     /// <seealso cref="QBittorrentClientExtensions"/>
+    /// <seealso cref="IQBittorrentClient2"/>
     public interface IQBittorrentClient
     {
         /// <summary>

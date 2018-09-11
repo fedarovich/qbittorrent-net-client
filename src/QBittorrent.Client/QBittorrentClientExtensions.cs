@@ -291,5 +291,22 @@ namespace QBittorrent.Client
             ValidateHash(hash);
             return client.ToggleSequentialDownloadAsync(new[] { hash }, token);
         }
+
+        /// <summary>
+        /// Reannounces the torrent.
+        /// </summary>
+        /// <param name="client">An <see cref="IQBittorrentClient2"/> instance.</param>
+        /// <param name="hash">The torrent hash.</param>
+        /// <param name="token">The cancellation token.</param>
+        /// <returns></returns>
+        [ApiLevel(ApiLevel.V2)]
+        public static Task ReannounceAsync(
+            [NotNull] this IQBittorrentClient2 client,
+            [NotNull] string hash,
+            CancellationToken token = default)
+        {
+            ValidateHash(hash);
+            return client.ReannounceAsync(new[] { hash }, token);
+        }
     }
 }

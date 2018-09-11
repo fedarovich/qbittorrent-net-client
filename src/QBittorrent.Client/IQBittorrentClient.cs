@@ -450,7 +450,7 @@ namespace QBittorrent.Client
             CancellationToken token = default);
 
         /// <summary>
-        /// Sets the super seeding asynchronous.
+        /// Sets the super seeding.
         /// </summary>
         /// <param name="hashes">The torrent hashes.</param>
         /// <param name="enabled"></param>

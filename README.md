@@ -1,6 +1,6 @@
 # qBittorrent Client Library for .Net
 
-[![Build status](https://pavelfedarovich.visualstudio.com/qBittorrent-net-client/_apis/build/status/qBittorrent-net-client%20CI)](https://pavelfedarovich.visualstudio.com/qBittorrent-net-client/_build/latest?definitionId=5)
+[![Build status](https://dev.azure.com/pavelfedarovich/qBittorrent-net-client/_apis/build/status/qBittorrent-net-client%20CI)](https://dev.azure.com/pavelfedarovich/qBittorrent-net-client/_build/latest?definitionId=5)
 [![license](https://img.shields.io/badge/license-MIT-blue.svg)](https://github.com/fedarovich/qbittorrent-net-client/blob/master/LICENSE)
 [![documentation](https://img.shields.io/badge/documentation-read-lightgrey.svg)](https://fedarovich.github.io/qbittorrent-net-client-docs)
 

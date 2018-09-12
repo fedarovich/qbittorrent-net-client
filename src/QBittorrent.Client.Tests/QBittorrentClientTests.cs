@@ -331,18 +331,27 @@ namespace QBittorrent.Client.Tests
             var hash = parser.Parse<Torrent>(torrentFile).OriginalInfoHash.ToLower();
 
             var addRequest = new AddTorrentsRequest(new[] { torrentFile }, links) { Paused = true };
-            await Client.AddTorrentsAsync(addRequest);
 
-            await Task.Delay(1000);
-
-            await Utils.Retry(async () =>
+            if (DockerFixture.Env.ApiVersion < new System.Version(2, 0))
             {
-                list = await Client.GetTorrentListAsync();
-                list.Should().HaveCount(3);
-                list.Should().Contain(t => t.Hash == "f07e0b0584745b7bcb35e98097488d34e68623d0");
-                list.Should().Contain(t => t.Hash == "778ce280b595e57780ff083f2eb6f897dfa4a4ee");
-                list.Should().Contain(t => t.Hash == hash);
-            });
+                var exception = await Assert.ThrowsAsync<ApiNotSupportedException>(() => Client.AddTorrentsAsync(addRequest));
+                exception.RequiredApiLevel.Should().Be(ApiLevel.V2);
+            }
+            else
+            {
+                await Client.AddTorrentsAsync(addRequest);
+
+                await Task.Delay(1000);
+
+                await Utils.Retry(async () =>
+                {
+                    list = await Client.GetTorrentListAsync();
+                    list.Should().HaveCount(3);
+                    list.Should().Contain(t => t.Hash == "f07e0b0584745b7bcb35e98097488d34e68623d0");
+                    list.Should().Contain(t => t.Hash == "778ce280b595e57780ff083f2eb6f897dfa4a4ee");
+                    list.Should().Contain(t => t.Hash == hash);
+                });
+            }
         }
 
         #endregion

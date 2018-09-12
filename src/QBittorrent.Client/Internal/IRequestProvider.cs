@@ -80,5 +80,11 @@ namespace QBittorrent.Client.Internal
         (Uri url, HttpContent request) ToggleSequentialDownload(IEnumerable<string> hashes);
 
         (Uri url, HttpContent request) SetPreferences(string json);
+
+        // API 2.0+
+
+        (Uri url, HttpContent request) AddTorrents(AddTorrentsRequest request);
+
+        (Uri url, HttpContent request) Reannounce(IEnumerable<string> hashes);
     }
 }

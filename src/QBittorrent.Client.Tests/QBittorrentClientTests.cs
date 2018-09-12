@@ -310,10 +310,45 @@ namespace QBittorrent.Client.Tests
             });
         }
 
+        [Fact]
+        [PrintTestName]
+        public async Task AddTorrentsFromFilesAndHttpLinks()
+        {
+            await Client.LoginAsync(UserName, Password);
+            var list = await Client.GetTorrentListAsync();
+            list.Should().BeEmpty();
+
+            var links = new[]
+            {
+                new Uri(
+                    "https://fedarovich.blob.core.windows.net/qbittorrent-test/torrents/ubuntu-17.10.1-desktop-amd64.iso.torrent"),
+                new Uri(
+                    "https://fedarovich.blob.core.windows.net/qbittorrent-test/torrents/ubuntu-16.04.4-desktop-amd64.iso.torrent"),
+            };
+
+            var torrentFile = Path.Combine(Utils.TorrentsFolder, "ubuntu-14.04-pack.torrent");
+            var parser = new BencodeParser();
+            var hash = parser.Parse<Torrent>(torrentFile).OriginalInfoHash.ToLower();
+
+            var addRequest = new AddTorrentsRequest(new[] { torrentFile }, links) { Paused = true };
+            await Client.AddTorrentsAsync(addRequest);
+
+            await Task.Delay(1000);
+
+            await Utils.Retry(async () =>
+            {
+                list = await Client.GetTorrentListAsync();
+                list.Should().HaveCount(3);
+                list.Should().Contain(t => t.Hash == "f07e0b0584745b7bcb35e98097488d34e68623d0");
+                list.Should().Contain(t => t.Hash == "778ce280b595e57780ff083f2eb6f897dfa4a4ee");
+                list.Should().Contain(t => t.Hash == hash);
+            });
+        }
+
         #endregion
 
         #region GetTorrentPropertiesAsync
-        
+
         [Fact]
         [PrintTestName]
         public async Task GetTorrentProperties()
@@ -740,7 +775,7 @@ namespace QBittorrent.Client.Tests
             var list = await Client.GetTorrentListAsync();
             list.Should().OnlyContain(t => t.State != TorrentState.PausedDownload);
 
-            await Client.PauseAllAsync();
+            await Client.PauseAsync();
             await Utils.Retry(async () =>
             {
                 list = await Client.GetTorrentListAsync();
@@ -762,7 +797,55 @@ namespace QBittorrent.Client.Tests
             var list = await Client.GetTorrentListAsync();
             list.Should().OnlyContain(t => t.State == TorrentState.PausedDownload);
 
+            await Client.ResumeAsync();
+            await Utils.Retry(async () =>
+            {
+                list = await Client.GetTorrentListAsync();
+                list.Should().OnlyContain(t => t.State != TorrentState.PausedDownload);
+            });
+        }
+
+        [Fact]
+        [PrintTestName]
+        public async Task PauseAllLegacy()
+        {
+            await Client.LoginAsync(UserName, Password);
+
+            var filesToAdd = Directory.GetFiles(Utils.TorrentsFolder, "*.torrent");
+
+            await Client.AddTorrentsAsync(new AddTorrentFilesRequest(filesToAdd));
+            await Task.Delay(1000);
+
+            var list = await Client.GetTorrentListAsync();
+            list.Should().OnlyContain(t => t.State != TorrentState.PausedDownload);
+
+#pragma warning disable CS0618 // Type or member is obsolete
+            await Client.PauseAllAsync();
+#pragma warning restore CS0618 // Type or member is obsolete
+            await Utils.Retry(async () =>
+            {
+                list = await Client.GetTorrentListAsync();
+                list.Should().OnlyContain(t => t.State == TorrentState.PausedDownload);
+            });
+        }
+
+        [Fact]
+        [PrintTestName]
+        public async Task ResumeAllLegacy()
+        {
+            await Client.LoginAsync(UserName, Password);
+
+            var filesToAdd = Directory.GetFiles(Utils.TorrentsFolder, "*.torrent");
+
+            await Client.AddTorrentsAsync(new AddTorrentFilesRequest(filesToAdd) { Paused = true });
+            await Task.Delay(1000);
+
+            var list = await Client.GetTorrentListAsync();
+            list.Should().OnlyContain(t => t.State == TorrentState.PausedDownload);
+
+#pragma warning disable CS0618 // Type or member is obsolete
             await Client.ResumeAllAsync();
+#pragma warning restore CS0618 // Type or member is obsolete
             await Utils.Retry(async () =>
             {
                 list = await Client.GetTorrentListAsync();

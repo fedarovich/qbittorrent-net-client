@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
+using System.Runtime.CompilerServices;
 using System.Text;
 using QBittorrent.Client.Extensions;
 
@@ -39,6 +40,8 @@ namespace QBittorrent.Client.Internal
 
             return (Url.AddTorrentUrls(), data);
         }
+
+        public abstract (Uri url, HttpContent request) AddTorrents(AddTorrentsRequest request);
 
         protected virtual MultipartFormDataContent AddTorrentsCore(AddTorrentRequestBase request)
         {
@@ -276,11 +279,14 @@ namespace QBittorrent.Client.Internal
                 ("json", json));
         }
 
+        public abstract (Uri url, HttpContent request) Reannounce(IEnumerable<string> hashes);
+
         protected (Uri, HttpContent) BuildForm(Uri uri, params (string key, string value)[] fields)
         {
             return (uri, new CompatibleFormUrlEncodedContent(fields));
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         protected string JoinHashes(IEnumerable<string> hashes) => string.Join("|", hashes);
     }
 }

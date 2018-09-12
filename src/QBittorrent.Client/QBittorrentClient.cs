@@ -22,7 +22,7 @@ namespace QBittorrent.Client
     /// <seealso cref="IDisposable" />
     /// <seealso cref="IQBittorrentClient"/>
     /// <seealso cref="QBittorrentClientExtensions"/>
-    public class QBittorrentClient : IQBittorrentClient, IDisposable
+    public partial class QBittorrentClient : IQBittorrentClient, IDisposable
     {
         private const int NewApiLegacyVersion = 18;
 
@@ -510,11 +510,13 @@ namespace QBittorrent.Client
         /// Pauses all torrents.
         /// </summary>
         /// <param name="token">The cancellation token.</param>
+        /// <remarks>This method is obsolete. Use <see cref="PauseAsync(CancellationToken)"/> method instead.</remarks>
         /// <returns></returns>
+        [Obsolete("Use PauseAsync(CancellationToken) method instead.")]
         public Task PauseAllAsync(
             CancellationToken token = default)
         {
-            return PostAsync(p => p.PauseAll(), token);
+            return PauseAsync(token);
         }
 
         /// <summary>
@@ -535,11 +537,13 @@ namespace QBittorrent.Client
         /// Resumes all torrents.
         /// </summary>
         /// <param name="token">The cancellation token.</param>
+        /// <remarks>This method is obsolete. Use <see cref="ResumeAsync(CancellationToken)"/> method instead.</remarks>
         /// <returns></returns>
+        [Obsolete("Use ResumeAsync(CancellationToken) method instead.")]
         public Task ResumeAllAsync(
             CancellationToken token = default)
         {
-            return PostAsync(p => p.ResumeAll(), token);
+            return ResumeAsync(token);
         }
 
         #endregion
@@ -614,14 +618,7 @@ namespace QBittorrent.Client
             CancellationToken token = default)
         {
             ValidateHashes(ref hashes);
-            return PostAsync(p => p.GetTorrentDownloadLimit(hashes), token, GetResult);
-
-            async Task<IReadOnlyDictionary<string, long?>> GetResult(HttpResponseMessage response)
-            {
-                var json = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
-                var dict = JsonConvert.DeserializeObject<Dictionary<string, long?>>(json, new NegativeToNullConverter());
-                return dict;
-            }
+            return PostAsync(p => p.GetTorrentDownloadLimit(hashes), token, GetTorrentLimits);
         }
 
         /// <summary>
@@ -654,14 +651,7 @@ namespace QBittorrent.Client
             CancellationToken token = default)
         {
             ValidateHashes(ref hashes);
-            return PostAsync(p => p.GetTorrentUploadLimit(hashes), token, GetResult);
-
-            async Task<IReadOnlyDictionary<string, long?>> GetResult(HttpResponseMessage response)
-            {
-                var json = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
-                var dict = JsonConvert.DeserializeObject<Dictionary<string, long?>>(json, new NegativeToNullConverter());
-                return dict;
-            }
+            return PostAsync(p => p.GetTorrentUploadLimit(hashes), token, GetTorrentLimits);
         }
 
         /// <summary>
@@ -1036,7 +1026,6 @@ namespace QBittorrent.Client
         {
             ValidateHashes(ref hashes);
             return PostAsync(p => p.ToggleSequentialDownload(hashes), token);
-
         }
 
         /// <summary>
@@ -1072,17 +1061,28 @@ namespace QBittorrent.Client
             return PostAsync(p => p.SetPreferences(json), token);
         }
 
+
+        /// <summary>
+        /// Quits qBittorrent.
+        /// </summary>
+        /// <param name="token">The cancellation token.</param>
+        /// <returns></returns>
+        public async Task ShutdownApplicationAsync(CancellationToken token = default)
+        {
+            var uri = await BuildUriAsync(p => p.ShutdownApplication(), token).ConfigureAwait(false);
+            var response = await _client.GetAsync(uri, token).ConfigureAwait(false);
+            using (response)
+            {
+                response.EnsureSuccessStatusCodeEx();
+            }
+        }
+
         #endregion
 
         /// <inheritdoc />
         public void Dispose()
         {
             _client?.Dispose();
-        }
-
-        private HttpContent BuildForm(params (string key, string value)[] fields)
-        {
-            return new CompatibleFormUrlEncodedContent(fields);
         }
 
         private Uri BuildUri(string path, params (string key, string value)[] parameters)
@@ -1124,6 +1124,13 @@ namespace QBittorrent.Client
                 response.EnsureSuccessStatusCodeEx();
                 return await transform(response).ConfigureAwait(false);
             }
+        }
+
+        private static async Task<IReadOnlyDictionary<string, long?>> GetTorrentLimits(HttpResponseMessage response)
+        {
+            var json = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
+            var dict = JsonConvert.DeserializeObject<Dictionary<string, long?>>(json, new NegativeToNullConverter());
+            return dict;
         }
 
         private struct UrlItem

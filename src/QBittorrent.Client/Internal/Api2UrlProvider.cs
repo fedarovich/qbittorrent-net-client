@@ -134,5 +134,9 @@ namespace QBittorrent.Client.Internal
         public Uri SetPreferences() => Create("/api/v2/app/setPreferences");
 
         public Uri ShutdownApplication() => Create("/api/v2/app/shutdown");
+
+        public Uri GetPeerLog(int afterId = -1) => Create("/api/v2/log/peers", ("last_known_id", afterId.ToString()));
+
+        public Uri Reannounce() => Create("/api/v2/torrents/reannounce");
     }
 }

@@ -114,5 +114,11 @@ namespace QBittorrent.Client.Internal
         Uri SetPreferences();
 
         Uri ShutdownApplication();
+
+        // API 2.0+
+
+        Uri GetPeerLog(int afterId = -1);
+
+        Uri Reannounce();
     }
 }

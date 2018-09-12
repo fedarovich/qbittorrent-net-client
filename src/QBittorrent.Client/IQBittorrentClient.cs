@@ -547,5 +547,13 @@ namespace QBittorrent.Client
         Task SetPreferencesAsync(
             Preferences preferences,
             CancellationToken token = default);
+
+        /// <summary>
+        /// Quits qBittorrent.
+        /// </summary>
+        /// <param name="token">The cancellation token.</param>
+        /// <returns></returns>
+        Task ShutdownApplicationAsync(
+            CancellationToken token = default);
     }
 }

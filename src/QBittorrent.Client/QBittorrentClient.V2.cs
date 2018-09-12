@@ -1,27 +1,30 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using JetBrains.Annotations;
+using Newtonsoft.Json;
+using QBittorrent.Client.Extensions;
+using static QBittorrent.Client.Internal.Utils;
 
 namespace QBittorrent.Client
 {
-    /// <summary>
-    /// Provides access to qBittorrent remote API.
-    /// </summary>
-    /// <seealso cref="QBittorrentClient"/>
-    /// <seealso cref="QBittorrentClientExtensions"/>
-    /// <seealso cref="IQBittorrentClient2"/>
-    public interface IQBittorrentClient2 : IQBittorrentClient
+    public partial class QBittorrentClient : IQBittorrentClient2
     {
+        private static readonly IEnumerable<string> All = new[] { "all" };
+
         /// <summary>
         /// Gets the peer log.
         /// </summary>
         [ApiLevel(ApiLevel.V2)]
-        Task<IEnumerable<PeerLogEntry>> GetPeerLogAsync(
+        public async Task<IEnumerable<PeerLogEntry>> GetPeerLogAsync(
             int afterId = -1,
-            CancellationToken token = default);
+            CancellationToken token = default)
+        {
+            var uri = await BuildUriAsync(p => p.GetPeerLog(afterId), token).ConfigureAwait(false);
+            var json = await _client.GetStringAsync(uri, token).ConfigureAwait(false);
+            return JsonConvert.DeserializeObject<IEnumerable<PeerLogEntry>>(json);
+        }
 
         /// <summary>
         /// Adds the torrents to download.
@@ -30,9 +33,15 @@ namespace QBittorrent.Client
         /// <param name="token">The cancellation token.</param>
         /// <returns></returns>
         [ApiLevel(ApiLevel.V2)]
-        Task AddTorrentsAsync(
+        public Task AddTorrentsAsync(
             [NotNull] AddTorrentsRequest request,
-            CancellationToken token = default);
+            CancellationToken token = default)
+        {
+            if (request == null)
+                throw new ArgumentNullException(nameof(request));
+
+            return PostAsync(p => p.AddTorrents(request), token);
+        }
 
         /// <summary>
         /// Deletes all torrents.
@@ -40,9 +49,12 @@ namespace QBittorrent.Client
         /// <param name="deleteDownloadedData"><see langword="true"/> to delete the downloaded data.</param>
         /// <param name="token">The cancellation token.</param>
         [ApiLevel(ApiLevel.V2)]
-        Task DeleteAsync(
+        public Task DeleteAsync(
             bool deleteDownloadedData = false,
-            CancellationToken token = default);
+            CancellationToken token = default)
+        {
+            return PostAsync(p => p.DeleteTorrents(All, deleteDownloadedData), token);
+        }
 
         /// <summary>
         /// Rechecks all torrents.
@@ -50,8 +62,11 @@ namespace QBittorrent.Client
         /// <param name="token">The cancellation token.</param>
         /// <returns></returns>
         [ApiLevel(ApiLevel.V2)]
-        Task RecheckAsync(
-            CancellationToken token = default);
+        public Task RecheckAsync(
+            CancellationToken token = default)
+        {
+            return PostAsync(p => p.Recheck(All), token);
+        }
 
         /// <summary>
         /// Rechecks the torrents.
@@ -59,9 +74,13 @@ namespace QBittorrent.Client
         /// <param name="hashes">The torrent hashes.</param>
         /// <param name="token">The cancellation token.</param>
         /// <returns></returns>
-        Task RecheckAsync(
+        public Task RecheckAsync(
             [NotNull, ItemNotNull] IEnumerable<string> hashes,
-            CancellationToken token = default);
+            CancellationToken token = default)
+        {
+            ValidateHashes(ref hashes);
+            return PostAsync(p => p.Recheck(hashes), token);
+        }
 
         /// <summary>
         /// Reannounces all torrents.
@@ -69,8 +88,11 @@ namespace QBittorrent.Client
         /// <param name="token">The cancellation token.</param>
         /// <returns></returns>
         [ApiLevel(ApiLevel.V2)]
-        Task ReannounceAsync(
-            CancellationToken token = default);
+        public Task ReannounceAsync(
+            CancellationToken token = default)
+        {
+            return PostAsync(p => p.Reannounce(All), token);
+        }
 
         /// <summary>
         /// Reannounces the torrents.
@@ -79,9 +101,13 @@ namespace QBittorrent.Client
         /// <param name="token">The token.</param>
         /// <returns></returns>
         [ApiLevel(ApiLevel.V2)]
-        Task ReannounceAsync(
+        public Task ReannounceAsync(
             [NotNull, ItemNotNull] IEnumerable<string> hashes,
-            CancellationToken token = default);
+            CancellationToken token = default)
+        {
+            ValidateHashes(ref hashes);
+            return PostAsync(p => p.Reannounce(hashes), token);
+        }
 
         /// <summary>
         /// Pauses all torrents.
@@ -89,9 +115,11 @@ namespace QBittorrent.Client
         /// <param name="token">The cancellation token.</param>
         /// <returns></returns>
         /// <remarks>This method supersedes <see cref="IQBittorrentClient.PauseAllAsync"/>.</remarks>
-        [ApiLevel(ApiLevel.V1)]
-        Task PauseAsync(
-            CancellationToken token = default);
+        public Task PauseAsync(
+            CancellationToken token = default)
+        {
+            return PostAsync(p => p.PauseAll(), token);
+        }
 
         /// <summary>
         /// Resumes all torrents.
@@ -99,9 +127,11 @@ namespace QBittorrent.Client
         /// <param name="token">The cancellation token.</param>
         /// <returns></returns>
         /// <remarks>This method supersedes <see cref="IQBittorrentClient.ResumeAllAsync"/>.</remarks>
-        [ApiLevel(ApiLevel.V1)]
-        Task ResumeAsync(
-            CancellationToken token = default);
+        public Task ResumeAsync(
+            CancellationToken token = default)
+        {
+            return PostAsync(p => p.ResumeAll(), token);
+        }
 
         /// <summary>
         /// Changes the torrent priority for all torrents.
@@ -110,9 +140,24 @@ namespace QBittorrent.Client
         /// <param name="token">The cancellation token.</param>
         /// <returns></returns>
         [ApiLevel(ApiLevel.V2)]
-        Task ChangeTorrentPriorityAsync(
+        public Task ChangeTorrentPriorityAsync(
             TorrentPriorityChange change,
-            CancellationToken token = default);
+            CancellationToken token = default)
+        {
+            switch (change)
+            {
+                case TorrentPriorityChange.Minimal:
+                    return PostAsync(p => p.MinTorrentPriority(All), token);
+                case TorrentPriorityChange.Increase:
+                    return PostAsync(p => p.IncTorrentPriority(All), token);
+                case TorrentPriorityChange.Decrease:
+                    return PostAsync(p => p.DecTorrentPriority(All), token);
+                case TorrentPriorityChange.Maximal:
+                    return PostAsync(p => p.MaxTorrentPriority(All), token);
+                default:
+                    throw new ArgumentOutOfRangeException(nameof(change), change, null);
+            }
+        }
 
         /// <summary>
         /// Gets the torrent download speed limit for all torrents.
@@ -120,8 +165,11 @@ namespace QBittorrent.Client
         /// <param name="token">The cancellation token.</param>
         /// <returns></returns>
         [ApiLevel(ApiLevel.V2)]
-        Task<IReadOnlyDictionary<string, long?>> GetTorrentDownloadLimitAsync(
-            CancellationToken token = default);
+        public Task<IReadOnlyDictionary<string, long?>> GetTorrentDownloadLimitAsync(
+            CancellationToken token = default)
+        {
+            return PostAsync(p => p.GetTorrentDownloadLimit(All), token, GetTorrentLimits);
+        }
 
         /// <summary>
         /// Sets the torrent download speed limit for all torrents.
@@ -130,9 +178,15 @@ namespace QBittorrent.Client
         /// <param name="token">The cancellation token.</param>
         /// <returns></returns>
         [ApiLevel(ApiLevel.V2)]
-        Task SetTorrentDownloadLimitAsync(
+        public Task SetTorrentDownloadLimitAsync(
             long limit,
-            CancellationToken token = default);
+            CancellationToken token = default)
+        {
+            if (limit < 0)
+                throw new ArgumentOutOfRangeException(nameof(limit));
+
+            return PostAsync(p => p.SetTorrentDownloadLimit(All, limit), token);
+        }
 
         /// <summary>
         /// Gets the torrent upload speed limit for all torrents.
@@ -140,8 +194,11 @@ namespace QBittorrent.Client
         /// <param name="token">The cancellation token.</param>
         /// <returns></returns>
         [ApiLevel(ApiLevel.V2)]
-        Task<IReadOnlyDictionary<string, long?>> GetTorrentUploadLimitAsync(
-            CancellationToken token = default);
+        public Task<IReadOnlyDictionary<string, long?>> GetTorrentUploadLimitAsync(
+            CancellationToken token = default)
+        {
+            return PostAsync(p => p.GetTorrentUploadLimit(All), token, GetTorrentLimits);
+        }
 
         /// <summary>
         /// Sets the torrent upload speed limit for all torrents.
@@ -150,9 +207,15 @@ namespace QBittorrent.Client
         /// <param name="token">The cancellation token.</param>
         /// <returns></returns>
         [ApiLevel(ApiLevel.V2)]
-        Task SetTorrentUploadLimitAsync(
+        public Task SetTorrentUploadLimitAsync(
             long limit,
-            CancellationToken token = default);
+            CancellationToken token = default)
+        {
+            if (limit < 0)
+                throw new ArgumentOutOfRangeException(nameof(limit));
+
+            return PostAsync(p => p.SetTorrentUploadLimit(All, limit), token);
+        }
 
         /// <summary>
         /// Sets the location of all torrents.
@@ -161,9 +224,17 @@ namespace QBittorrent.Client
         /// <param name="token">The cancellation token.</param>
         /// <returns></returns>
         [ApiLevel(ApiLevel.V2)]
-        Task SetLocationAsync(
+        public Task SetLocationAsync(
             [NotNull] string newLocation,
-            CancellationToken token = default);
+            CancellationToken token = default)
+        {
+            if (newLocation == null)
+                throw new ArgumentNullException(nameof(newLocation));
+            if (string.IsNullOrEmpty(newLocation))
+                throw new ArgumentException("The location cannot be an empty string.", nameof(newLocation));
+
+            return PostAsync(p => p.SetLocation(All, newLocation), token);
+        }
 
         /// <summary>
         /// Sets the torrent category for all torrents.
@@ -172,9 +243,15 @@ namespace QBittorrent.Client
         /// <param name="token">The cancellation token.</param>
         /// <returns></returns>
         [ApiLevel(ApiLevel.V2)]
-        Task SetTorrentCategoryAsync(
+        public Task SetTorrentCategoryAsync(
             [NotNull] string category,
-            CancellationToken token = default);
+            CancellationToken token = default)
+        {
+            if (category == null)
+                throw new ArgumentNullException(nameof(category));
+
+            return PostAsync(p => p.SetCategory(All, category), token);
+        }
 
         /// <summary>
         /// Sets the automatic torrent management for all torrents.
@@ -183,9 +260,12 @@ namespace QBittorrent.Client
         /// <param name="token">The cancellation token.</param>
         /// <returns></returns>
         [ApiLevel(ApiLevel.V2)]
-        Task SetAutomaticTorrentManagementAsync(
+        public Task SetAutomaticTorrentManagementAsync(
             bool enabled,
-            CancellationToken token = default);
+            CancellationToken token = default)
+        {
+            return PostAsync(p => p.SetAutomaticTorrentManagement(All, enabled), token);
+        }
 
         /// <summary>
         /// Toggles the sequential download for all torrents.
@@ -193,8 +273,11 @@ namespace QBittorrent.Client
         /// <param name="token">The cancellation token.</param>
         /// <returns></returns>
         [ApiLevel(ApiLevel.V2)]
-        Task ToggleSequentialDownloadAsync(
-            CancellationToken token = default);
+        public Task ToggleSequentialDownloadAsync(
+            CancellationToken token = default)
+        {
+            return PostAsync(p => p.ToggleSequentialDownload(All), token);
+        }
 
         /// <summary>
         /// Toggles the first and last piece priority for all torrents.
@@ -202,8 +285,11 @@ namespace QBittorrent.Client
         /// <param name="token">The cancellation token.</param>
         /// <returns></returns>
         [ApiLevel(ApiLevel.V2)]
-        Task ToggleFirstLastPiecePrioritizedAsync(
-            CancellationToken token = default);
+        public Task ToggleFirstLastPiecePrioritizedAsync(
+            CancellationToken token = default)
+        {
+            return PostAsync(p => p.ToggleFirstLastPiecePrioritized(All), token);
+        }
 
         /// <summary>
         /// Sets the force start for all torrents.
@@ -212,9 +298,12 @@ namespace QBittorrent.Client
         /// <param name="token">The cancellation token.</param>
         /// <returns></returns>
         [ApiLevel(ApiLevel.V2)]
-        Task SetForceStartAsync(
+        public Task SetForceStartAsync(
             bool enabled,
-            CancellationToken token = default);
+            CancellationToken token = default)
+        {
+            return PostAsync(p => p.SetForceStart(All, enabled), token);
+        }
 
         /// <summary>
         /// Sets the super seeding for all torrents.
@@ -223,8 +312,11 @@ namespace QBittorrent.Client
         /// <param name="token">The cancellation token.</param>
         /// <returns></returns>
         [ApiLevel(ApiLevel.V2)]
-        Task SetSuperSeedingAsync(
+        public Task SetSuperSeedingAsync(
             bool enabled,
-            CancellationToken token = default);
+            CancellationToken token = default)
+        {
+            return PostAsync(p => p.SetSuperSeeding(All, enabled), token);
+        }
     }
 }

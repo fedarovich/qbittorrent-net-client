@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using QBittorrent.Client.Extensions;
 
 namespace QBittorrent.Client.Internal
@@ -137,5 +138,9 @@ namespace QBittorrent.Client.Internal
         public Uri SetPreferences() => Create("/command/setPreferences");
 
         public Uri ShutdownApplication() => Create("/command/shutdown");
+
+        public Uri GetPeerLog(int afterId = -1) => throw new ApiNotSupportedException(ApiLevel.V2);
+
+        public Uri Reannounce() => throw new ApiNotSupportedException(ApiLevel.V2);
     }
 }

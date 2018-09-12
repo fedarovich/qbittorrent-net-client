@@ -53,7 +53,7 @@ namespace QBittorrent.Client
             bool deleteDownloadedData = false,
             CancellationToken token = default)
         {
-            return PostAsync(p => p.DeleteTorrents(All, deleteDownloadedData), token);
+            return PostAsync(p => p.DeleteTorrents(All, deleteDownloadedData), token, ApiLevel.V2);
         }
 
         /// <summary>
@@ -65,7 +65,7 @@ namespace QBittorrent.Client
         public Task RecheckAsync(
             CancellationToken token = default)
         {
-            return PostAsync(p => p.Recheck(All), token);
+            return PostAsync(p => p.Recheck(All), token, ApiLevel.V2);
         }
 
         /// <summary>
@@ -79,7 +79,7 @@ namespace QBittorrent.Client
             CancellationToken token = default)
         {
             ValidateHashes(ref hashes);
-            return PostAsync(p => p.Recheck(hashes), token);
+            return PostAsync(p => p.Recheck(hashes), token, ApiLevel.V2);
         }
 
         /// <summary>
@@ -91,7 +91,7 @@ namespace QBittorrent.Client
         public Task ReannounceAsync(
             CancellationToken token = default)
         {
-            return PostAsync(p => p.Reannounce(All), token);
+            return PostAsync(p => p.Reannounce(All), token, ApiLevel.V2);
         }
 
         /// <summary>
@@ -106,7 +106,7 @@ namespace QBittorrent.Client
             CancellationToken token = default)
         {
             ValidateHashes(ref hashes);
-            return PostAsync(p => p.Reannounce(hashes), token);
+            return PostAsync(p => p.Reannounce(hashes), token, ApiLevel.V2);
         }
 
         /// <summary>
@@ -147,13 +147,13 @@ namespace QBittorrent.Client
             switch (change)
             {
                 case TorrentPriorityChange.Minimal:
-                    return PostAsync(p => p.MinTorrentPriority(All), token);
+                    return PostAsync(p => p.MinTorrentPriority(All), token, ApiLevel.V2);
                 case TorrentPriorityChange.Increase:
-                    return PostAsync(p => p.IncTorrentPriority(All), token);
+                    return PostAsync(p => p.IncTorrentPriority(All), token, ApiLevel.V2);
                 case TorrentPriorityChange.Decrease:
-                    return PostAsync(p => p.DecTorrentPriority(All), token);
+                    return PostAsync(p => p.DecTorrentPriority(All), token, ApiLevel.V2);
                 case TorrentPriorityChange.Maximal:
-                    return PostAsync(p => p.MaxTorrentPriority(All), token);
+                    return PostAsync(p => p.MaxTorrentPriority(All), token, ApiLevel.V2);
                 default:
                     throw new ArgumentOutOfRangeException(nameof(change), change, null);
             }
@@ -168,7 +168,7 @@ namespace QBittorrent.Client
         public Task<IReadOnlyDictionary<string, long?>> GetTorrentDownloadLimitAsync(
             CancellationToken token = default)
         {
-            return PostAsync(p => p.GetTorrentDownloadLimit(All), token, GetTorrentLimits);
+            return PostAsync(p => p.GetTorrentDownloadLimit(All), token, GetTorrentLimits, ApiLevel.V2);
         }
 
         /// <summary>
@@ -185,7 +185,7 @@ namespace QBittorrent.Client
             if (limit < 0)
                 throw new ArgumentOutOfRangeException(nameof(limit));
 
-            return PostAsync(p => p.SetTorrentDownloadLimit(All, limit), token);
+            return PostAsync(p => p.SetTorrentDownloadLimit(All, limit), token, ApiLevel.V2);
         }
 
         /// <summary>
@@ -197,7 +197,7 @@ namespace QBittorrent.Client
         public Task<IReadOnlyDictionary<string, long?>> GetTorrentUploadLimitAsync(
             CancellationToken token = default)
         {
-            return PostAsync(p => p.GetTorrentUploadLimit(All), token, GetTorrentLimits);
+            return PostAsync(p => p.GetTorrentUploadLimit(All), token, GetTorrentLimits, ApiLevel.V2);
         }
 
         /// <summary>
@@ -214,7 +214,7 @@ namespace QBittorrent.Client
             if (limit < 0)
                 throw new ArgumentOutOfRangeException(nameof(limit));
 
-            return PostAsync(p => p.SetTorrentUploadLimit(All, limit), token);
+            return PostAsync(p => p.SetTorrentUploadLimit(All, limit), token, ApiLevel.V2);
         }
 
         /// <summary>
@@ -233,7 +233,7 @@ namespace QBittorrent.Client
             if (string.IsNullOrEmpty(newLocation))
                 throw new ArgumentException("The location cannot be an empty string.", nameof(newLocation));
 
-            return PostAsync(p => p.SetLocation(All, newLocation), token);
+            return PostAsync(p => p.SetLocation(All, newLocation), token, ApiLevel.V2);
         }
 
         /// <summary>
@@ -250,7 +250,7 @@ namespace QBittorrent.Client
             if (category == null)
                 throw new ArgumentNullException(nameof(category));
 
-            return PostAsync(p => p.SetCategory(All, category), token);
+            return PostAsync(p => p.SetCategory(All, category), token, ApiLevel.V2);
         }
 
         /// <summary>
@@ -264,7 +264,7 @@ namespace QBittorrent.Client
             bool enabled,
             CancellationToken token = default)
         {
-            return PostAsync(p => p.SetAutomaticTorrentManagement(All, enabled), token);
+            return PostAsync(p => p.SetAutomaticTorrentManagement(All, enabled), token, ApiLevel.V2);
         }
 
         /// <summary>
@@ -276,7 +276,7 @@ namespace QBittorrent.Client
         public Task ToggleSequentialDownloadAsync(
             CancellationToken token = default)
         {
-            return PostAsync(p => p.ToggleSequentialDownload(All), token);
+            return PostAsync(p => p.ToggleSequentialDownload(All), token, ApiLevel.V2);
         }
 
         /// <summary>
@@ -288,7 +288,7 @@ namespace QBittorrent.Client
         public Task ToggleFirstLastPiecePrioritizedAsync(
             CancellationToken token = default)
         {
-            return PostAsync(p => p.ToggleFirstLastPiecePrioritized(All), token);
+            return PostAsync(p => p.ToggleFirstLastPiecePrioritized(All), token, ApiLevel.V2);
         }
 
         /// <summary>
@@ -302,7 +302,7 @@ namespace QBittorrent.Client
             bool enabled,
             CancellationToken token = default)
         {
-            return PostAsync(p => p.SetForceStart(All, enabled), token);
+            return PostAsync(p => p.SetForceStart(All, enabled), token, ApiLevel.V2);
         }
 
         /// <summary>
@@ -316,7 +316,7 @@ namespace QBittorrent.Client
             bool enabled,
             CancellationToken token = default)
         {
-            return PostAsync(p => p.SetSuperSeeding(All, enabled), token);
+            return PostAsync(p => p.SetSuperSeeding(All, enabled), token, ApiLevel.V2);
         }
     }
 }

@@ -8,6 +8,8 @@ namespace QBittorrent.Client.Internal
     internal interface IRequestProvider
     {
         IUrlProvider Url { get; }
+        
+        ApiLevel ApiLevel { get; }
 
         (Uri url, HttpContent request) Login(string username, string password);
 

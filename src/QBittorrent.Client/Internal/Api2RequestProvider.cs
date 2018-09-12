@@ -15,6 +15,8 @@ namespace QBittorrent.Client.Internal
 
         public override IUrlProvider Url { get; }
 
+        public override ApiLevel ApiLevel => ApiLevel.V2;
+
         public override (Uri url, HttpContent request) Pause(IEnumerable<string> hashes)
         {
             return BuildForm(Url.Pause(),

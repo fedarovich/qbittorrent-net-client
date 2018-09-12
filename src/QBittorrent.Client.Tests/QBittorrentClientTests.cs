@@ -332,7 +332,7 @@ namespace QBittorrent.Client.Tests
 
             var addRequest = new AddTorrentsRequest(new[] { torrentFile }, links) { Paused = true };
 
-            if (DockerFixture.Env.ApiVersion < new System.Version(2, 0))
+            if (ApiVersionLessThan(2))
             {
                 var exception = await Assert.ThrowsAsync<ApiNotSupportedException>(() => Client.AddTorrentsAsync(addRequest));
                 exception.RequiredApiLevel.Should().Be(ApiLevel.V2);
@@ -1317,6 +1317,38 @@ namespace QBittorrent.Client.Tests
             });
         }
         
+        [Fact]
+        [PrintTestName]
+        public async Task DeleteAll()
+        {
+            await Client.LoginAsync(UserName, Password);
+           
+            var filesToAdd = Directory.GetFiles(Utils.TorrentsFolder, "*.torrent");
+            await Client.AddTorrentsAsync(new AddTorrentFilesRequest(filesToAdd));
+
+            await Utils.Retry(async () =>
+            {
+                var list = await Client.GetTorrentListAsync();
+                list.Should().HaveCount(filesToAdd.Length);
+            });
+
+
+            if (ApiVersionLessThan(2))
+            {
+                var exception = await Assert.ThrowsAsync<ApiNotSupportedException>(() => Client.DeleteAsync(true));
+                exception.RequiredApiLevel.Should().Be(ApiLevel.V2);
+                return;
+            }
+            
+            await Client.DeleteAsync(true);
+
+            await Utils.Retry(async () =>
+            {
+                var list = await Client.GetTorrentListAsync();
+                return list.Should().BeEmpty();
+            });
+        }
+        
         #endregion
 
         #region SetLocationAsync
@@ -2087,5 +2119,10 @@ namespace QBittorrent.Client.Tests
         }
         
         #endregion
+
+        private bool ApiVersionLessThan(int major, int minor = 0, int build = 0)
+        {
+            return DockerFixture.Env.ApiVersion < new System.Version(major, minor, build);
+        }
     }
 }

@@ -11,6 +11,8 @@ namespace QBittorrent.Client.Internal
     internal abstract class BaseRequestProvider : IRequestProvider
     {
         public abstract IUrlProvider Url { get; }
+        
+        public abstract ApiLevel ApiLevel { get; }
 
         public virtual (Uri url, HttpContent request) Login(string username, string password)
         {

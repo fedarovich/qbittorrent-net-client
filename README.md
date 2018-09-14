@@ -5,7 +5,7 @@
 [![documentation](https://img.shields.io/badge/documentation-read-lightgrey.svg)](https://fedarovich.github.io/qbittorrent-net-client-docs)
 
 [![nuget](https://img.shields.io/nuget/v/QBittorrent.Client.svg?label=nuget)](https://www.nuget.org/packages/QBittorrent.Client)
-[![myget](https://img.shields.io/myget/fedarovich/v/QBittorrent.Client.svg?label=myget)](https://www.myget.org/feed/fedarovich/package/nuget/QBittorrent.Client)
+[![myget](https://img.shields.io/myget/fedarovich/vpre/QBittorrent.Client.svg?label=myget)](https://www.myget.org/feed/fedarovich/package/nuget/QBittorrent.Client)
 
 ***
 ## Description

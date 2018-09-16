@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
@@ -10,15 +9,11 @@ using System.Net.NetworkInformation;
 using System.Net.Sockets;
 using System.Security.Cryptography;
 using System.Text;
-using System.Threading;
 using System.Threading.Tasks;
 using BencodeNET.Parsing;
 using BencodeNET.Torrents;
-using Docker.DotNet;
 using Docker.DotNet.Models;
 using FluentAssertions;
-using Newtonsoft.Json;
-using Org.BouncyCastle.Asn1;
 using Org.BouncyCastle.Asn1.X509;
 using Org.BouncyCastle.Crypto;
 using Org.BouncyCastle.Crypto.Generators;
@@ -1160,6 +1155,81 @@ namespace QBittorrent.Client.Tests
             });
         }
 
+        [SkippableFact]
+        [PrintTestName]
+        public async Task AllTorrentLimitsInitiallyNotSet()
+        {
+            Skip.If(ApiVersionLessThan(2));
+
+            const long downLimit = 2048 * 1024;
+            const long upLimit = 1024 * 1024;
+
+            await Client.LoginAsync(UserName, Password);
+
+            var files = Directory.GetFiles(Utils.TorrentsFolder, "*.torrent");
+
+            await Client.AddTorrentsAsync(new AddTorrentFilesRequest(files) { Paused = true });
+            await Task.Delay(1000);
+            var list = await Client.GetTorrentListAsync();
+            list.Should().HaveCount(files.Length);
+
+            var (down, up) = await Utils.WhenAll(
+                Client.GetTorrentDownloadLimitAsync(),
+                Client.GetTorrentUploadLimitAsync());
+            down.Should().HaveCount(files.Length);
+            down.Values.Should().AllBeEquivalentTo(default(long?));
+            up.Should().HaveCount(files.Length);
+            up.Values.Should().AllBeEquivalentTo(default(long?));
+
+            await Client.SetTorrentDownloadLimitAsync(downLimit);
+            await Utils.Retry(async () =>
+            {
+                (down, up) = await Utils.WhenAll(
+                    Client.GetTorrentDownloadLimitAsync(),
+                    Client.GetTorrentUploadLimitAsync());
+                down.Should().HaveCount(files.Length);
+                down.Values.Should().AllBeEquivalentTo(downLimit);
+                up.Should().HaveCount(files.Length);
+                up.Values.Should().AllBeEquivalentTo(default(long?));
+            });
+
+            await Client.SetTorrentUploadLimitAsync(upLimit);
+            await Utils.Retry(async () =>
+            {
+                (down, up) = await Utils.WhenAll(
+                    Client.GetTorrentDownloadLimitAsync(),
+                    Client.GetTorrentUploadLimitAsync());
+                down.Should().HaveCount(files.Length);
+                down.Values.Should().AllBeEquivalentTo(downLimit);
+                up.Should().HaveCount(files.Length);
+                up.Values.Should().AllBeEquivalentTo(upLimit);
+            });
+
+            await Client.SetTorrentDownloadLimitAsync(0);
+            await Utils.Retry(async () =>
+            {
+                (down, up) = await Utils.WhenAll(
+                    Client.GetTorrentDownloadLimitAsync(),
+                    Client.GetTorrentUploadLimitAsync());
+                down.Should().HaveCount(files.Length);
+                down.Values.Should().AllBeEquivalentTo(0L);
+                up.Should().HaveCount(files.Length);
+                up.Values.Should().AllBeEquivalentTo(upLimit);
+            });
+
+            await Client.SetTorrentUploadLimitAsync(0);
+            await Utils.Retry(async () =>
+            {
+                (down, up) = await Utils.WhenAll(
+                    Client.GetTorrentDownloadLimitAsync(),
+                    Client.GetTorrentUploadLimitAsync());
+                down.Should().HaveCount(files.Length);
+                down.Values.Should().AllBeEquivalentTo(0L);
+                up.Should().HaveCount(files.Length);
+                up.Values.Should().AllBeEquivalentTo(0L);
+            });
+        }
+
         #endregion
 
         #region ChangeTorrentPriorityAsync
@@ -1384,6 +1454,42 @@ namespace QBittorrent.Client.Tests
             });
         }
 
+        [SkippableFact]
+        [PrintTestName]
+        public async Task SetLocationForAll()
+        {
+            Skip.If(Environment.OSVersion.Platform != PlatformID.Unix,
+                "This test is supported only on linux at the moment.");
+            Skip.If(ApiVersionLessThan(2), "API version 2+ is required.");
+
+            await Client.LoginAsync(UserName, Password);
+
+            var files = Directory.GetFiles(Utils.TorrentsFolder, "*.torrent");
+            await Client.AddTorrentsAsync(new AddTorrentFilesRequest(files));
+
+            var defaultDir = await Client.GetDefaultSavePathAsync();
+
+            var torrentList = await Utils.Retry(async () =>
+            {
+                var list = await Client.GetTorrentListAsync();
+                list.Should().HaveCount(files.Length);
+                return list;
+            });
+
+            torrentList.Select(t => t.SavePath)
+                .Should().BeEquivalentTo(Enumerable.Repeat(defaultDir, files.Length));
+
+            await Client.SetLocationAsync("/tmp/");
+
+            await Utils.Retry(async () =>
+            {
+                var list = await Client.GetTorrentListAsync();
+                list.Should().HaveCount(files.Length);
+                list.Select(t => t.SavePath)
+                    .Should().BeEquivalentTo(Enumerable.Repeat("/tmp/", files.Length));
+            });
+        }
+
         #endregion
 
         #region RenameAsync
@@ -1489,8 +1595,27 @@ namespace QBittorrent.Client.Tests
             log.Min(l => l.Id).Should().Be(4);
         }
 
+        [Fact]
+        [PrintTestName]
+        public async Task GetPeerLog()
+        {
+            await Client.LoginAsync(UserName, Password);
+
+            if (ApiVersionLessThan(2))
+            {
+                var exception = await Assert.ThrowsAsync<ApiNotSupportedException>(
+                    () => Client.GetPeerLogAsync());
+                exception.RequiredApiLevel.Should().Be(ApiLevel.V2);
+            }
+            else
+            {
+                var log = await Client.GetPeerLogAsync();
+                log.Should().BeEmpty();
+            }
+        }
+
         #endregion
-        
+
         #region Alternative Speed Limits
 
         [Fact]
@@ -1548,7 +1673,45 @@ namespace QBittorrent.Client.Tests
                 list.Single().AutomaticTorrentManagement.Should().Be(false);
             });
         }
-        
+
+        [SkippableFact]
+        [PrintTestName]
+        public async Task AutomaticTorrentManagementForAll()
+        {
+            Skip.If(ApiVersionLessThan(2), "API 2.0+ required for this test.");
+
+            await Client.LoginAsync(UserName, Password);
+
+            var files = Directory.GetFiles(Utils.TorrentsFolder, "*.torrent");
+            await Utils.Retry(() => Client.AddTorrentsAsync(new AddTorrentFilesRequest(files)));
+
+            var torrents = await Utils.Retry(async () =>
+            {
+                var list = await Client.GetTorrentListAsync();
+                list.Should().HaveCount(files.Length);
+                return list;
+            });
+
+            torrents.Select(t => t.AutomaticTorrentManagement)
+                .Should().AllBeEquivalentTo(false);
+
+            await Client.SetAutomaticTorrentManagementAsync(true);
+            await Utils.Retry(async () =>
+            {
+                var list = await Client.GetTorrentListAsync();
+                list.Select(t => t.AutomaticTorrentManagement)
+                    .Should().AllBeEquivalentTo(true);
+            });
+
+            await Client.SetAutomaticTorrentManagementAsync(false);
+            await Utils.Retry(async () =>
+            {
+                var list = await Client.GetTorrentListAsync();
+                list.Select(t => t.AutomaticTorrentManagement)
+                    .Should().AllBeEquivalentTo(false);
+            });
+        }
+
         [Fact]
         [PrintTestName]
         public async Task ForceStart()
@@ -1580,7 +1743,45 @@ namespace QBittorrent.Client.Tests
                 list.Single().ForceStart.Should().Be(false);
             });
         }
-        
+
+        [SkippableFact]
+        [PrintTestName]
+        public async Task ForceStartForAll()
+        {
+            Skip.If(ApiVersionLessThan(2), "API 2.0+ required for this test.");
+
+            await Client.LoginAsync(UserName, Password);
+
+            var files = Directory.GetFiles(Utils.TorrentsFolder, "*.torrent");
+            await Utils.Retry(() => Client.AddTorrentsAsync(new AddTorrentFilesRequest(files)));
+
+            var torrents = await Utils.Retry(async () =>
+            {
+                var list = await Client.GetTorrentListAsync();
+                list.Should().HaveCount(files.Length);
+                return list;
+            });
+
+            torrents.Select(t => t.ForceStart)
+                .Should().BeEquivalentTo(false);
+
+            await Client.SetForceStartAsync(true);
+            await Utils.Retry(async () =>
+            {
+                var list = await Client.GetTorrentListAsync();
+                list.Select(t => t.ForceStart)
+                    .Should().BeEquivalentTo(true);
+            });
+
+            await Client.SetForceStartAsync(false);
+            await Utils.Retry(async () =>
+            {
+                var list = await Client.GetTorrentListAsync();
+                list.Select(t => t.ForceStart)
+                    .Should().BeEquivalentTo(false);
+            });
+        }
+
         [Fact]
         [PrintTestName]
         public async Task SuperSeeding()
@@ -1612,7 +1813,45 @@ namespace QBittorrent.Client.Tests
                 list.Single().SuperSeeding.Should().Be(false);
             });
         }
-        
+
+        [SkippableFact]
+        [PrintTestName]
+        public async Task SuperSeedingForAll()
+        {
+            Skip.If(ApiVersionLessThan(2), "API 2.0+ required for this test.");
+
+            await Client.LoginAsync(UserName, Password);
+
+            var files = Directory.GetFiles(Utils.TorrentsFolder, "*.torrent");
+            await Utils.Retry(() => Client.AddTorrentsAsync(new AddTorrentFilesRequest(files)));
+
+            var torrents = await Utils.Retry(async () =>
+            {
+                var list = await Client.GetTorrentListAsync();
+                list.Should().HaveCount(files.Length);
+                return list;
+            });
+
+            torrents.Select(t => t.SuperSeeding)
+                .Should().AllBeEquivalentTo(false);
+
+            await Client.SetSuperSeedingAsync(true);
+            await Utils.Retry(async () =>
+            {
+                var list = await Client.GetTorrentListAsync();
+                list.Select(t => t.SuperSeeding)
+                    .Should().AllBeEquivalentTo(true);
+            });
+
+            await Client.SetSuperSeedingAsync(false);
+            await Utils.Retry(async () =>
+            {
+                var list = await Client.GetTorrentListAsync();
+                list.Select(t => t.SuperSeeding)
+                    .Should().AllBeEquivalentTo(false);
+            });
+        }
+
         [SkippableTheory]
         [InlineData(false)]
         [InlineData(true)]
@@ -1649,7 +1888,47 @@ namespace QBittorrent.Client.Tests
                 list.Single().FirstLastPiecePrioritized.Should().Be(initial);
             });
         }
-        
+
+        [SkippableTheory]
+        [InlineData(false)]
+        [InlineData(true)]
+        [PrintTestName]
+        public async Task FirstLastPiecePrioritizedForAll(bool initial)
+        {
+            Skip.If(ApiVersionLessThan(2), "API 2.0+ required for this test.");
+
+            await Client.LoginAsync(UserName, Password);
+
+            var files = Directory.GetFiles(Utils.TorrentsFolder, "*.torrent");
+            await Utils.Retry(() => Client.AddTorrentsAsync(new AddTorrentFilesRequest(files) { FirstLastPiecePrioritized = initial }));
+
+            var torrents = await Utils.Retry(async () =>
+            {
+                var list = await Client.GetTorrentListAsync();
+                list.Should().HaveCount(files.Length);
+                return list;
+            });
+
+            torrents.Select(t => t.FirstLastPiecePrioritized)
+                .Should().AllBeEquivalentTo(initial);
+
+            await Client.ToggleFirstLastPiecePrioritizedAsync();
+            await Utils.Retry(async () =>
+            {
+                var list = await Client.GetTorrentListAsync();
+                list.Select(t => t.FirstLastPiecePrioritized)
+                    .Should().AllBeEquivalentTo(!initial);
+            });
+
+            await Client.ToggleFirstLastPiecePrioritizedAsync();
+            await Utils.Retry(async () =>
+            {
+                var list = await Client.GetTorrentListAsync();
+                list.Select(t => t.FirstLastPiecePrioritized)
+                    .Should().AllBeEquivalentTo(initial);
+            });
+        }
+
         [Theory]
         [InlineData(false)]
         [InlineData(true)]
@@ -1683,9 +1962,49 @@ namespace QBittorrent.Client.Tests
                 list.Single().SequentialDownload.Should().Be(initial);
             });
         }
-        
+
+        [SkippableTheory]
+        [InlineData(false)]
+        [InlineData(true)]
+        [PrintTestName]
+        public async Task SequentialDownloadForAll(bool initial)
+        {
+            Skip.If(ApiVersionLessThan(2), "API 2.0+ required for this test.");
+
+            await Client.LoginAsync(UserName, Password);
+
+            var files = Directory.GetFiles(Utils.TorrentsFolder, "*.torrent");
+            await Utils.Retry(() => Client.AddTorrentsAsync(new AddTorrentFilesRequest(files) { SequentialDownload = initial }));
+
+            var torrents = await Utils.Retry(async () =>
+            {
+                var list = await Client.GetTorrentListAsync();
+                list.Should().HaveCount(files.Length);
+                return list;
+            });
+
+            torrents.Select(t => t.SequentialDownload)
+                .Should().AllBeEquivalentTo(initial);
+
+            await Client.ToggleSequentialDownloadAsync();
+            await Utils.Retry(async () =>
+            {
+                var list = await Client.GetTorrentListAsync();
+                list.Select(t => t.SequentialDownload)
+                    .Should().AllBeEquivalentTo(!initial);
+            });
+
+            await Client.ToggleSequentialDownloadAsync();
+            await Utils.Retry(async () =>
+            {
+                var list = await Client.GetTorrentListAsync();
+                list.Select(t => t.SequentialDownload)
+                    .Should().AllBeEquivalentTo(initial);
+            });
+        }
+
         #endregion
-        
+
         #region Preferences
 
         [Fact]
@@ -2117,7 +2436,7 @@ namespace QBittorrent.Client.Tests
                 return stringWriter.ToString();
             }
         }
-        
+
         #endregion
 
         private bool ApiVersionLessThan(int major, int minor = 0, int build = 0)

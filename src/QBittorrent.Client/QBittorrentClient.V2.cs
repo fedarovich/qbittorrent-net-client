@@ -318,5 +318,117 @@ namespace QBittorrent.Client
         {
             return PostAsync(p => p.SetSuperSeeding(All, enabled), token, ApiLevel.V2);
         }
+
+        /// <summary>
+        /// Adds the RSS folder.
+        /// </summary>
+        /// <param name="path">Full path of added folder.</param>
+        /// <param name="token">The cancellation token.</param>
+        /// <returns></returns>
+        [ApiLevel(ApiLevel.V2)]
+        public Task AddRssFolderAsync(string path, CancellationToken token = default)
+        {
+            throw new NotImplementedException();
+        }
+
+        /// <summary>
+        /// Adds the RSS feed.
+        /// </summary>
+        /// <param name="url">The URL of the RSS feed.</param>
+        /// <param name="path">The full path of added folder.</param>
+        /// <param name="token">The cancellation token.</param>
+        /// <returns></returns>
+        [ApiLevel(ApiLevel.V2)]
+        public Task AddRssFeedAsync(Uri url, string path = null, CancellationToken token = default)
+        {
+            throw new NotImplementedException();
+        }
+
+        /// <summary>
+        /// Removes the RSS folder or feed.
+        /// </summary>
+        /// <param name="path">The full path of removed folder or feed.</param>
+        /// <param name="token">The cancellation token.</param>
+        /// <returns></returns>
+        [ApiLevel(ApiLevel.V2)]
+        public Task DeleteRssItemAsync(string path, CancellationToken token = default)
+        {
+            throw new NotImplementedException();
+        }
+
+        /// <summary>
+        /// Moves or renames the RSS folder or feed.
+        /// </summary>
+        /// <param name="path">The current full path of the folder or feed.</param>
+        /// <param name="newPath">The new path.</param>
+        /// <param name="token">The cancellation token.</param>
+        /// <returns></returns>
+        [ApiLevel(ApiLevel.V2)]
+        public Task MoveRssItemAsync(string path, string newPath, CancellationToken token = default)
+        {
+            throw new NotImplementedException();
+        }
+
+        /// <summary>
+        /// Gets all RSS folders and feeds.
+        /// </summary>
+        /// <param name="withData">
+        ///   <see langword="true" /> if you need current feed articles.</param>
+        /// <param name="token">The cancellation token.</param>
+        /// <returns></returns>
+        [ApiLevel(ApiLevel.V2)]
+        public Task<RssFolder> GetRssItemsAsync(bool withData = false, CancellationToken token = default)
+        {
+            throw new NotImplementedException();
+        }
+
+        /// <summary>
+        /// Sets the RSS auto-downloading rule.
+        /// </summary>
+        /// <param name="name">The rule name.</param>
+        /// <param name="rule">The rule definition.</param>
+        /// <param name="token">The cancellation token.</param>
+        /// <returns></returns>
+        [ApiLevel(ApiLevel.V2)]
+        public Task SetRssAutoDownloadingRuleAsync(string name, RssAutoDownloadingRule rule, CancellationToken token = default)
+        {
+            throw new NotImplementedException();
+        }
+
+        /// <summary>
+        /// Renames the RSS auto-downloading rule.
+        /// </summary>
+        /// <param name="name">The rule name.</param>
+        /// <param name="newName">The new rule name.</param>
+        /// <param name="token">The cancellation token.</param>
+        /// <returns></returns>
+        [ApiLevel(ApiLevel.V2)]
+        public Task RenameRssAutoDownloadingRuleAsync(string name, string newName, CancellationToken token = default)
+        {
+            throw new NotImplementedException();
+        }
+
+        /// <summary>
+        /// Deletes the RSS auto-downloading rule.
+        /// </summary>
+        /// <param name="name">The rule name.</param>
+        /// <param name="token">The cancellation token.</param>
+        /// <returns></returns>
+        [ApiLevel(ApiLevel.V2)]
+        public Task DeleteRssAutoDownloadingRuleAsync(string name, CancellationToken token = default)
+        {
+            throw new NotImplementedException();
+        }
+
+        /// <summary>
+        /// Gets the RSS auto-downloading rules.
+        /// </summary>
+        /// <param name="token">The cancellation token.</param>
+        /// <returns></returns>
+        [ApiLevel(ApiLevel.V2)]
+        public Task<IReadOnlyDictionary<string, RssAutoDownloadingRule>> GetRssAutoDownloadingRulesAsync(CancellationToken token = default)
+        {
+            throw new NotImplementedException();
+        }
     }
 }

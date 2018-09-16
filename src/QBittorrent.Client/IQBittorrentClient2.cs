@@ -226,5 +226,113 @@ namespace QBittorrent.Client
         Task SetSuperSeedingAsync(
             bool enabled,
             CancellationToken token = default);
+
+        // RSS
+
+        /// <summary>
+        /// Adds the RSS folder.
+        /// </summary>
+        /// <param name="path">Full path of added folder.</param>
+        /// <param name="token">The cancellation token.</param>
+        /// <returns></returns>
+        [ApiLevel(ApiLevel.V2)]
+        Task AddRssFolderAsync(
+            string path,
+            CancellationToken token = default);
+
+        /// <summary>
+        /// Adds the RSS feed.
+        /// </summary>
+        /// <param name="url">The URL of the RSS feed.</param>
+        /// <param name="path">The full path of added folder.</param>
+        /// <param name="token">The cancellation token.</param>
+        /// <returns></returns>
+        [ApiLevel(ApiLevel.V2)]
+        Task AddRssFeedAsync(
+            Uri url,
+            string path = null,
+            CancellationToken token = default);
+
+        /// <summary>
+        /// Removes the RSS folder or feed.
+        /// </summary>
+        /// <param name="path">The full path of removed folder or feed.</param>
+        /// <param name="token">The cancellation token.</param>
+        /// <returns></returns>
+        [ApiLevel(ApiLevel.V2)]
+        Task DeleteRssItemAsync(
+            string path,
+            CancellationToken token = default);
+
+        /// <summary>
+        /// Moves or renames the RSS folder or feed.
+        /// </summary>
+        /// <param name="path">The current full path of the folder or feed.</param>
+        /// <param name="newPath">The new path.</param>
+        /// <param name="token">The cancellation token.</param>
+        /// <returns></returns>
+        [ApiLevel(ApiLevel.V2)]
+        Task MoveRssItemAsync(
+            string path,
+            string newPath,
+            CancellationToken token = default);
+
+        /// <summary>
+        /// Gets all RSS folders and feeds.
+        /// </summary>
+        /// <param name="withData"><see langword="true" /> if you need current feed articles.</param>
+        /// <param name="token">The cancellation token.</param>
+        /// <returns></returns>
+        [ApiLevel(ApiLevel.V2)]
+        // TODO: Create classes for RSS items        
+        Task<RssFolder> GetRssItemsAsync(
+            bool withData = false,
+            CancellationToken token = default);
+
+        /// <summary>
+        /// Sets the RSS auto-downloading rule.
+        /// </summary>
+        /// <param name="name">The rule name.</param>
+        /// <param name="rule">The rule definition.</param>
+        /// <param name="token">The cancellation token.</param>
+        /// <returns></returns>
+        [ApiLevel(ApiLevel.V2)]
+        Task SetRssAutoDownloadingRuleAsync(
+            string name,
+            RssAutoDownloadingRule rule,
+            CancellationToken token = default);
+
+        /// <summary>
+        /// Renames the RSS auto-downloading rule.
+        /// </summary>
+        /// <param name="name">The rule name.</param>
+        /// <param name="newName">The new rule name.</param>
+        /// <param name="token">The cancellation token.</param>
+        /// <returns></returns>
+        [ApiLevel(ApiLevel.V2)]
+        Task RenameRssAutoDownloadingRuleAsync(
+            string name,
+            string newName,
+            CancellationToken token = default);
+
+        /// <summary>
+        /// Deletes the RSS auto-downloading rule.
+        /// </summary>
+        /// <param name="name">The rule name.</param>
+        /// <param name="token">The cancellation token.</param>
+        /// <returns></returns>
+        [ApiLevel(ApiLevel.V2)]
+        Task DeleteRssAutoDownloadingRuleAsync(
+            string name,
+            CancellationToken token = default);
+
+        /// <summary>
+        /// Gets the RSS auto-downloading rules.
+        /// </summary>
+        /// <param name="token">The cancellation token.</param>
+        /// <returns></returns>
+        [ApiLevel(ApiLevel.V2)]
+        Task<IReadOnlyDictionary<string, RssAutoDownloadingRule>> GetRssAutoDownloadingRulesAsync(
+            CancellationToken token = default);
     }
 }

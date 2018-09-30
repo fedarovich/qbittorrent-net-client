@@ -17,12 +17,13 @@ namespace QBittorrent.Client.Internal
         public Uri QBittorrentVersion() => Create("/version/qbittorrent");
 
         public Uri GetTorrentList(
-            TorrentListFilter filter, 
-            string category, 
-            string sort, 
-            bool reverse, 
-            int? limit, 
-            int? offset)
+            TorrentListFilter filter,
+            string category,
+            string sort,
+            bool reverse,
+            int? limit,
+            int? offset, 
+            IEnumerable<string> hashes)
         {
             return Create("/query/torrents",
                 ("filter", filter.ToString().ToLowerInvariant()),

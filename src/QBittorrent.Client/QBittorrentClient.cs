@@ -235,23 +235,35 @@ namespace QBittorrent.Client
         /// <param name="query">The query.</param>
         /// <param name="token">The cancellation token.</param>
         /// <returns></returns>
-        public async Task<IReadOnlyList<TorrentInfo>> GetTorrentListAsync(
+        public Task<IReadOnlyList<TorrentInfo>> GetTorrentListAsync(
             TorrentListQuery query = null,
             CancellationToken token = default)
         {
             query = query ?? new TorrentListQuery();
-            var uri = await BuildUriAsync(p => p.GetTorrentList(
-                    query.Filter,
-                    query.Category,
-                    query.SortBy,
-                    query.ReverseSort,
-                    query.Limit,
-                    query.Offset), token)
-                .ConfigureAwait(false);
+            var hashes = query.Hashes;
+            if (hashes != null)
+            {
+                ValidateHashes(ref hashes);
+            }
 
-            var json = await _client.GetStringAsync(uri, token).ConfigureAwait(false);
-            var result = JsonConvert.DeserializeObject<TorrentInfo[]>(json);
-            return result;
+            return ExecuteAsync();
+
+            async Task<IReadOnlyList<TorrentInfo>> ExecuteAsync()
+            {
+                var uri = await BuildUriAsync(p => p.GetTorrentList(
+                        query.Filter,
+                        query.Category,
+                        query.SortBy,
+                        query.ReverseSort,
+                        query.Limit,
+                        query.Offset,
+                        hashes), token)
+                    .ConfigureAwait(false);
+
+                var json = await _client.GetStringAsync(uri, token).ConfigureAwait(false);
+                var result = JsonConvert.DeserializeObject<TorrentInfo[]>(json);
+                return result;
+            }
         }
 
         /// <summary>
@@ -1105,11 +1117,14 @@ namespace QBittorrent.Client
 
         private async Task PostAsync(Func<IRequestProvider, (Uri, HttpContent)> builder, 
             CancellationToken token, 
-            ApiLevel minApiLevel = ApiLevel.V1)
+            ApiLevel minApiLevel = ApiLevel.V1,
+            Version minVersion = null)
         {
             var provider = await _requestProvider.GetValueAsync(token).ConfigureAwait(false);
             if (minApiLevel != ApiLevel.V1 && provider.ApiLevel < minApiLevel)
                 throw new ApiNotSupportedException(minApiLevel);
+            if (minVersion != null && await GetApiVersionAsync(token).ConfigureAwait(false) < minVersion)
+                throw new ApiNotSupportedException(minApiLevel, minVersion);
             
             var (uri, content) = builder(provider);
             using (var response = await _client.PostAsync(uri, content, token).ConfigureAwait(false))
@@ -1121,12 +1136,15 @@ namespace QBittorrent.Client
         private async Task<T> PostAsync<T>(Func<IRequestProvider, (Uri, HttpContent)> builder,
             CancellationToken token,
             Func<HttpResponseMessage, Task<T>> transform, 
-            ApiLevel minApiLevel = ApiLevel.V1)
+            ApiLevel minApiLevel = ApiLevel.V1,
+            Version minVersion = null)
         {
             var provider = await _requestProvider.GetValueAsync(token).ConfigureAwait(false);
             if (minApiLevel != ApiLevel.V1 && provider.ApiLevel < minApiLevel)
                 throw new ApiNotSupportedException(minApiLevel);
-            
+            if (minVersion != null && await GetApiVersionAsync(token).ConfigureAwait(false) < minVersion)
+                throw new ApiNotSupportedException(minApiLevel, minVersion);
+
             var (uri, content) = builder(provider);
             using (var response = await _client.PostAsync(uri, content, token).ConfigureAwait(false))
             {

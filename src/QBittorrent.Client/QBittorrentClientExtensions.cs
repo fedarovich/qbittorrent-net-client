@@ -299,7 +299,7 @@ namespace QBittorrent.Client
         /// <param name="hash">The torrent hash.</param>
         /// <param name="token">The cancellation token.</param>
         /// <returns></returns>
-        [ApiLevel(ApiLevel.V2)]
+        [ApiLevel(ApiLevel.V2, MinVersion = "2.0.2")]
         public static Task ReannounceAsync(
             [NotNull] this IQBittorrentClient2 client,
             [NotNull] string hash,

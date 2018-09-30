@@ -1,4 +1,7 @@
-﻿namespace QBittorrent.Client
+﻿using System.Collections;
+using System.Collections.Generic;
+
+namespace QBittorrent.Client
 {
     /// <summary>
     /// Encapsulates the query parameters to get the list of torrents.
@@ -36,5 +39,11 @@
         /// </summary>
         /// <seealso cref="Limit" />
         public int? Offset { get; set; }
+
+        /// <summary>
+        /// Gets or sets the hashes of the torrents to display.
+        /// </summary>
+        [ApiLevel(ApiLevel.V2, MinVersion = "2.0.1")]
+        public IEnumerable<string> Hashes { get; set; }
     }
 }

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Threading;
 using System.Threading.Tasks;
 using JetBrains.Annotations;
@@ -12,6 +13,9 @@ namespace QBittorrent.Client
     public partial class QBittorrentClient : IQBittorrentClient2
     {
         private static readonly IEnumerable<string> All = new[] { "all" };
+
+        [SuppressMessage("ReSharper", "InconsistentNaming")]
+        private static readonly Version Version_2_0_2 = new Version(2, 0, 2);
 
         /// <summary>
         /// Gets the peer log.
@@ -87,11 +91,11 @@ namespace QBittorrent.Client
         /// </summary>
         /// <param name="token">The cancellation token.</param>
         /// <returns></returns>
-        [ApiLevel(ApiLevel.V2)]
+        [ApiLevel(ApiLevel.V2, MinVersion = "2.0.2")]
         public Task ReannounceAsync(
             CancellationToken token = default)
         {
-            return PostAsync(p => p.Reannounce(All), token, ApiLevel.V2);
+            return PostAsync(p => p.Reannounce(All), token, ApiLevel.V2, Version_2_0_2);
         }
 
         /// <summary>
@@ -100,13 +104,13 @@ namespace QBittorrent.Client
         /// <param name="hashes">The torrent hashes.</param>
         /// <param name="token">The token.</param>
         /// <returns></returns>
-        [ApiLevel(ApiLevel.V2)]
+        [ApiLevel(ApiLevel.V2, MinVersion = "2.0.2")]
         public Task ReannounceAsync(
             [NotNull, ItemNotNull] IEnumerable<string> hashes,
             CancellationToken token = default)
         {
             ValidateHashes(ref hashes);
-            return PostAsync(p => p.Reannounce(hashes), token, ApiLevel.V2);
+            return PostAsync(p => p.Reannounce(hashes), token, ApiLevel.V2, Version_2_0_2);
         }
 
         /// <summary>

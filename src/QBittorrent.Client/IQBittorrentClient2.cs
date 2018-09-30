@@ -68,7 +68,7 @@ namespace QBittorrent.Client
         /// </summary>
         /// <param name="token">The cancellation token.</param>
         /// <returns></returns>
-        [ApiLevel(ApiLevel.V2)]
+        [ApiLevel(ApiLevel.V2, MinVersion = "2.0.2")]
         Task ReannounceAsync(
             CancellationToken token = default);
 
@@ -78,7 +78,7 @@ namespace QBittorrent.Client
         /// <param name="hashes">The torrent hashes.</param>
         /// <param name="token">The token.</param>
         /// <returns></returns>
-        [ApiLevel(ApiLevel.V2)]
+        [ApiLevel(ApiLevel.V2, MinVersion = "2.0.2")]
         Task ReannounceAsync(
             [NotNull, ItemNotNull] IEnumerable<string> hashes,
             CancellationToken token = default);

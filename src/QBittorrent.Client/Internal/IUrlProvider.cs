@@ -12,12 +12,13 @@ namespace QBittorrent.Client.Internal
 
         Uri QBittorrentVersion();
 
-        Uri GetTorrentList(TorrentListFilter filter, 
-            string category, 
-            string sort, 
-            bool reverse, 
+        Uri GetTorrentList(TorrentListFilter filter,
+            string category,
+            string sort,
+            bool reverse,
             int? limit,
-            int? offset);
+            int? offset, 
+            IEnumerable<string> hashes);
 
         Uri GetTorrentProperties(string hash);
 

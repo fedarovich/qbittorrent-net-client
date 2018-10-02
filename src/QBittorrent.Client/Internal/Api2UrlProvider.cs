@@ -138,5 +138,23 @@ namespace QBittorrent.Client.Internal
         public Uri GetPeerLog(int afterId = -1) => Create("/api/v2/log/peers", ("last_known_id", afterId.ToString()));
 
         public Uri Reannounce() => Create("/api/v2/torrents/reannounce");
+
+        public Uri AddRssFolder() => Create("/api/v2/rss/addFolder");
+
+        public Uri AddRssFeed() => Create("/api/v2/rss/addFeed");
+
+        public Uri DeleteRssItem() => Create("/api/v2/rss/removeItem");
+
+        public Uri MoveRssItem() => Create("/api/v2/rss/moveItem");
+
+        public Uri GetRssItems(bool withData) => Create("/api/v2/rss/items", ("withData", withData.ToLowerString()));
+
+        public Uri SetRssAutoDownloadingRule() => Create("/api/v2/rss/setRule");
+
+        public Uri RenameRssAutoDownloadingRule() => Create("/api/v2/rss/renameRule");
+
+        public Uri DeleteRssAutoDownloadingRule() => Create("/api/v2/rss/removeRule");
+
+        public Uri GetRssAutoDownloadingRules() => Create("/api/v2/rss/rules");
     }
 }

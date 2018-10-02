@@ -142,5 +142,23 @@ namespace QBittorrent.Client.Internal
         public Uri GetPeerLog(int afterId = -1) => throw new ApiNotSupportedException(ApiLevel.V2);
 
         public Uri Reannounce() => throw new ApiNotSupportedException(ApiLevel.V2);
+
+        public Uri AddRssFolder() => throw new ApiNotSupportedException(ApiLevel.V2);
+
+        public Uri AddRssFeed() => throw new ApiNotSupportedException(ApiLevel.V2);
+
+        public Uri DeleteRssItem() => throw new ApiNotSupportedException(ApiLevel.V2);
+
+        public Uri MoveRssItem() => throw new ApiNotSupportedException(ApiLevel.V2);
+
+        public Uri GetRssItems(bool withData) => throw new ApiNotSupportedException(ApiLevel.V2);
+
+        public Uri SetRssAutoDownloadingRule() => throw new ApiNotSupportedException(ApiLevel.V2);
+
+        public Uri RenameRssAutoDownloadingRule() => throw new ApiNotSupportedException(ApiLevel.V2);
+
+        public Uri DeleteRssAutoDownloadingRule() => throw new ApiNotSupportedException(ApiLevel.V2);
+
+        public Uri GetRssAutoDownloadingRules() => throw new ApiNotSupportedException(ApiLevel.V2);
     }
 }

@@ -328,7 +328,12 @@ namespace QBittorrent.Client
         [ApiLevel(ApiLevel.V2)]
         public Task AddRssFolderAsync(string path, CancellationToken token = default)
         {
-            throw new NotImplementedException();
+            if (path == null)
+                throw new ArgumentNullException(nameof(path));
+            if (string.IsNullOrWhiteSpace(path))
+                throw new ArgumentException("The path cannot be an empty string.", nameof(path));
+
+            return PostAsync(p => p.AddRssFolder(path), token, ApiLevel.V2);
         }
 
         /// <summary>
@@ -339,9 +344,14 @@ namespace QBittorrent.Client
         /// <param name="token">The cancellation token.</param>
         /// <returns></returns>
         [ApiLevel(ApiLevel.V2)]
-        public Task AddRssFeedAsync(Uri url, string path = null, CancellationToken token = default)
+        public Task AddRssFeedAsync(Uri url, string path = "", CancellationToken token = default)
         {
-            throw new NotImplementedException();
+            if (url == null)
+                throw new ArgumentNullException(nameof(url));
+            if (path == null)
+                throw new ArgumentNullException(nameof(path));
+
+            return PostAsync(p => p.AddRssFeed(url, path), token, ApiLevel.V2);
         }
 
         /// <summary>
@@ -353,7 +363,12 @@ namespace QBittorrent.Client
         [ApiLevel(ApiLevel.V2)]
         public Task DeleteRssItemAsync(string path, CancellationToken token = default)
         {
-            throw new NotImplementedException();
+            if (path == null)
+                throw new ArgumentNullException(nameof(path));
+            if (string.IsNullOrWhiteSpace(path))
+                throw new ArgumentException("The path cannot be an empty string.", nameof(path));
+
+            return PostAsync(p => p.DeleteRssItem(path), token, ApiLevel.V2);
         }
 
         /// <summary>
@@ -366,7 +381,14 @@ namespace QBittorrent.Client
         [ApiLevel(ApiLevel.V2)]
         public Task MoveRssItemAsync(string path, string newPath, CancellationToken token = default)
         {
-            throw new NotImplementedException();
+            if (path == null)
+                throw new ArgumentNullException(nameof(path));
+            if (string.IsNullOrWhiteSpace(path))
+                throw new ArgumentException("The path cannot be an empty string.", nameof(path));
+            if (newPath == null)
+                throw new ArgumentNullException(nameof(newPath));
+
+            return PostAsync(p => p.MoveRssItem(path, newPath), token, ApiLevel.V2);
         }
 
         /// <summary>
@@ -392,7 +414,13 @@ namespace QBittorrent.Client
         [ApiLevel(ApiLevel.V2)]
         public Task SetRssAutoDownloadingRuleAsync(string name, RssAutoDownloadingRule rule, CancellationToken token = default)
         {
-            throw new NotImplementedException();
+            if (name == null)
+                throw new ArgumentNullException(nameof(name));
+            if (rule == null)
+                throw new ArgumentNullException(nameof(rule));
+
+            var ruleDefinition = JsonConvert.SerializeObject(rule);
+            return PostAsync(p => p.SetRssAutoDownloadingRule(name, ruleDefinition), token, ApiLevel.V2);
         }
 
         /// <summary>
@@ -405,7 +433,12 @@ namespace QBittorrent.Client
         [ApiLevel(ApiLevel.V2)]
         public Task RenameRssAutoDownloadingRuleAsync(string name, string newName, CancellationToken token = default)
         {
-            throw new NotImplementedException();
+            if (name == null)
+                throw new ArgumentNullException(nameof(name));
+            if (newName == null)
+                throw new ArgumentNullException(nameof(newName));
+
+            return PostAsync(p => p.RenameRssAutoDownloadingRule(name, newName), token, ApiLevel.V2);
         }
 
         /// <summary>
@@ -417,7 +450,10 @@ namespace QBittorrent.Client
         [ApiLevel(ApiLevel.V2)]
         public Task DeleteRssAutoDownloadingRuleAsync(string name, CancellationToken token = default)
         {
-            throw new NotImplementedException();
+            if (name == null)
+                throw new ArgumentNullException(nameof(name));
+
+            return PostAsync(p => p.DeleteRssAutoDownloadingRule(name), token, ApiLevel.V2);
         }
 
         /// <summary>
@@ -426,9 +462,16 @@ namespace QBittorrent.Client
         /// <param name="token">The cancellation token.</param>
         /// <returns></returns>
         [ApiLevel(ApiLevel.V2)]
-        public Task<IReadOnlyDictionary<string, RssAutoDownloadingRule>> GetRssAutoDownloadingRulesAsync(CancellationToken token = default)
+        public async Task<IReadOnlyDictionary<string, RssAutoDownloadingRule>> GetRssAutoDownloadingRulesAsync(CancellationToken token = default)
         {
-            throw new NotImplementedException();
+            var provider = await _requestProvider.GetValueAsync(token).ConfigureAwait(false);
+            if (provider.ApiLevel < ApiLevel.V2)
+                throw new ApiNotSupportedException(ApiLevel.V2);
+
+            var uri = provider.Url.GetRssAutoDownloadingRules();
+            var json = await _client.GetStringAsync(uri, token).ConfigureAwait(false);
+            var result = JsonConvert.DeserializeObject<Dictionary<string, RssAutoDownloadingRule>>(json);
+            return result;
         }
     }
 }

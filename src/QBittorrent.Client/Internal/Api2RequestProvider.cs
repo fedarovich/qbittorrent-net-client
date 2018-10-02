@@ -74,5 +74,51 @@ namespace QBittorrent.Client.Internal
 
             return (Url.AddTorrentFiles(), data);
         }
+
+        public override (Uri url, HttpContent request) AddRssFolder(string path)
+        {
+            return BuildForm(Url.AddRssFolder(),
+                ("path", path));
+        }
+
+        public override (Uri url, HttpContent request) AddRssFeed(Uri url, string path)
+        {
+            return BuildForm(Url.AddRssFeed(),
+                ("url", url.AbsoluteUri),
+                ("path", path));
+        }
+
+        public override (Uri url, HttpContent request) DeleteRssItem(string path)
+        {
+            return BuildForm(Url.DeleteRssItem(),
+                ("path", path));
+        }
+
+        public override (Uri url, HttpContent request) MoveRssItem(string path, string destinationPath)
+        {
+            return BuildForm(Url.MoveRssItem(),
+                ("itemPath", path),
+                ("destPath", destinationPath));
+        }
+
+        public override (Uri url, HttpContent request) SetRssAutoDownloadingRule(string name, string ruleDefinition)
+        {
+            return BuildForm(Url.SetRssAutoDownloadingRule(),
+                ("ruleName", name),
+                ("ruleDef", ruleDefinition));
+        }
+
+        public override (Uri url, HttpContent request) RenameRssAutoDownloadingRule(string name, string newName)
+        {
+            return BuildForm(Url.RenameRssAutoDownloadingRule(),
+                ("ruleName", name),
+                ("newRuleName", newName));
+        }
+
+        public override (Uri url, HttpContent request) DeleteRssAutoDownloadingRule(string name)
+        {
+            return BuildForm(Url.DeleteRssAutoDownloadingRule(),
+                ("ruleName", name));
+        }
     }
 }

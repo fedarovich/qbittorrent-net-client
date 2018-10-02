@@ -74,5 +74,19 @@ namespace QBittorrent.Client.Internal
         public override (Uri url, HttpContent request) Reannounce(IEnumerable<string> hashes) => throw new ApiNotSupportedException(ApiLevel.V2);
 
         public override (Uri url, HttpContent request) AddTorrents(AddTorrentsRequest request) => throw new ApiNotSupportedException(ApiLevel.V2);
+
+        public override (Uri url, HttpContent request) AddRssFolder(string path) => throw new ApiNotSupportedException(ApiLevel.V2);
+
+        public override (Uri url, HttpContent request) AddRssFeed(Uri url, string path) => throw new ApiNotSupportedException(ApiLevel.V2);
+
+        public override (Uri url, HttpContent request) DeleteRssItem(string path) => throw new ApiNotSupportedException(ApiLevel.V2);
+
+        public override (Uri url, HttpContent request) MoveRssItem(string path, string destinationPath) => throw new ApiNotSupportedException(ApiLevel.V2);
+
+        public override (Uri url, HttpContent request) SetRssAutoDownloadingRule(string name, string ruleDefinition) => throw new ApiNotSupportedException(ApiLevel.V2);
+
+        public override (Uri url, HttpContent request) RenameRssAutoDownloadingRule(string name, string newName) => throw new ApiNotSupportedException(ApiLevel.V2);
+
+        public override (Uri url, HttpContent request) DeleteRssAutoDownloadingRule(string name) => throw new ApiNotSupportedException(ApiLevel.V2);
     }
 }

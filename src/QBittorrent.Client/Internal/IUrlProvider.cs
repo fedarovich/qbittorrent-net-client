@@ -120,5 +120,25 @@ namespace QBittorrent.Client.Internal
         Uri GetPeerLog(int afterId = -1);
 
         Uri Reannounce();
+
+        // RSS
+
+        Uri AddRssFolder();
+
+        Uri AddRssFeed();
+
+        Uri DeleteRssItem();
+
+        Uri MoveRssItem();
+
+        Uri GetRssItems(bool withData);
+
+        Uri SetRssAutoDownloadingRule();
+
+        Uri RenameRssAutoDownloadingRule();
+
+        Uri DeleteRssAutoDownloadingRule();
+
+        Uri GetRssAutoDownloadingRules();
     }
 }

@@ -283,6 +283,20 @@ namespace QBittorrent.Client.Internal
 
         public abstract (Uri url, HttpContent request) Reannounce(IEnumerable<string> hashes);
 
+        public abstract (Uri url, HttpContent request) AddRssFolder(string path);
+
+        public abstract (Uri url, HttpContent request) AddRssFeed(Uri url, string path);
+
+        public abstract (Uri url, HttpContent request) DeleteRssItem(string path);
+
+        public abstract (Uri url, HttpContent request) MoveRssItem(string path, string destinationPath);
+
+        public abstract (Uri url, HttpContent request) SetRssAutoDownloadingRule(string name, string ruleDefinition);
+
+        public abstract (Uri url, HttpContent request) RenameRssAutoDownloadingRule(string name, string newName);
+
+        public abstract (Uri url, HttpContent request) DeleteRssAutoDownloadingRule(string name);
+        
         protected (Uri, HttpContent) BuildForm(Uri uri, params (string key, string value)[] fields)
         {
             return (uri, new CompatibleFormUrlEncodedContent(fields));

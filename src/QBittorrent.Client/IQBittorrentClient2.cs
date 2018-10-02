@@ -250,7 +250,7 @@ namespace QBittorrent.Client
         [ApiLevel(ApiLevel.V2)]
         Task AddRssFeedAsync(
             Uri url,
-            string path = null,
+            string path = "",
             CancellationToken token = default);
 
         /// <summary>

@@ -88,5 +88,21 @@ namespace QBittorrent.Client.Internal
         (Uri url, HttpContent request) AddTorrents(AddTorrentsRequest request);
 
         (Uri url, HttpContent request) Reannounce(IEnumerable<string> hashes);
+
+        // RSS
+
+        (Uri url, HttpContent request) AddRssFolder(string path);
+
+        (Uri url, HttpContent request) AddRssFeed(Uri url, string path);
+
+        (Uri url, HttpContent request) DeleteRssItem(string path);
+
+        (Uri url, HttpContent request) MoveRssItem(string path, string destinationPath);
+
+        (Uri url, HttpContent request) SetRssAutoDownloadingRule(string name, string ruleDefinition);
+
+        (Uri url, HttpContent request) RenameRssAutoDownloadingRule(string name, string newName);
+
+        (Uri url, HttpContent request) DeleteRssAutoDownloadingRule(string name);
     }
 }

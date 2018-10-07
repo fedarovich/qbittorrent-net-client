@@ -27,7 +27,9 @@ namespace QBittorrent.Client.Internal
 
         (Uri url, HttpContent request) ResumeAll();
 
-        (Uri url, HttpContent request) AddCategory(string category);
+        (Uri url, HttpContent request) AddCategory(string category, string savePath = null);
+
+        (Uri url, HttpContent request) EditCategory(string category, string savePath);
 
         (Uri url, HttpContent request) DeleteCategories(IEnumerable<string> categories);
 

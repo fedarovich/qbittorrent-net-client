@@ -17,6 +17,9 @@ namespace QBittorrent.Client
         [SuppressMessage("ReSharper", "InconsistentNaming")]
         private static readonly Version Version_2_0_2 = new Version(2, 0, 2);
 
+        [SuppressMessage("ReSharper", "InconsistentNaming")]
+        private static readonly Version Version_2_1_0 = new Version(2, 1, 0);
+
         /// <summary>
         /// Gets the peer log.
         /// </summary>
@@ -321,6 +324,32 @@ namespace QBittorrent.Client
             CancellationToken token = default)
         {
             return PostAsync(p => p.SetSuperSeeding(All, enabled), token, ApiLevel.V2);
+        }
+
+        /// <summary>
+        /// Adds the category.
+        /// </summary>
+        /// <param name="category">The category name.</param>
+        /// <param name="savePath">The save path for the torrents belonging to this category.</param>
+        /// <param name="token">The cancellation token.</param>
+        /// <returns></returns>
+        [ApiLevel(ApiLevel.V2, MinVersion = "2.1.0")]
+        public Task AddCategoryAsync(string category, string savePath, CancellationToken token = default)
+        {
+            return PostAsync(p => p.AddCategory(category, savePath), token, ApiLevel.V2, Version_2_1_0);
+        }
+
+        /// <summary>
+        /// Changes the category save path.
+        /// </summary>
+        /// <param name="category">The category name.</param>
+        /// <param name="savePath">The save path for the torrents belonging to this category.</param>
+        /// <param name="token">The cancellation token.</param>
+        /// <returns></returns>
+        [ApiLevel(ApiLevel.V2, MinVersion = "2.1.0")]
+        public Task EditCategoryAsync(string category, string savePath, CancellationToken token = default)
+        {
+            return PostAsync(p => p.EditCategory(category, savePath), token, ApiLevel.V2, Version_2_1_0);
         }
 
         /// <summary>

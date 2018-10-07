@@ -1,4 +1,8 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Runtime.Serialization;
+using JetBrains.Annotations;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
@@ -43,8 +47,18 @@ namespace QBittorrent.Client
         /// <summary>
         /// Gets or sets the list of added categories.
         /// </summary>
-        [JsonProperty("categories")]
+        /// <remarks>
+        /// Starting from API v2.1.0 this property will always be <see langword="null"/>.
+        /// You should use <see cref="CategoriesChanged"/> property instead.
+        /// </remarks>
+        /// <seealso cref="CategoriesChanged"/>
+        [Obsolete("Use CategoriesChanged property instead.")]
         public IReadOnlyList<string> CategoriesAdded { get; set; }
+
+        /// <summary>
+        /// Gets or sets the changed categories with their save paths.
+        /// </summary>
+        public IReadOnlyDictionary<string, Category> CategoriesChanged { get; set; }
 
         /// <summary>
         /// Gets or sets the list of removed categories.
@@ -69,5 +83,31 @@ namespace QBittorrent.Client
         /// </summary>
         [JsonExtensionData]
         public IDictionary<string, JToken> AdditionalData { get; set; }
+
+        [OnDeserialized]
+        [UsedImplicitly]
+        private void OnDeserialized(StreamingContext context)
+        {
+            const string categoriesKey = "categories";
+            if (AdditionalData != null &&
+                AdditionalData.TryGetValue(categoriesKey, out JToken categories))
+            {
+#pragma warning disable 618
+                if (categories.Type == JTokenType.Array)
+                {
+                    CategoriesAdded = categories.ToObject<List<string>>();
+                    CategoriesChanged = CategoriesAdded.ToDictionary(
+                        name => name, 
+                        name => new Category {Name = name, SavePath = string.Empty});
+                    AdditionalData.Remove(categoriesKey);
+                }
+                else if (categories.Type == JTokenType.Object)
+                {
+                    CategoriesChanged = categories.ToObject<Dictionary<string, Category>>();
+                    AdditionalData.Remove(categoriesKey);
+                }
+#pragma warning restore 618
+            }
+        }
     }
 }

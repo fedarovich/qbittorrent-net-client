@@ -70,6 +70,8 @@ namespace QBittorrent.Client.Internal
 
         public Uri AddCategory() => Create("/command/addCategory");
 
+        public Uri EditCategory() => throw new ApiNotSupportedException(ApiLevel.V2, new Version(2, 1, 0));
+
         public Uri DeleteCategories() => Create("/command/removeCategories");
 
         public Uri SetCategory() => Create("/command/setCategory");

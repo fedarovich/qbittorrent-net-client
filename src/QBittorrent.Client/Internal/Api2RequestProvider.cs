@@ -41,6 +41,13 @@ namespace QBittorrent.Client.Internal
                 ("hashes", "all"));
         }
 
+        public override (Uri url, HttpContent request) EditCategory(string category, string savePath)
+        {
+            return BuildForm(Url.EditCategory(),
+                ("category", category),
+                ("savePath", savePath));
+        }
+
         public override (Uri url, HttpContent request) DeleteTorrents(IEnumerable<string> hashes, bool withFiles)
         {
             return BuildForm(Url.DeleteTorrents(withFiles),

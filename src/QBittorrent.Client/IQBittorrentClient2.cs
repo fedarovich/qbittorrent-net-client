@@ -227,6 +227,32 @@ namespace QBittorrent.Client
             bool enabled,
             CancellationToken token = default);
 
+        /// <summary>
+        /// Adds the category.
+        /// </summary>
+        /// <param name="category">The category name.</param>
+        /// <param name="savePath">The save path for the torrents belonging to this category.</param>
+        /// <param name="token">The cancellation token.</param>
+        /// <returns></returns>
+        [ApiLevel(ApiLevel.V2, MinVersion = "2.1.0")]
+        Task AddCategoryAsync(
+            [NotNull] string category,
+            string savePath,
+            CancellationToken token = default);
+
+        /// <summary>
+        /// Changes the category save path.
+        /// </summary>
+        /// <param name="category">The category name.</param>
+        /// <param name="savePath">The save path for the torrents belonging to this category.</param>
+        /// <param name="token">The cancellation token.</param>
+        /// <returns></returns>
+        [ApiLevel(ApiLevel.V2, MinVersion = "2.1.0")]
+        Task EditCategoryAsync(
+            [NotNull] string category,
+            string savePath,
+            CancellationToken token = default);
+
         // RSS
 
         /// <summary>

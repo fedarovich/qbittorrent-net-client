@@ -54,6 +54,8 @@ namespace QBittorrent.Client.Internal
 
         Uri AddCategory();
 
+        Uri EditCategory();
+
         Uri DeleteCategories();
 
         Uri SetCategory();

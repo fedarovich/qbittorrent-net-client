@@ -52,6 +52,8 @@ namespace QBittorrent.Client.Internal
             return BuildForm(Url.ResumeAll());
         }
 
+        public override (Uri url, HttpContent request) EditCategory(string category, string savePath) => throw new ApiNotSupportedException(ApiLevel.V2, new Version(2, 1, 0));
+
         public override (Uri url, HttpContent request) DeleteTorrents(IEnumerable<string> hashes, bool withFiles)
         {
             return BuildForm(Url.DeleteTorrents(withFiles),

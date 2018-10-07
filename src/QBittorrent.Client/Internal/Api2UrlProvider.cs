@@ -74,6 +74,8 @@ namespace QBittorrent.Client.Internal
 
         public Uri AddCategory() => Create("/api/v2/torrents/createCategory");
 
+        public Uri EditCategory() => Create("/api/v2/torrents/editCategory");
+        
         public Uri DeleteCategories() => Create("/api/v2/torrents/removeCategories");
 
         public Uri SetCategory() => Create("/api/v2/torrents/setCategory");

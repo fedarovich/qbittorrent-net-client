@@ -69,11 +69,22 @@ namespace QBittorrent.Client.Internal
 
         public abstract (Uri url, HttpContent request) ResumeAll();
 
-        public virtual (Uri url, HttpContent request) AddCategory(string category)
+        public virtual (Uri url, HttpContent request) AddCategory(string category, string savePath = null)
         {
-            return BuildForm(Url.AddCategory(), 
-                ("category", category));
+            if (savePath != null)
+            {
+                return BuildForm(Url.AddCategory(),
+                    ("category", category),
+                    ("savePath", savePath));
+            }
+            else
+            {
+                return BuildForm(Url.AddCategory(),
+                    ("category", category));
+            }
         }
+
+        public abstract (Uri url, HttpContent request) EditCategory(string category, string savePath);
 
         public virtual (Uri url, HttpContent request) DeleteCategories(IEnumerable<string> categories)
         {

@@ -104,6 +104,10 @@ namespace QBittorrent.Client
                 else if (categories.Type == JTokenType.Object)
                 {
                     CategoriesChanged = categories.ToObject<Dictionary<string, Category>>();
+                    if (FullUpdate)
+                    {
+                        CategoriesAdded = CategoriesChanged.Keys.ToList();
+                    }
                     AdditionalData.Remove(categoriesKey);
                 }
 #pragma warning restore 618

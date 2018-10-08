@@ -1177,9 +1177,9 @@ namespace QBittorrent.Client.Tests
                 Client.GetTorrentDownloadLimitAsync(),
                 Client.GetTorrentUploadLimitAsync());
             down.Should().HaveCount(files.Length);
-            down.Values.Should().AllBeEquivalentTo(default(long?));
+            down.Values.Should().AllBeEquivalentTo(Enumerable.Repeat(default(long?), files.Length));
             up.Should().HaveCount(files.Length);
-            up.Values.Should().AllBeEquivalentTo(default(long?));
+            up.Values.Should().AllBeEquivalentTo(Enumerable.Repeat(default(long?), files.Length));
 
             await Client.SetTorrentDownloadLimitAsync(downLimit);
             await Utils.Retry(async () =>
@@ -1763,14 +1763,14 @@ namespace QBittorrent.Client.Tests
             });
 
             torrents.Select(t => t.ForceStart)
-                .Should().BeEquivalentTo(false);
+                .Should().AllBeEquivalentTo(false);
 
             await Client.SetForceStartAsync(true);
             await Utils.Retry(async () =>
             {
                 var list = await Client.GetTorrentListAsync();
                 list.Select(t => t.ForceStart)
-                    .Should().BeEquivalentTo(true);
+                    .Should().AllBeEquivalentTo(true);
             });
 
             await Client.SetForceStartAsync(false);
@@ -1778,7 +1778,7 @@ namespace QBittorrent.Client.Tests
             {
                 var list = await Client.GetTorrentListAsync();
                 list.Select(t => t.ForceStart)
-                    .Should().BeEquivalentTo(false);
+                    .Should().AllBeEquivalentTo(false);
             });
         }
 

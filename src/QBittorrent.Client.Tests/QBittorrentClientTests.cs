@@ -630,10 +630,12 @@ namespace QBittorrent.Client.Tests
         
         #region GetPartialDataAsync/AddCategoryAsync/DeleteCategoryAsync/DeleteAsync
 
-        [Fact]
+        [SkippableFact]
         [PrintTestName]
         public async Task GetPartialData()
         {
+            Skip.IfNot(ApiVersionLessThan(2, 1), $"API 2.1+ is tested with {nameof(GetPartialData_API_2_1)} test.");
+            
             await Client.LoginAsync(UserName, Password);
             var list = await Client.GetTorrentListAsync();
             list.Should().BeEmpty();
@@ -657,6 +659,7 @@ namespace QBittorrent.Client.Tests
             partialData.TorrentsChanged.Should().Contain(p => p.Key.ToLower() == hashes[0]);
             partialData.TorrentsRemoved.Should().BeNull();
             partialData.CategoriesAdded.Should().BeEmpty();
+            partialData.CategoriesChanged.Should().BeEmpty();
             partialData.CategoriesRemoved.Should().BeNull();
             responseId = partialData.ResponseId;
             var refreshInterval = partialData.ServerState.RefreshInterval ?? 1000;
@@ -669,6 +672,7 @@ namespace QBittorrent.Client.Tests
             partialData.TorrentsChanged.Should().BeNull();
             partialData.TorrentsRemoved.Should().BeNull();
             partialData.CategoriesAdded.Should().BeNull();
+            partialData.CategoriesChanged.Should().BeNull();
             partialData.CategoriesRemoved.Should().BeNull();
             responseId = partialData.ResponseId;
 
@@ -682,6 +686,7 @@ namespace QBittorrent.Client.Tests
             partialData.TorrentsChanged.Should().Contain(p => p.Key.ToLower() == hashes[2]);
             partialData.TorrentsRemoved.Should().BeNull();
             partialData.CategoriesAdded.Should().BeNull();
+            partialData.CategoriesChanged.Should().BeNull();
             partialData.CategoriesRemoved.Should().BeNull();
             responseId = partialData.ResponseId;
 
@@ -695,6 +700,12 @@ namespace QBittorrent.Client.Tests
             partialData.TorrentsChanged.Should().Contain(p => p.Key.ToLower() == hashes[0] && p.Value.Category == "b");
             partialData.TorrentsRemoved.Should().BeNull();
             partialData.CategoriesAdded.Should().BeEquivalentTo("a", "b");
+            partialData.CategoriesChanged.Should().BeEquivalentTo(
+                new Dictionary<string, Category>
+                {
+                    ["a"] = new Category {Name = "a", SavePath = ""},
+                    ["b"] = new Category {Name = "b", SavePath = ""}
+                });
             partialData.CategoriesRemoved.Should().BeNull();
             responseId = partialData.ResponseId;
 
@@ -709,9 +720,105 @@ namespace QBittorrent.Client.Tests
             partialData.TorrentsRemoved.Should().HaveCount(1);
             partialData.TorrentsRemoved.Should().Contain(hashes[1]);
             partialData.CategoriesAdded.Should().BeNull();
+            partialData.CategoriesChanged.Should().BeNull();
             partialData.CategoriesRemoved.Should().BeEquivalentTo("b");
         }
-        
+
+        [SkippableFact]
+        [PrintTestName]
+        public async Task GetPartialData_API_2_1()
+        {
+            Skip.If(ApiVersionLessThan(2, 1), $"API prior to 2.1 is tested with {nameof(GetPartialData)} test.");
+            
+            await Client.LoginAsync(UserName, Password);
+            var list = await Client.GetTorrentListAsync();
+            list.Should().BeEmpty();
+
+            var parser = new BencodeParser();
+            var filesToAdd = Directory.GetFiles(Utils.TorrentsFolder, "*.torrent");
+            var torrents = filesToAdd
+                .Select(path => parser.Parse<Torrent>(path))
+                .ToList();
+            var hashes = torrents.Select(t => t.OriginalInfoHash.ToLower()).ToList();
+
+            await Client.AddTorrentsAsync(new AddTorrentFilesRequest(filesToAdd[0]) { Paused = true });
+
+            await Task.Delay(1000);
+
+            int responseId = 0;
+            var partialData = await Client.GetPartialDataAsync(responseId);
+            partialData.Should().NotBeNull();
+            partialData.FullUpdate.Should().BeTrue();
+            partialData.TorrentsChanged.Should().HaveCount(1);
+            partialData.TorrentsChanged.Should().Contain(p => p.Key.ToLower() == hashes[0]);
+            partialData.TorrentsRemoved.Should().BeNull();
+            partialData.CategoriesAdded.Should().BeEmpty();
+            partialData.CategoriesChanged.Should().BeEmpty();
+            partialData.CategoriesRemoved.Should().BeNull();
+            responseId = partialData.ResponseId;
+            var refreshInterval = partialData.ServerState.RefreshInterval ?? 1000;
+
+            await Task.Delay(refreshInterval);
+            
+            partialData = await Client.GetPartialDataAsync(responseId);
+            partialData.Should().NotBeNull();
+            partialData.FullUpdate.Should().BeFalse();
+            partialData.TorrentsChanged.Should().BeNull();
+            partialData.TorrentsRemoved.Should().BeNull();
+            partialData.CategoriesAdded.Should().BeNull();
+            partialData.CategoriesChanged.Should().BeNull();
+            partialData.CategoriesRemoved.Should().BeNull();
+            responseId = partialData.ResponseId;
+
+            await Client.AddTorrentsAsync(new AddTorrentFilesRequest(filesToAdd.Skip(1)) {Paused = true});
+            await Task.Delay(refreshInterval);
+
+            partialData = await Client.GetPartialDataAsync(responseId);
+            partialData.FullUpdate.Should().BeFalse();
+            partialData.TorrentsChanged.Should().HaveCount(2);
+            partialData.TorrentsChanged.Should().Contain(p => p.Key.ToLower() == hashes[1]);
+            partialData.TorrentsChanged.Should().Contain(p => p.Key.ToLower() == hashes[2]);
+            partialData.TorrentsRemoved.Should().BeNull();
+            partialData.CategoriesAdded.Should().BeNull();
+            partialData.CategoriesChanged.Should().BeNull();
+            partialData.CategoriesRemoved.Should().BeNull();
+            responseId = partialData.ResponseId;
+
+            await Client.AddCategoryAsync("a");
+            await Client.AddCategoryAsync("b", "/tmp");
+            await Client.SetTorrentCategoryAsync(hashes[0], "b");
+            await Task.Delay(refreshInterval);
+            
+            partialData = await Client.GetPartialDataAsync(responseId);
+            partialData.FullUpdate.Should().BeFalse();
+            partialData.TorrentsChanged.Should().HaveCount(1);
+            partialData.TorrentsChanged.Should().Contain(p => p.Key.ToLower() == hashes[0] && p.Value.Category == "b");
+            partialData.TorrentsRemoved.Should().BeNull();
+            partialData.CategoriesAdded.Should().BeNull();
+            partialData.CategoriesChanged.Should().BeEquivalentTo(
+                new Dictionary<string, Category>
+                {
+                    ["a"] = new Category {Name = "a", SavePath = ""},
+                    ["b"] = new Category {Name = "b", SavePath = "/tmp"}
+                });
+            partialData.CategoriesRemoved.Should().BeNull();
+            responseId = partialData.ResponseId;
+
+            await Client.DeleteCategoryAsync("b");
+            await Client.DeleteAsync(hashes[1]);
+            await Task.Delay(refreshInterval);
+            
+            partialData = await Client.GetPartialDataAsync(responseId);
+            partialData.FullUpdate.Should().BeFalse();
+            partialData.TorrentsChanged.Should().HaveCountGreaterOrEqualTo(1);
+            partialData.TorrentsChanged.Should().Contain(p => p.Key.ToLower() == hashes[0] && p.Value.Category == "");
+            partialData.TorrentsRemoved.Should().HaveCount(1);
+            partialData.TorrentsRemoved.Should().Contain(hashes[1]);
+            partialData.CategoriesAdded.Should().BeNull();
+            partialData.CategoriesChanged.Should().BeNull();
+            partialData.CategoriesRemoved.Should().BeEquivalentTo("b");
+        }
+
         #endregion
         
         #region Pause/Resume
@@ -867,6 +974,13 @@ namespace QBittorrent.Client.Tests
         {
             await Client.LoginAsync(UserName, Password);
 
+            if (!ApiVersionLessThan(2, 1))
+            {
+                // API 2.1+ requires category to exist before adding to the torrent.
+                await Client.AddCategoryAsync("test");
+                await Client.AddCategoryAsync("a/b");
+            }
+            
             var file = Path.Combine(Utils.TorrentsFolder, "ubuntu-16.04.4-desktop-amd64.iso.torrent");
             
             await Client.AddTorrentsAsync(new AddTorrentFilesRequest(file) {Paused = true});
@@ -896,7 +1010,14 @@ namespace QBittorrent.Client.Tests
         public async Task SetTorrentCategoryWithPreset()
         {
             await Client.LoginAsync(UserName, Password);
-
+            
+            if (!ApiVersionLessThan(2, 1))
+            {
+                // API 2.1+ requires category to exist before adding to the torrent.
+                await Client.AddCategoryAsync("test");
+                await Client.AddCategoryAsync("a/b");
+            }
+            
             var file = Path.Combine(Utils.TorrentsFolder, "ubuntu-16.04.4-desktop-amd64.iso.torrent");
             
             await Client.AddTorrentsAsync(new AddTorrentFilesRequest(file) {Paused = true, Category = "xyz"});
@@ -1167,6 +1288,8 @@ namespace QBittorrent.Client.Tests
             await Client.LoginAsync(UserName, Password);
 
             var files = Directory.GetFiles(Utils.TorrentsFolder, "*.torrent");
+            var parser = new BencodeParser();
+            var hashes = files.Select(f => parser.Parse<Torrent>(f).OriginalInfoHash.ToLower()).ToArray();
 
             await Client.AddTorrentsAsync(new AddTorrentFilesRequest(files) { Paused = true });
             await Task.Delay(1000);
@@ -1174,31 +1297,31 @@ namespace QBittorrent.Client.Tests
             list.Should().HaveCount(files.Length);
 
             var (down, up) = await Utils.WhenAll(
-                Client.GetTorrentDownloadLimitAsync(),
-                Client.GetTorrentUploadLimitAsync());
+                Client.GetTorrentDownloadLimitAsync(hashes),
+                Client.GetTorrentUploadLimitAsync(hashes));
             down.Should().HaveCount(files.Length);
-            down.Values.Should().AllBeEquivalentTo(Enumerable.Repeat(default(long?), files.Length));
+            down.Values.Should().AllBeEquivalentTo(default(long?));
             up.Should().HaveCount(files.Length);
-            up.Values.Should().AllBeEquivalentTo(Enumerable.Repeat(default(long?), files.Length));
+            up.Values.Should().AllBeEquivalentTo(default(long?));
 
             await Client.SetTorrentDownloadLimitAsync(downLimit);
             await Utils.Retry(async () =>
             {
                 (down, up) = await Utils.WhenAll(
-                    Client.GetTorrentDownloadLimitAsync(),
-                    Client.GetTorrentUploadLimitAsync());
+                    Client.GetTorrentDownloadLimitAsync(hashes),
+                    Client.GetTorrentUploadLimitAsync(hashes));
                 down.Should().HaveCount(files.Length);
                 down.Values.Should().AllBeEquivalentTo(downLimit);
                 up.Should().HaveCount(files.Length);
-                up.Values.Should().AllBeEquivalentTo(default(long?));
+                up.Values.Should().AllBeEquivalentTo(0L);
             });
 
             await Client.SetTorrentUploadLimitAsync(upLimit);
             await Utils.Retry(async () =>
             {
                 (down, up) = await Utils.WhenAll(
-                    Client.GetTorrentDownloadLimitAsync(),
-                    Client.GetTorrentUploadLimitAsync());
+                    Client.GetTorrentDownloadLimitAsync(hashes),
+                    Client.GetTorrentUploadLimitAsync(hashes));
                 down.Should().HaveCount(files.Length);
                 down.Values.Should().AllBeEquivalentTo(downLimit);
                 up.Should().HaveCount(files.Length);
@@ -1209,8 +1332,8 @@ namespace QBittorrent.Client.Tests
             await Utils.Retry(async () =>
             {
                 (down, up) = await Utils.WhenAll(
-                    Client.GetTorrentDownloadLimitAsync(),
-                    Client.GetTorrentUploadLimitAsync());
+                    Client.GetTorrentDownloadLimitAsync(hashes),
+                    Client.GetTorrentUploadLimitAsync(hashes));
                 down.Should().HaveCount(files.Length);
                 down.Values.Should().AllBeEquivalentTo(0L);
                 up.Should().HaveCount(files.Length);
@@ -1221,8 +1344,8 @@ namespace QBittorrent.Client.Tests
             await Utils.Retry(async () =>
             {
                 (down, up) = await Utils.WhenAll(
-                    Client.GetTorrentDownloadLimitAsync(),
-                    Client.GetTorrentUploadLimitAsync());
+                    Client.GetTorrentDownloadLimitAsync(hashes),
+                    Client.GetTorrentUploadLimitAsync(hashes));
                 down.Should().HaveCount(files.Length);
                 down.Values.Should().AllBeEquivalentTo(0L);
                 up.Should().HaveCount(files.Length);
@@ -2441,7 +2564,12 @@ namespace QBittorrent.Client.Tests
 
         private bool ApiVersionLessThan(int major, int minor = 0, int build = 0)
         {
-            return DockerFixture.Env.ApiVersion < new System.Version(major, minor, build);
+            var apiVersion = new System.Version(
+                Math.Max(DockerFixture.Env.ApiVersion.Major, 0),
+                Math.Max(DockerFixture.Env.ApiVersion.Minor, 0),
+                Math.Max(DockerFixture.Env.ApiVersion.Build, 0));
+            
+            return apiVersion < new System.Version(major, minor, build);
         }
     }
 }

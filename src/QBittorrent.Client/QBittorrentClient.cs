@@ -184,7 +184,11 @@ namespace QBittorrent.Client
 
             var uri = BuildUri("/api/v2/app/webapiVersion");
             var version = await _client.GetStringAsync(uri, token).ConfigureAwait(false);
-            return new Version(version);
+            var v = new Version(version);
+            return new Version(
+                Math.Max(v.Major, 0),
+                Math.Max(v.Minor, 0),
+                Math.Max(v.Build, 0));
         }
 
         /// <summary>

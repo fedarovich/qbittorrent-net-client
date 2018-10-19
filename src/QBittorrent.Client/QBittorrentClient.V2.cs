@@ -167,18 +167,6 @@ namespace QBittorrent.Client
         }
 
         /// <summary>
-        /// Gets the torrent download speed limit for all torrents.
-        /// </summary>
-        /// <param name="token">The cancellation token.</param>
-        /// <returns></returns>
-        [ApiLevel(ApiLevel.V2)]
-        public Task<IReadOnlyDictionary<string, long?>> GetTorrentDownloadLimitAsync(
-            CancellationToken token = default)
-        {
-            return PostAsync(p => p.GetTorrentDownloadLimit(All), token, GetTorrentLimits, ApiLevel.V2);
-        }
-
-        /// <summary>
         /// Sets the torrent download speed limit for all torrents.
         /// </summary>
         /// <param name="limit">The limit.</param>
@@ -193,18 +181,6 @@ namespace QBittorrent.Client
                 throw new ArgumentOutOfRangeException(nameof(limit));
 
             return PostAsync(p => p.SetTorrentDownloadLimit(All, limit), token, ApiLevel.V2);
-        }
-
-        /// <summary>
-        /// Gets the torrent upload speed limit for all torrents.
-        /// </summary>
-        /// <param name="token">The cancellation token.</param>
-        /// <returns></returns>
-        [ApiLevel(ApiLevel.V2)]
-        public Task<IReadOnlyDictionary<string, long?>> GetTorrentUploadLimitAsync(
-            CancellationToken token = default)
-        {
-            return PostAsync(p => p.GetTorrentUploadLimit(All), token, GetTorrentLimits, ApiLevel.V2);
         }
 
         /// <summary>

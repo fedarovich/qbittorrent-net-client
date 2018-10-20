@@ -496,7 +496,7 @@ namespace QBittorrent.Client
         /// </para>
         /// </remarks>
         /// <returns></returns>
-        Task<Version> GetApiVersionAsync(CancellationToken token = default);
+        Task<ApiVersion> GetApiVersionAsync(CancellationToken token = default);
         
         /// <summary>
         /// Gets the current API version of the server for qBittorrent versions up to 4.0.4.

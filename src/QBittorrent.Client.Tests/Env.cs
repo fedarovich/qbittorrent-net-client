@@ -8,8 +8,8 @@ namespace QBittorrent.Client.Tests
     public class Env
     {
         [JsonProperty("api-version")]
-        [JsonConverter(typeof(VersionConverter))]
-        public Version ApiVersion { get; set; }
+        [JsonConverter(typeof(ApiVersionJsonConverter))]
+        public ApiVersion ApiVersion { get; set; }
         
         [JsonProperty("legacy-api-version")]
         public int LegacyApiVersion { get; set; }

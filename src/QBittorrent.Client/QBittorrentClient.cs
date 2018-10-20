@@ -176,19 +176,15 @@ namespace QBittorrent.Client
         /// </para>
         /// </remarks>
         /// <returns></returns>
-        public async Task<Version> GetApiVersionAsync(CancellationToken token = default)
+        public async Task<ApiVersion> GetApiVersionAsync(CancellationToken token = default)
         {
             var legacyVersion = await GetLegacyApiVersionAsync(token).ConfigureAwait(false);
             if (legacyVersion < NewApiLegacyVersion)
-                return new Version(1, legacyVersion);
+                return new ApiVersion(1, checked((byte)legacyVersion));
 
             var uri = BuildUri("/api/v2/app/webapiVersion");
             var version = await _client.GetStringAsync(uri, token).ConfigureAwait(false);
-            var v = new Version(version);
-            return new Version(
-                Math.Max(v.Major, 0),
-                Math.Max(v.Minor, 0),
-                Math.Max(v.Build, 0));
+            return ApiVersion.Parse(version);
         }
 
         /// <summary>
@@ -1122,13 +1118,13 @@ namespace QBittorrent.Client
         private async Task PostAsync(Func<IRequestProvider, (Uri, HttpContent)> builder, 
             CancellationToken token, 
             ApiLevel minApiLevel = ApiLevel.V1,
-            Version minVersion = null)
+            ApiVersion minApiVersion = default)
         {
             var provider = await _requestProvider.GetValueAsync(token).ConfigureAwait(false);
             if (minApiLevel != ApiLevel.V1 && provider.ApiLevel < minApiLevel)
                 throw new ApiNotSupportedException(minApiLevel);
-            if (minVersion != null && await GetApiVersionAsync(token).ConfigureAwait(false) < minVersion)
-                throw new ApiNotSupportedException(minApiLevel, minVersion);
+            if (minApiVersion != default && await GetApiVersionAsync(token).ConfigureAwait(false) < minApiVersion)
+                throw new ApiNotSupportedException(minApiLevel, minApiVersion);
             
             var (uri, content) = builder(provider);
             using (var response = await _client.PostAsync(uri, content, token).ConfigureAwait(false))
@@ -1141,13 +1137,13 @@ namespace QBittorrent.Client
             CancellationToken token,
             Func<HttpResponseMessage, Task<T>> transform, 
             ApiLevel minApiLevel = ApiLevel.V1,
-            Version minVersion = null)
+            ApiVersion minApiVersion = default)
         {
             var provider = await _requestProvider.GetValueAsync(token).ConfigureAwait(false);
             if (minApiLevel != ApiLevel.V1 && provider.ApiLevel < minApiLevel)
                 throw new ApiNotSupportedException(minApiLevel);
-            if (minVersion != null && await GetApiVersionAsync(token).ConfigureAwait(false) < minVersion)
-                throw new ApiNotSupportedException(minApiLevel, minVersion);
+            if (minApiVersion != default && await GetApiVersionAsync(token).ConfigureAwait(false) < minApiVersion)
+                throw new ApiNotSupportedException(minApiLevel, minApiVersion);
 
             var (uri, content) = builder(provider);
             using (var response = await _client.PostAsync(uri, content, token).ConfigureAwait(false))

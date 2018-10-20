@@ -15,10 +15,10 @@ namespace QBittorrent.Client
         private static readonly IEnumerable<string> All = new[] { "all" };
 
         [SuppressMessage("ReSharper", "InconsistentNaming")]
-        private static readonly Version Version_2_0_2 = new Version(2, 0, 2);
+        private static readonly ApiVersion Version_2_0_2 = new ApiVersion(2, 0, 2);
 
         [SuppressMessage("ReSharper", "InconsistentNaming")]
-        private static readonly Version Version_2_1_0 = new Version(2, 1, 0);
+        private static readonly ApiVersion Version_2_1_0 = new ApiVersion(2, 1);
 
         /// <summary>
         /// Gets the peer log.

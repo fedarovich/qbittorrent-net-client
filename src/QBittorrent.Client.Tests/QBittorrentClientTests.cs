@@ -629,6 +629,7 @@ namespace QBittorrent.Client.Tests
         #endregion
         
         #region GetPartialDataAsync/AddCategoryAsync/DeleteCategoryAsync/DeleteAsync
+#pragma warning disable 618
 
         [SkippableFact]
         [PrintTestName]
@@ -723,6 +724,7 @@ namespace QBittorrent.Client.Tests
             partialData.CategoriesChanged.Should().BeNull();
             partialData.CategoriesRemoved.Should().BeEquivalentTo("b");
         }
+
 
         [SkippableFact]
         [PrintTestName]
@@ -819,8 +821,9 @@ namespace QBittorrent.Client.Tests
             partialData.CategoriesRemoved.Should().BeEquivalentTo("b");
         }
 
+#pragma warning restore 618
         #endregion
-        
+
         #region Pause/Resume
 
         [Fact]
@@ -2562,14 +2565,9 @@ namespace QBittorrent.Client.Tests
 
         #endregion
 
-        private bool ApiVersionLessThan(int major, int minor = 0, int build = 0)
+        private bool ApiVersionLessThan(byte major, byte minor = 0, byte build = 0)
         {
-            var apiVersion = new System.Version(
-                Math.Max(DockerFixture.Env.ApiVersion.Major, 0),
-                Math.Max(DockerFixture.Env.ApiVersion.Minor, 0),
-                Math.Max(DockerFixture.Env.ApiVersion.Build, 0));
-            
-            return apiVersion < new System.Version(major, minor, build);
+            return DockerFixture.Env.ApiVersion < new ApiVersion(major, minor, build);
         }
     }
 }

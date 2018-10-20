@@ -6,6 +6,9 @@ using Newtonsoft.Json.Linq;
 
 namespace QBittorrent.Client
 {
+    /// <summary>
+    /// Represents an RSS auto-downloading rule.
+    /// </summary>
     public class RssAutoDownloadingRule
     {
         /// <summary>

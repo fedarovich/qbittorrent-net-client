@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using Newtonsoft.Json;
 
 namespace QBittorrent.Client
@@ -8,6 +9,7 @@ namespace QBittorrent.Client
     /// Represents an RSS Feed.
     /// </summary>
     /// <seealso cref="QBittorrent.Client.RssItem" />
+    [DebuggerDisplay("Feed {Name} : {Url}")]
     public class RssFeed : RssItem
     {
         /// <summary>
@@ -44,8 +46,7 @@ namespace QBittorrent.Client
         /// The last build date.
         /// </value>
         [JsonProperty("lastBuildDate")]
-        // What is the format?
-        public string LastBuildDate { get; set; }
+        public DateTimeOffset? LastBuildDate { get; set; }
 
         /// <summary>
         /// Gets or sets the value indicating whether the feed is loading.

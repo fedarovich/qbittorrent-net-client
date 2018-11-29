@@ -40,4 +40,5 @@ public $Type$ $Name$ { get; set; }</s:String>
 	<s:Boolean x:Key="/Default/PatternsAndTemplates/LiveTemplates/Template/=AE72754038A7054FA2D8DC37DA4528DB/Field/=Type/@KeyIndexDefined">True</s:Boolean>
 	<s:Int64 x:Key="/Default/PatternsAndTemplates/LiveTemplates/Template/=AE72754038A7054FA2D8DC37DA4528DB/Field/=Type/Order/@EntryValue">0</s:Int64>
 	<s:Boolean x:Key="/Default/PatternsAndTemplates/LiveTemplates/Template/=AE72754038A7054FA2D8DC37DA4528DB/Field/=Name/@KeyIndexDefined">True</s:Boolean>
-	<s:Int64 x:Key="/Default/PatternsAndTemplates/LiveTemplates/Template/=AE72754038A7054FA2D8DC37DA4528DB/Field/=Name/Order/@EntryValue">1</s:Int64></wpf:ResourceDictionary>
+	<s:Int64 x:Key="/Default/PatternsAndTemplates/LiveTemplates/Template/=AE72754038A7054FA2D8DC37DA4528DB/Field/=Name/Order/@EntryValue">1</s:Int64>
+	<s:Boolean x:Key="/Default/UserDictionary/Words/=Bittorrent/@EntryIndexedValue">True</s:Boolean></wpf:ResourceDictionary>

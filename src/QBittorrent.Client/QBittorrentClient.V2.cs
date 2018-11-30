@@ -1,14 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
-using System.Globalization;
-using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using JetBrains.Annotations;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using QBittorrent.Client.Extensions;
+using QBittorrent.Client.Internal;
 using static QBittorrent.Client.Internal.Utils;
 
 namespace QBittorrent.Client
@@ -420,24 +419,7 @@ namespace QBittorrent.Client
             var uri = provider.Url.GetRssItems(withData);
             var json = await _client.GetStringAsync(uri, token).ConfigureAwait(false);
             var rootObject = JObject.Parse(json);
-            var feedSerializer = new JsonSerializer()
-            {
-                DateFormatString = "ddd, dd MMM yyyy HH:mm:ss zzz",
-                DateTimeZoneHandling = DateTimeZoneHandling.RoundtripKind,
-                Culture = CultureInfo.InvariantCulture
-            };
-            return (RssFolder)Convert(rootObject, string.Empty);
-
-            RssItem ConvertFeed(JObject jObject) => jObject.ToObject<RssFeed>(feedSerializer);
-
-            RssItem ConvertFolder(JObject jObject) => new RssFolder(jObject.Properties().Select(p => Convert((JObject) p.Value, p.Name)));
-
-            RssItem Convert(JObject jObject, string name)
-            {
-                var item = jObject.ContainsKey("uid") ? ConvertFeed(jObject) : ConvertFolder(jObject);
-                item.Name = name;
-                return item;
-            }
+            return RssParser.Parse(rootObject);
         }
 
         /// <summary>

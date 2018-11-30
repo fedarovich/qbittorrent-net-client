@@ -4,6 +4,9 @@
     <IsPackable>false</IsPackable>
   </PropertyGroup>
   <ItemGroup>
+    <None Remove="data\rss-valid.json" />
+  </ItemGroup>
+  <ItemGroup>
     <PackageReference Include="BencodeNET" Version="2.2.24" />
     <PackageReference Include="Docker.DotNet" Version="3.125.2" />
     <PackageReference Include="FluentAssertions" Version="5.4.1" />
@@ -18,6 +21,7 @@
       <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
     </PackageReference>
     <DotNetCliToolReference Include="dotnet-xunit" Version="2.3.1" />
+    <EmbeddedResource Include="data\rss-valid.json" />
     <PackageReference Include="Xunit.SkippableFact" Version="1.3.6" />
   </ItemGroup>
   <ItemGroup>

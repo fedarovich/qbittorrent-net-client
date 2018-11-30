@@ -17,8 +17,13 @@ namespace QBittorrent.Client
         {
         }
 
-        public RssFolder(IEnumerable<RssItem> items)
+        public RssFolder(IEnumerable<RssItem> items) : this(string.Empty, items)
         {
+        }
+
+        public RssFolder(string name, IEnumerable<RssItem> items)
+        {
+            Name = name;
             Items = new List<RssItem>(items ?? Enumerable.Empty<RssItem>());
         }
 
@@ -26,6 +31,6 @@ namespace QBittorrent.Client
 
         public IEnumerable<RssFolder> Folders => Items?.OfType<RssFolder>();
 
-        public IEnumerable<RssItem> Feeds => Items?.OfType<RssFeed>();
+        public IEnumerable<RssFeed> Feeds => Items?.OfType<RssFeed>();
     }
 }

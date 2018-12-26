@@ -127,7 +127,7 @@ namespace QBittorrent.Client
         /// The files.
         /// </value>
         [JsonProperty("files")]
-        [JsonConverter(typeof(StringToListConverter), "\n")]
+        [JsonConverter(typeof(StringToListConverter), "\n", false)]
         public IReadOnlyList<string> Files { get; set; }
 
         /// <summary>

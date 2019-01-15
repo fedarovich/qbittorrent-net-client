@@ -1,0 +1,61 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<rss xmlns:torrent="http://tests.fedarovich.com/qbittorrent-net-clien/1.0/" version="2.0">
+  <channel>
+    <title>Ubuntu downloads</title>
+    <link>http://example.com/ubuntu.rss</link>
+    <description></description>
+    <lastBuildDate>Thu, 29 Nov 2018 09:34:01 -0500</lastBuildDate>
+    <item>
+      <title>
+        Ubuntu 16.04.4
+      </title>
+      <category></category>
+      <link>
+        https://www.ubuntu.com/download/desktop
+      </link>
+      <guid>
+        http://releases.ubuntu.com/16.04/ubuntu-16.04.4-desktop-amd64.iso.torrent
+      </guid>
+      <pubDate>29 Nov 2018 10:56:14 +0000</pubDate>
+      <torrent:contentLength>1624211456</torrent:contentLength>
+      <torrent:infoHash>778CE280B595E57780FF083F2EB6F897DFA4A4EE</torrent:infoHash>
+      <torrent:magnetURI>
+        <![CDATA[
+magnet:?xt=urn:btih:778ce280b595e57780ff083f2eb6f897dfa4a4ee&dn=ubuntu-16.04.4-desktop-amd64.iso&tr=http://torrent.ubuntu.com:6969/announce&tr=http://ipv6.torrent.ubuntu.com:6969/announce
+]]>
+      </torrent:magnetURI>
+      <torrent:seeds>0</torrent:seeds>
+      <torrent:peers>0</torrent:peers>
+      <torrent:verified>0</torrent:verified>
+      <torrent:fileName>
+        ubuntu-16.04.4-desktop-amd64.iso
+      </torrent:fileName>
+      <enclosure url="https://fedarovich.blob.core.windows.net/qbittorrent-test/torrents/ubuntu-16.04.4-desktop-amd64.iso.torrent" length="1624211456" type="application/x-bittorrent"/>
+    </item>
+    <item>
+      <title>Ubuntu 17.10.1</title>
+      <category></category>
+      <link>
+        https://www.ubuntu.com/download/desktop
+      </link>
+      <guid>
+        http://releases.ubuntu.com/17.10/ubuntu-17.10.1-desktop-amd64.iso.torrent
+      </guid>
+      <pubDate>29 Nov 2018 11:52:49 +0000</pubDate>
+      <torrent:contentLength>1502576640</torrent:contentLength>
+      <torrent:infoHash>F07E0B0584745B7BCB35E98097488D34E68623D0</torrent:infoHash>
+      <torrent:magnetURI>
+        <![CDATA[
+magnet:?xt=urn:btih:f07e0b0584745b7bcb35e98097488d34e68623d0&dn=ubuntu-17.10.1-desktop-amd64.iso&tr=http://torrent.ubuntu.com:6969/announce&tr=http://ipv6.torrent.ubuntu.com:6969/announce9
+]]>
+      </torrent:magnetURI>
+      <torrent:seeds>0</torrent:seeds>
+      <torrent:peers>0</torrent:peers>
+      <torrent:verified>0</torrent:verified>
+      <torrent:fileName>
+        ubuntu-17.10.1-desktop-amd64.iso
+      </torrent:fileName>
+      <enclosure url="https://fedarovich.blob.core.windows.net/qbittorrent-test/torrents/ubuntu-17.10.1-desktop-amd64.iso.torrent" length="1502576640" type="application/x-bittorrent"/>
+    </item>
+  </channel>
+</rss>

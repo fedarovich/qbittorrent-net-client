@@ -1,0 +1,18 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0" xmlns:torrent="http://tests.fedarovich.com/qbittorrent-net-clien/1.0/">
+  <channel>
+    <title>Rutracker feed</title>
+    <link>http://example.com/rutracker.rss</link>
+    <ttl>30</ttl>
+    <description></description>
+    <item>
+      <title>Ubuntu 14.04</title>
+      <link><![CDATA[magnet:?xt=urn:btih:9fadb1dcf775fe9a88a7ff0e8150b979d3803398&dn=ubuntu-pack-14.04-unity&tr=http://bt.t-ru.org/ann&tr=http://retracker.local/announce]]></link>
+      <guid isPermaLink="false">428325a2b3b846759bf7b1089b42bfa2</guid>
+      <pubDate>18 Nov 2018 19:56:41 +0000</pubDate>
+      <description>Ubuntu 14.04 i386 and AMD64</description>
+      <torrent:info_hash>8B0D024760C412F5E0DCBCFAB59B267CBDD895C6</torrent:info_hash>
+      <enclosure url="magnet:?xt=urn:btih:9fadb1dcf775fe9a88a7ff0e8150b979d3803398&amp;dn=ubuntu-pack-14.04-unity&amp;tr=http://bt.t-ru.org/ann&amp;tr=http://retracker.local/announce" length="0" type="application/x-bittorrent" />
+    </item>
+  </channel>
+</rss>

@@ -1,5 +1,7 @@
 FROM ubuntu:artful
 
+COPY ../../../data/*.rss /rss/
+
 RUN set -x \
     && apt update \
     # Install qBittorrent-nox 3.3.7

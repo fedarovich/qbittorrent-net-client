@@ -23,6 +23,10 @@
     <DotNetCliToolReference Include="dotnet-xunit" Version="2.3.1" />
     <EmbeddedResource Include="data\rss-valid.json" />
     <PackageReference Include="Xunit.SkippableFact" Version="1.3.6" />
+    <None Remove="data\rutracker.rss" />
+    <EmbeddedResource Include="data\rutracker.rss" />
+    <None Remove="data\ubuntu.rss" />
+    <EmbeddedResource Include="data\ubuntu.rss" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\QBittorrent.Client\QBittorrent.Client.csproj" />
@@ -35,14 +39,6 @@
   <ItemGroup>
     <None Update="torrents\**\*.*">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-  </ItemGroup>
-  <ItemGroup>
-    <None Update="data\rutracker.rss">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
-    <None Update="data\ubuntu.rss">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
   </ItemGroup>
 </Project>

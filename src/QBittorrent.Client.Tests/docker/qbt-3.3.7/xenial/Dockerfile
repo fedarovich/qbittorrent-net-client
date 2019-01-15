@@ -1,6 +1,6 @@
 FROM ubuntu:artful
 
-COPY ../../../data/*.rss /rss/
+COPY *.rss /rss/
 
 RUN set -x \
     && apt update \

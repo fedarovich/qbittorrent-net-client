@@ -1,7 +1,7 @@
 FROM ubuntu:xenial
 
 COPY *.deb /install/
-COPY ../../../data/*.rss /rss/
+COPY *.rss /rss/
 
 RUN set -x \
     && apt update \

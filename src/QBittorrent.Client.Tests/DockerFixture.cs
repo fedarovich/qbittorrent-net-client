@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Net.Http;
+using System.Reflection;
 using System.Threading.Tasks;
 using Docker.DotNet;
 using Docker.DotNet.Models;
@@ -29,6 +30,7 @@ namespace QBittorrent.Client.Tests
             Console.WriteLine("Test Environment:");
             Console.WriteLine(env);
             Env = JsonConvert.DeserializeObject<Env>(env);
+            await CopyRssFiles();
             await DownloadBinaries();
             
             var config = new DockerClientConfiguration(new Uri("http://localhost:2375"));
@@ -77,6 +79,27 @@ namespace QBittorrent.Client.Tests
                 } 
             }
 
+            async Task CopyRssFiles()
+            {
+                var assembly = Assembly.GetExecutingAssembly();
+                var resourceNames = assembly
+                    .GetManifestResourceNames()
+                    .Where(n => Path.GetExtension(n) == ".rss")
+                    .ToList();
+
+                foreach (var resourceName in resourceNames)
+                {
+                    var parts = resourceName.Split('.');
+                    var name = parts[parts.Length - 2] + ".rss";
+                    var outputName = Path.Combine(sourceDir, name);
+                    using (var inStream = assembly.GetManifestResourceStream(resourceName))
+                    using (var outStream = File.Open(outputName, FileMode.Create, FileAccess.Write))
+                    {
+                        await inStream.CopyToAsync(outStream);
+                    }
+                }
+            }
+            
             async Task DownloadBinaries()
             {
                 if (Env.Binaries?.Any() != true)
@@ -121,7 +144,7 @@ namespace QBittorrent.Client.Tests
                 });
         }
 
-        private string DefaultImageName => "qbt:4.0.4";
+        private string DefaultImageName => "qbt:4.1.3";
 
         private string DefaulOS
         {

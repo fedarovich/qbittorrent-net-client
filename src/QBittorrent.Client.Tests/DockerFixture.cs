@@ -23,7 +23,7 @@ namespace QBittorrent.Client.Tests
         public async Task InitializeAsync()
         {
             ImageName = Environment.GetEnvironmentVariable("QBT_IMAGE") ?? DefaultImageName;
-            var os = Environment.GetEnvironmentVariable("QBT_OS") ?? DefaulOS;
+            var os = Environment.GetEnvironmentVariable("QBT_OS") ?? DefaultOS;
 
             var sourceDir = Path.Combine(Utils.StartupFolder, "docker", ImageName.Replace(':', '-'), os);
             var env = File.ReadAllText(Path.Combine(sourceDir, "env.json"));
@@ -144,9 +144,9 @@ namespace QBittorrent.Client.Tests
                 });
         }
 
-        private string DefaultImageName => "qbt:4.1.3";
+        private string DefaultImageName => "qbt:4.0.4";
 
-        private string DefaulOS
+        private string DefaultOS
         {
             get
             {

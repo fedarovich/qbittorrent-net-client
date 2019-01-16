@@ -2582,7 +2582,7 @@ namespace QBittorrent.Client.Tests
         [SkippableFact]
         public async Task AddRssFeed()
         {
-            Skip.If(ApiVersionLessThan(2));
+            Skip.If(ApiVersionLessThan(2, 1));
 
             await Client.LoginAsync(UserName, Password);
 
@@ -2596,7 +2596,7 @@ namespace QBittorrent.Client.Tests
         [SkippableFact]
         public async Task AddRssFolder()
         {
-            Skip.If(ApiVersionLessThan(2));
+            Skip.If(ApiVersionLessThan(2, 1));
 
             await Client.LoginAsync(UserName, Password);
 
@@ -2612,7 +2612,7 @@ namespace QBittorrent.Client.Tests
         [SkippableFact]
         public async Task AddRssFeedWithFolder()
         {
-            Skip.If(ApiVersionLessThan(2));
+            Skip.If(ApiVersionLessThan(2, 1));
 
             await Client.LoginAsync(UserName, Password);
 
@@ -2625,17 +2625,20 @@ namespace QBittorrent.Client.Tests
             items.Feeds.Should().BeEmpty();
         }
         
-        [Fact(Skip = "TODO: Investigate why the data is not filled correctly filled in.")]
-        //[SkippableFact]
-        public async Task AddRssItems()
+        [SkippableFact]
+        public async Task AddAndProcessRssItems()
         {
-            Skip.If(ApiVersionLessThan(2));
+            Skip.If(ApiVersionLessThan(2, 1));
 
             await Client.LoginAsync(UserName, Password);
 
+            await Client.SetPreferencesAsync(new Preferences {RssProcessingEnabled = true});
+            await Task.Delay(1000);
+            
             await Client.AddRssFolderAsync("Test folder");
             await Client.AddRssFeedAsync(new Uri("file:///rss/ubuntu.rss"), "Ubuntu");
             await Client.AddRssFeedAsync(new Uri("file:///rss/rutracker.rss"), "Test folder\\Rutracker");
+            await Task.Delay(1000);
             
             var items = await Client.GetRssItemsAsync(true);
             var expected = new RssFolder(
@@ -2658,7 +2661,7 @@ namespace QBittorrent.Client.Tests
                                 Id = "http://releases.ubuntu.com/16.04/ubuntu-16.04.4-desktop-amd64.iso.torrent",
                                 Link = new Uri("https://www.ubuntu.com/download/desktop"),
                                 Title = "Ubuntu 16.04.4",
-                                TorrentUri = new Uri("http://releases.ubuntu.com/16.04/ubuntu-16.04.4-desktop-amd64.iso.torrent"),
+                                TorrentUri = new Uri("https://fedarovich.blob.core.windows.net/qbittorrent-test/torrents/ubuntu-16.04.4-desktop-amd64.iso.torrent"),
                                 IsRead = false,
                                 AdditionalData = new Dictionary<string, JToken>
                                 {
@@ -2676,7 +2679,7 @@ namespace QBittorrent.Client.Tests
                                 Id = "http://releases.ubuntu.com/17.10/ubuntu-17.10.1-desktop-amd64.iso.torrent",
                                 Link = new Uri("https://www.ubuntu.com/download/desktop"),
                                 Title = "Ubuntu 17.10.1",
-                                TorrentUri = new Uri("http://releases.ubuntu.com/17.10/ubuntu-17.10.1-desktop-amd64.iso.torrent"),
+                                TorrentUri = new Uri("https://fedarovich.blob.core.windows.net/qbittorrent-test/torrents/ubuntu-17.10.1-desktop-amd64.iso.torrent"),
                                 IsRead = false,
                                 AdditionalData = new Dictionary<string, JToken>
                                 {
@@ -2724,6 +2727,184 @@ namespace QBittorrent.Client.Tests
                 }
             );
 
+            items.Should().BeEquivalentTo(expected, cfg => cfg
+                .Excluding(m => m.SelectedMemberPath.EndsWith(".Url"))
+                .Excluding(m => m.SelectedMemberPath.EndsWith(".Uid"))
+                .Excluding(m => m.SelectedMemberPath.EndsWith(".AdditionalData"))
+            );
+        }
+        
+        [SkippableFact]
+        public async Task DeleteRssItems()
+        {
+            Skip.If(ApiVersionLessThan(2, 1));
+
+            await Client.LoginAsync(UserName, Password);
+
+            await Client.AddRssFolderAsync("Test folder");
+            await Client.AddRssFeedAsync(new Uri("file:///rss/ubuntu.rss"), "Ubuntu");
+            await Client.AddRssFeedAsync(new Uri("file:///rss/rutracker.rss"), "Test folder\\Rutracker");
+            
+            var items = await Client.GetRssItemsAsync();
+            var expected = new RssFolder(
+                new RssItem[]
+                {
+                    new RssFeed { Name = "Ubuntu" },
+                    new RssFolder("Test folder",
+                        new RssItem[]
+                        {
+                            new RssFeed { Name = "Rutracker" }
+                        })
+                }
+            );
+
+            items.Should().BeEquivalentTo(expected, cfg => cfg
+                .Excluding(m => m.SelectedMemberPath.EndsWith(".Url"))
+                .Excluding(m => m.SelectedMemberPath.EndsWith(".Uid"))
+            );
+
+            // Delete "Ubuntu"
+            
+            await Client.DeleteRssItemAsync("Ubuntu");
+            
+            items = await Client.GetRssItemsAsync();
+            expected = new RssFolder(
+                new RssItem[]
+                {
+                    new RssFolder("Test folder",
+                        new RssItem[]
+                        {
+                            new RssFeed { Name = "Rutracker" }
+                        })
+                }
+            );
+            
+            items.Should().BeEquivalentTo(expected, cfg => cfg
+                .Excluding(m => m.SelectedMemberPath.EndsWith(".Url"))
+                .Excluding(m => m.SelectedMemberPath.EndsWith(".Uid"))
+            );
+            
+            // Delete "Test folder\Rutracker"
+            
+            await Client.DeleteRssItemAsync("Test folder\\Rutracker");
+            
+            items = await Client.GetRssItemsAsync();
+            expected = new RssFolder(
+                new RssItem[]
+                {
+                    new RssFolder("Test folder", null)
+                }
+            );
+            
+            items.Should().BeEquivalentTo(expected, cfg => cfg
+                .Excluding(m => m.SelectedMemberPath.EndsWith(".Url"))
+                .Excluding(m => m.SelectedMemberPath.EndsWith(".Uid"))
+            );
+            
+            // Delete "Test folder"
+            
+            await Client.DeleteRssItemAsync("Test folder");
+            
+            items = await Client.GetRssItemsAsync();
+            expected = new RssFolder();
+            
+            items.Should().BeEquivalentTo(expected, cfg => cfg
+                .Excluding(m => m.SelectedMemberPath.EndsWith(".Url"))
+                .Excluding(m => m.SelectedMemberPath.EndsWith(".Uid"))
+            );
+        }
+        
+        [SkippableFact]
+        public async Task MoveRssItems()
+        {
+            Skip.If(ApiVersionLessThan(2, 1));
+
+            await Client.LoginAsync(UserName, Password);
+
+            await Client.AddRssFolderAsync("Test folder");
+            await Client.AddRssFeedAsync(new Uri("file:///rss/ubuntu.rss"), "Ubuntu");
+            await Client.AddRssFeedAsync(new Uri("file:///rss/rutracker.rss"), "Test folder\\Rutracker");
+            
+            var items = await Client.GetRssItemsAsync();
+            var expected = new RssFolder(
+                new RssItem[]
+                {
+                    new RssFeed { Name = "Ubuntu" },
+                    new RssFolder("Test folder",
+                        new RssItem[]
+                        {
+                            new RssFeed { Name = "Rutracker" }
+                        })
+                }
+            );
+
+            items.Should().BeEquivalentTo(expected, cfg => cfg
+                .Excluding(m => m.SelectedMemberPath.EndsWith(".Url"))
+                .Excluding(m => m.SelectedMemberPath.EndsWith(".Uid"))
+            );
+
+            // Move "Ubuntu" to "Test folder\Ubuntu"
+            
+            await Client.MoveRssItemAsync("Ubuntu", "Test folder\\Ubuntu");
+            
+            items = await Client.GetRssItemsAsync();
+            expected = new RssFolder(
+                new RssItem[]
+                {
+                    new RssFolder("Test folder",
+                        new RssItem[]
+                        {
+                            new RssFeed { Name = "Rutracker" },
+                            new RssFeed { Name = "Ubuntu" },
+                        })
+                }
+            );
+            
+            items.Should().BeEquivalentTo(expected, cfg => cfg
+                .Excluding(m => m.SelectedMemberPath.EndsWith(".Url"))
+                .Excluding(m => m.SelectedMemberPath.EndsWith(".Uid"))
+            );
+            
+            // Rename "Test folder\Rutracker" to "Test folder\Rutracker Ubuntu"
+            
+            await Client.MoveRssItemAsync("Test folder\\Rutracker","Test folder\\Rutracker Ubuntu");
+            
+            items = await Client.GetRssItemsAsync();
+            expected = new RssFolder(
+                new RssItem[]
+                {
+                    new RssFolder("Test folder",
+                        new RssItem[]
+                        {
+                            new RssFeed { Name = "Rutracker Ubuntu" },
+                            new RssFeed { Name = "Ubuntu" },
+                        })
+                }
+            );
+            
+            items.Should().BeEquivalentTo(expected, cfg => cfg
+                .Excluding(m => m.SelectedMemberPath.EndsWith(".Url"))
+                .Excluding(m => m.SelectedMemberPath.EndsWith(".Uid"))
+            );
+            
+            // Move and rename "Test folder\Rutracker Ubuntu" to "Rutracker"
+            
+            await Client.MoveRssItemAsync("Test folder\\Rutracker Ubuntu","Rutracker");
+            
+            items = await Client.GetRssItemsAsync();
+            items = await Client.GetRssItemsAsync();
+            expected = new RssFolder(
+                new RssItem[]
+                {
+                    new RssFeed { Name = "Rutracker" },
+                    new RssFolder("Test folder",
+                        new RssItem[]
+                        {
+                            new RssFeed { Name = "Ubuntu" },
+                        })
+                }
+            );
+            
             items.Should().BeEquivalentTo(expected, cfg => cfg
                 .Excluding(m => m.SelectedMemberPath.EndsWith(".Url"))
                 .Excluding(m => m.SelectedMemberPath.EndsWith(".Uid"))

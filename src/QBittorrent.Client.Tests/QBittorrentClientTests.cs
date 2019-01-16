@@ -2911,6 +2911,113 @@ namespace QBittorrent.Client.Tests
             );
         }
 
+        [SkippableFact]
+        public async Task AddRssAutoDownloadingRule()
+        {
+            Skip.If(ApiVersionLessThan(2, 1));
+            
+            await Client.LoginAsync(UserName, Password);
+
+            var rule = new RssAutoDownloadingRule()
+            {
+                AssignedCategory = "Linux",
+                MustContain = "Ubuntu",
+                AddPaused =  true,
+                LastMatch = new DateTimeOffset(2019, 1, 16, 17, 45, 0, TimeSpan.FromHours(3))
+            };
+
+            await Client.SetRssAutoDownloadingRuleAsync("Ubuntu rule", rule);
+
+            var rules = await Client.GetRssAutoDownloadingRulesAsync();
+            rules.Should().HaveCount(1);
+            rules["Ubuntu rule"].Should().BeEquivalentTo(rule, cfg => cfg.Excluding(r => r.AdditionalData));
+        }
+        
+        [SkippableFact]
+        public async Task UpdateRssAutoDownloadingRule()
+        {
+            Skip.If(ApiVersionLessThan(2, 1));
+            
+            await Client.LoginAsync(UserName, Password);
+
+            var rule = new RssAutoDownloadingRule()
+            {
+                AssignedCategory = "Linux",
+                MustContain = "KUbuntu",
+                AddPaused =  true
+            };
+
+            await Client.SetRssAutoDownloadingRuleAsync("Ubuntu rule", rule);
+
+            var rules = await Client.GetRssAutoDownloadingRulesAsync();
+            rules.Should().HaveCount(1);
+            rules["Ubuntu rule"].Should().BeEquivalentTo(rule, cfg => cfg.Excluding(r => r.AdditionalData));
+
+            rule.MustContain = "Ubuntu";
+            
+            await Client.SetRssAutoDownloadingRuleAsync("Ubuntu rule", rule);
+
+            rules = await Client.GetRssAutoDownloadingRulesAsync();
+            rules.Should().HaveCount(1);
+            rules["Ubuntu rule"].Should().BeEquivalentTo(rule, cfg => cfg.Excluding(r => r.AdditionalData));
+        }
+        
+        [SkippableFact(Skip = "This functionality does not work in current versions of qBittorrent")]
+        public async Task RenameRssAutoDownloadingRule()
+        {
+            Skip.If(ApiVersionLessThan(2, 1));
+            
+            await Client.LoginAsync(UserName, Password);
+
+            var rule = new RssAutoDownloadingRule()
+            {
+                AssignedCategory = "Linux",
+                MustContain = "KUbuntu",
+                AddPaused =  true
+            };
+
+            await Client.SetRssAutoDownloadingRuleAsync("Ubuntu rule", rule);
+
+            var rules = await Client.GetRssAutoDownloadingRulesAsync();
+            rules.Should().HaveCount(1);
+            rules.Single().Key.Should().Be("Ubuntu rule");
+
+            await Client.RenameRssAutoDownloadingRuleAsync("Ubuntu rule", "KUbuntu rule");
+
+            await Utils.Retry(async () =>
+            {
+                rules = await Client.GetRssAutoDownloadingRulesAsync();
+                rules.Should().HaveCount(1);
+                rules.Single().Key.Should().Be("KUbuntu rule");
+            });
+        }
+
+        [SkippableFact]
+        public async Task DeleteRssAutoDownloadingRule()
+        {
+            Skip.If(ApiVersionLessThan(2, 1));
+            
+            await Client.LoginAsync(UserName, Password);
+
+            var rule = new RssAutoDownloadingRule()
+            {
+                AssignedCategory = "Linux",
+                MustContain = "Ubuntu",
+                AddPaused =  true
+            };
+
+            await Client.SetRssAutoDownloadingRuleAsync("Ubuntu rule", rule);
+
+            var rules = await Client.GetRssAutoDownloadingRulesAsync();
+            rules.Should().HaveCount(1);
+            rules["Ubuntu rule"].Should().BeEquivalentTo(rule, cfg => cfg.Excluding(r => r.AdditionalData));
+
+            await Client.DeleteRssAutoDownloadingRuleAsync("Ubuntu rule");
+            
+            rules = await Client.GetRssAutoDownloadingRulesAsync();
+            rules.Should().BeEmpty();
+        }
+        
         #endregion
 
         private bool ApiVersionLessThan(byte major, byte minor = 0, byte build = 0)

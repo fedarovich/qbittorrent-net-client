@@ -30,12 +30,7 @@ namespace QBittorrent.Client.Tests
                     ""savePath"": ""C:/Users/JohnDoe/Downloads/Punisher""
                 }";
 
-            var settings = new JsonSerializerSettings
-            {
-                DateFormatString = "dd MMM yyyy HH:mm:ss"
-            };
-
-            var rule = JsonConvert.DeserializeObject<RssAutoDownloadingRule>(ruleText, settings);
+            var rule = JsonConvert.DeserializeObject<RssAutoDownloadingRule>(ruleText);
             rule.Should().BeEquivalentTo(
                 new RssAutoDownloadingRule
                 {

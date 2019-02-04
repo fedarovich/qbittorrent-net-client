@@ -1121,7 +1121,7 @@ namespace QBittorrent.Client
             ApiVersion minApiVersion = default)
         {
             var provider = await _requestProvider.GetValueAsync(token).ConfigureAwait(false);
-            await EnsureApiVersion(provider, token, minApiLevel, minApiVersion);
+            await EnsureApiVersionAsync(provider, token, minApiLevel, minApiVersion);
 
             var (uri, content) = builder(provider);
             using (var response = await _client.PostAsync(uri, content, token).ConfigureAwait(false))
@@ -1137,7 +1137,7 @@ namespace QBittorrent.Client
             ApiVersion minApiVersion = default)
         {
             var provider = await _requestProvider.GetValueAsync(token).ConfigureAwait(false);
-            await EnsureApiVersion(provider, token, minApiLevel, minApiVersion);
+            await EnsureApiVersionAsync(provider, token, minApiLevel, minApiVersion);
 
             var (uri, content) = builder(provider);
             using (var response = await _client.PostAsync(uri, content, token).ConfigureAwait(false))
@@ -1147,7 +1147,7 @@ namespace QBittorrent.Client
             }
         }
 
-        private async Task EnsureApiVersion(IRequestProvider provider, 
+        private async Task EnsureApiVersionAsync(IRequestProvider provider, 
             CancellationToken token, 
             ApiLevel minApiLevel = ApiLevel.V1,
             ApiVersion minApiVersion = default)

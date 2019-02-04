@@ -295,6 +295,10 @@ namespace QBittorrent.Client.Internal
 
         public abstract (Uri url, HttpContent request) Reannounce(IEnumerable<string> hashes);
 
+        public abstract (Uri url, HttpContent) EditTracker(string hash, Uri trackerUrl, Uri newTrackerUrl);
+
+        public abstract (Uri url, HttpContent) DeleteTrackers(string hash, IEnumerable<Uri> trackerUrls);
+
         public abstract (Uri url, HttpContent request) AddRssFolder(string path);
 
         public abstract (Uri url, HttpContent request) AddRssFeed(Uri url, string path);

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using JetBrains.Annotations;
@@ -24,6 +25,9 @@ namespace QBittorrent.Client
 
         [SuppressMessage("ReSharper", "InconsistentNaming")]
         private static readonly ApiVersion Version_2_1_1 = new ApiVersion(2, 1, 1);
+
+        [SuppressMessage("ReSharper", "InconsistentNaming")]
+        private static readonly ApiVersion Version_2_2_0 = new ApiVersion(2, 2, 0);
 
         /// <summary>
         /// Gets the peer log.
@@ -342,11 +346,57 @@ namespace QBittorrent.Client
         public async Task<IReadOnlyDictionary<string, Category>> GetCategoriesAsync(CancellationToken token = default)
         {
             var provider = await _requestProvider.GetValueAsync(token).ConfigureAwait(false);
-            await EnsureApiVersion(provider, token, ApiLevel.V2, Version_2_1_1);
+            await EnsureApiVersionAsync(provider, token, ApiLevel.V2, Version_2_1_1);
 
             var uri = provider.Url.GetCategories();
             var json = await _client.GetStringAsync(uri, token).ConfigureAwait(false);
             return JsonConvert.DeserializeObject<Dictionary<string, Category>>(json);
+        }
+
+        /// <summary>
+        /// Changes tracker URL.
+        /// </summary>
+        /// <param name="hash">The hash of the torrent.</param>
+        /// <param name="trackerUrl">The tracker URL you want to edit.</param>
+        /// <param name="newTrackerUrl">The new URL to replace the <paramref name="trackerUrl"/>.</param>
+        /// <param name="token">The cancellation token.</param>
+        /// <returns></returns>
+        [ApiLevel(ApiLevel.V2, MinVersion = "2.2.0")]
+        public Task EditTrackerAsync(string hash, Uri trackerUrl, Uri newTrackerUrl, CancellationToken token = default)
+        {
+            ValidateHash(hash);
+            if (trackerUrl == null)
+                throw new ArgumentNullException(nameof(trackerUrl));
+            if (newTrackerUrl == null)
+                throw new ArgumentNullException(nameof(newTrackerUrl));
+            if (!trackerUrl.IsAbsoluteUri)
+                throw new ArgumentException(nameof(trackerUrl) + " must be an absolute URI.", nameof(trackerUrl));
+            if (!newTrackerUrl.IsAbsoluteUri)
+                throw new ArgumentException(nameof(newTrackerUrl) + " must be an absolute URI.", nameof(newTrackerUrl));
+
+            return PostAsync(p => p.EditTracker(hash, trackerUrl, newTrackerUrl), token, ApiLevel.V2, Version_2_2_0);
+        }
+
+        /// <summary>
+        /// Removes the trackers from the torrent.
+        /// </summary>
+        /// <param name="hash">The hash of the torrent.</param>
+        /// <param name="trackerUrls">The tracker URLs you want to remove.</param>
+        /// <param name="token">The cancellation token.</param>
+        /// <returns></returns>
+        [ApiLevel(ApiLevel.V2, MinVersion = "2.2.0")]
+        public Task DeleteTrackersAsync(string hash, IEnumerable<Uri> trackerUrls, CancellationToken token = default)
+        {
+            ValidateHash(hash);
+            if (trackerUrls == null)
+                throw new ArgumentNullException(nameof(trackerUrls));
+            var urls = trackerUrls.ToList();
+            if (urls.Any(u => u == null))
+                throw new ArgumentException("The tracker URL cannot be null.", nameof(trackerUrls));
+            if (urls.Any(u => !u.IsAbsoluteUri))
+                throw new ArgumentException("The tracker URLs must be absolute.", nameof(trackerUrls));
+
+            return PostAsync(p => p.DeleteTrackers(hash, urls), token, ApiLevel.V2, Version_2_2_0);
         }
 
         /// <summary>
@@ -503,7 +553,7 @@ namespace QBittorrent.Client
         public async Task<IReadOnlyDictionary<string, RssAutoDownloadingRule>> GetRssAutoDownloadingRulesAsync(CancellationToken token = default)
         {
             var provider = await _requestProvider.GetValueAsync(token).ConfigureAwait(false);
-            await EnsureApiVersion(provider, token, ApiLevel.V2, Version_2_1_0).ConfigureAwait(false);
+            await EnsureApiVersionAsync(provider, token, ApiLevel.V2, Version_2_1_0).ConfigureAwait(false);
 
             var uri = provider.Url.GetRssAutoDownloadingRules();
             var json = await _client.GetStringAsync(uri, token).ConfigureAwait(false);

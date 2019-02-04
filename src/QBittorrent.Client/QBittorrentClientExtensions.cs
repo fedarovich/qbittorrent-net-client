@@ -308,5 +308,23 @@ namespace QBittorrent.Client
             ValidateHash(hash);
             return client.ReannounceAsync(new[] { hash }, token);
         }
+
+        /// <summary>
+        /// Removes the trackers from the torrent.
+        /// </summary>
+        /// <param name="client">An <see cref="IQBittorrentClient2"/> instance.</param>
+        /// <param name="hash">The hash of the torrent.</param>
+        /// <param name="trackerUrl">The tracker URL you want to remove.</param>
+        /// <param name="token">The cancellation token.</param>
+        /// <returns></returns>
+        [ApiLevel(ApiLevel.V2, MinVersion = "2.2.0")]
+        public static Task DeleteTrackerAsync(
+            [NotNull] this IQBittorrentClient2 client,
+            [NotNull] string hash,
+            [NotNull] Uri trackerUrl,
+            CancellationToken token = default)
+        {
+            return client.DeleteTrackersAsync(hash, new[] {trackerUrl}, token);
+        }
     }
 }

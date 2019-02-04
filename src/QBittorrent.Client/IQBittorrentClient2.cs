@@ -244,6 +244,34 @@ namespace QBittorrent.Client
         Task<IReadOnlyDictionary<string, Category>> GetCategoriesAsync(
             CancellationToken token = default);
 
+        /// <summary>
+        /// Changes tracker URL.
+        /// </summary>
+        /// <param name="hash">The hash of the torrent.</param>
+        /// <param name="trackerUrl">The tracker URL you want to edit.</param>
+        /// <param name="newTrackerUrl">The new URL to replace the <paramref name="trackerUrl"/>.</param>
+        /// <param name="token">The cancellation token.</param>
+        /// <returns></returns>
+        [ApiLevel(ApiLevel.V2, MinVersion = "2.2.0")]
+        Task EditTrackerAsync(
+            [NotNull] string hash,
+            [NotNull] Uri trackerUrl,
+            [NotNull] Uri newTrackerUrl,
+            CancellationToken token = default);
+
+        /// <summary>
+        /// Removes the trackers from the torrent.
+        /// </summary>
+        /// <param name="hash">The hash of the torrent.</param>
+        /// <param name="trackerUrls">The tracker URLs you want to remove.</param>
+        /// <param name="token">The cancellation token.</param>
+        /// <returns></returns>
+        [ApiLevel(ApiLevel.V2, MinVersion = "2.2.0")]
+        Task DeleteTrackersAsync(
+            [NotNull] string hash,
+            [NotNull, ItemNotNull] IEnumerable<Uri> trackerUrls,
+            CancellationToken token = default);
+
         // RSS
 
         /// <summary>
@@ -252,7 +280,7 @@ namespace QBittorrent.Client
         /// <param name="path">Full path of added folder.</param>
         /// <param name="token">The cancellation token.</param>
         /// <returns></returns>
-        [ApiLevel(ApiLevel.V2)]
+        [ApiLevel(ApiLevel.V2, MinVersion = "2.1.0")]
         Task AddRssFolderAsync(
             string path,
             CancellationToken token = default);
@@ -264,7 +292,7 @@ namespace QBittorrent.Client
         /// <param name="path">The full path of added folder.</param>
         /// <param name="token">The cancellation token.</param>
         /// <returns></returns>
-        [ApiLevel(ApiLevel.V2)]
+        [ApiLevel(ApiLevel.V2, MinVersion = "2.1.0")]
         Task AddRssFeedAsync(
             Uri url,
             string path = "",
@@ -276,7 +304,7 @@ namespace QBittorrent.Client
         /// <param name="path">The full path of removed folder or feed.</param>
         /// <param name="token">The cancellation token.</param>
         /// <returns></returns>
-        [ApiLevel(ApiLevel.V2)]
+        [ApiLevel(ApiLevel.V2, MinVersion = "2.1.0")]
         Task DeleteRssItemAsync(
             string path,
             CancellationToken token = default);
@@ -288,7 +316,7 @@ namespace QBittorrent.Client
         /// <param name="newPath">The new path.</param>
         /// <param name="token">The cancellation token.</param>
         /// <returns></returns>
-        [ApiLevel(ApiLevel.V2)]
+        [ApiLevel(ApiLevel.V2, MinVersion = "2.1.0")]
         Task MoveRssItemAsync(
             string path,
             string newPath,
@@ -300,8 +328,7 @@ namespace QBittorrent.Client
         /// <param name="withData"><see langword="true" /> if you need current feed articles.</param>
         /// <param name="token">The cancellation token.</param>
         /// <returns></returns>
-        [ApiLevel(ApiLevel.V2)]
-        // TODO: Create classes for RSS items        
+        [ApiLevel(ApiLevel.V2, MinVersion = "2.1.0")]
         Task<RssFolder> GetRssItemsAsync(
             bool withData = false,
             CancellationToken token = default);
@@ -313,7 +340,7 @@ namespace QBittorrent.Client
         /// <param name="rule">The rule definition.</param>
         /// <param name="token">The cancellation token.</param>
         /// <returns></returns>
-        [ApiLevel(ApiLevel.V2)]
+        [ApiLevel(ApiLevel.V2, MinVersion = "2.1.0")]
         Task SetRssAutoDownloadingRuleAsync(
             string name,
             RssAutoDownloadingRule rule,
@@ -326,7 +353,7 @@ namespace QBittorrent.Client
         /// <param name="newName">The new rule name.</param>
         /// <param name="token">The cancellation token.</param>
         /// <returns></returns>
-        [ApiLevel(ApiLevel.V2)]
+        [ApiLevel(ApiLevel.V2, MinVersion = "2.1.0")]
         Task RenameRssAutoDownloadingRuleAsync(
             string name,
             string newName,
@@ -338,7 +365,7 @@ namespace QBittorrent.Client
         /// <param name="name">The rule name.</param>
         /// <param name="token">The cancellation token.</param>
         /// <returns></returns>
-        [ApiLevel(ApiLevel.V2)]
+        [ApiLevel(ApiLevel.V2, MinVersion = "2.1.0")]
         Task DeleteRssAutoDownloadingRuleAsync(
             string name,
             CancellationToken token = default);
@@ -348,7 +375,7 @@ namespace QBittorrent.Client
         /// </summary>
         /// <param name="token">The cancellation token.</param>
         /// <returns></returns>
-        [ApiLevel(ApiLevel.V2)]
+        [ApiLevel(ApiLevel.V2, MinVersion = "2.1.0")]
         Task<IReadOnlyDictionary<string, RssAutoDownloadingRule>> GetRssAutoDownloadingRulesAsync(
             CancellationToken token = default);
     }

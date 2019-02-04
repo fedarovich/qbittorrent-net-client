@@ -67,6 +67,21 @@ namespace QBittorrent.Client.Internal
                 ("hashes", JoinHashes(hashes)));
         }
 
+        public override (Uri url, HttpContent) EditTracker(string hash, Uri trackerUrl, Uri newTrackerUrl)
+        {
+            return BuildForm(Url.EditTracker(),
+                ("hash", hash),
+                ("origUrl", trackerUrl.AbsoluteUri),
+                ("newUrl", newTrackerUrl.AbsoluteUri));
+        }
+
+        public override (Uri url, HttpContent) DeleteTrackers(string hash, IEnumerable<Uri> trackerUrls)
+        {
+            return BuildForm(Url.EditTracker(),
+                ("hash", hash),
+                ("urls", string.Join("|", trackerUrls.Select(u => u.AbsoluteUri))));
+        }
+
         public override (Uri url, HttpContent request) AddTorrents(AddTorrentsRequest request)
         {
             var data = AddTorrentsCore(request);

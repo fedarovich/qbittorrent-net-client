@@ -58,7 +58,8 @@ namespace QBittorrent.Client.Internal
                 .AddNotNullValue("upLimit", request.UploadLimit)
                 .AddNotNullValue("dlLimit", request.DownloadLimit)
                 .AddValue("sequentialDownload", request.SequentialDownload)
-                .AddValue("firstLastPiecePrio", request.FirstLastPiecePrioritized);
+                .AddValue("firstLastPiecePrio", request.FirstLastPiecePrioritized)
+                .AddValue("autoTMM", request.AutomaticTorrentManagement);
         }
 
         public abstract (Uri url, HttpContent request) Pause(IEnumerable<string> hashes);

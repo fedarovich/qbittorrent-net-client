@@ -59,6 +59,12 @@
         /// Prioritize download of first and last pieces
         /// </summary>
         public bool FirstLastPiecePrioritized { get; set; }
-        
+
+        /// <summary>
+        /// Enable/disable automatic torrent management for these torrents
+        /// </summary>
+        /// <remarks>This value is ignored until API v2.2.0</remarks>
+        [ApiLevel(ApiLevel.V2, MinVersion = "2.2.0")]
+        public bool? AutomaticTorrentManagement { get; set; }
     }
 }

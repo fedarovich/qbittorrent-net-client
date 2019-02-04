@@ -272,6 +272,21 @@ namespace QBittorrent.Client
             [NotNull, ItemNotNull] IEnumerable<Uri> trackerUrls,
             CancellationToken token = default);
 
+        /// <summary>
+        /// Sets the file priority for multiple files.
+        /// </summary>
+        /// <param name="hash">The torrent hash.</param>
+        /// <param name="fileIds">The file identifiers.</param>
+        /// <param name="priority">The priority.</param>
+        /// <param name="token">The cancellation token.</param>
+        /// <returns></returns>
+        [ApiLevel(ApiLevel.V2, MinVersion = "2.2.0")]
+        Task SetFilePriorityAsync(
+            [NotNull] string hash,
+            [NotNull] IEnumerable<int> fileIds,
+            TorrentContentPriority priority,
+            CancellationToken token = default);
+
         // RSS
 
         /// <summary>

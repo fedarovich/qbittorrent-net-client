@@ -91,9 +91,11 @@ namespace QBittorrent.Client.Internal
 
         (Uri url, HttpContent request) Reannounce(IEnumerable<string> hashes);
 
-        (Uri url, HttpContent) EditTracker(string hash, Uri trackerUrl, Uri newTrackerUrl);
+        (Uri url, HttpContent request) EditTracker(string hash, Uri trackerUrl, Uri newTrackerUrl);
 
-        (Uri url, HttpContent) DeleteTrackers(string hash, IEnumerable<Uri> trackerUrls);
+        (Uri url, HttpContent request) DeleteTrackers(string hash, IEnumerable<Uri> trackerUrls);
+
+        (Uri url, HttpContent request) SetFilePriority(string hash, IEnumerable<int> fileIds, TorrentContentPriority priority);
 
 
         // RSS

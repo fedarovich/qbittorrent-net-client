@@ -400,6 +400,31 @@ namespace QBittorrent.Client
         }
 
         /// <summary>
+        /// Sets the file priority for multiple files.
+        /// </summary>
+        /// <param name="hash">The torrent hash.</param>
+        /// <param name="fileIds">The file identifiers.</param>
+        /// <param name="priority">The priority.</param>
+        /// <param name="token">The cancellation token.</param>
+        /// <returns></returns>
+        [ApiLevel(ApiLevel.V2, MinVersion = "2.2.0")]
+        public Task SetFilePriorityAsync(string hash, IEnumerable<int> fileIds, TorrentContentPriority priority,
+            CancellationToken token = default)
+        {
+            ValidateHash(hash);
+            if (fileIds == null)
+                throw new ArgumentNullException(nameof(fileIds));
+            if (!Enum.GetValues(typeof(TorrentContentPriority)).Cast<TorrentContentPriority>().Contains(priority))
+                throw new ArgumentOutOfRangeException(nameof(priority));
+
+            var ids = fileIds.ToList();
+            if (ids.Any(id => id < 0))
+                throw new ArgumentException("The file IDs must be non-negative numbers.", nameof(fileIds));
+
+            return PostAsync(p => p.SetFilePriority(hash, ids, priority), token, ApiLevel.V2, Version_2_2_0);
+        }
+
+        /// <summary>
         /// Adds the RSS folder.
         /// </summary>
         /// <param name="path">Full path of added folder.</param>

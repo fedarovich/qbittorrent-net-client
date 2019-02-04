@@ -67,7 +67,7 @@ namespace QBittorrent.Client.Internal
                 ("hashes", JoinHashes(hashes)));
         }
 
-        public override (Uri url, HttpContent) EditTracker(string hash, Uri trackerUrl, Uri newTrackerUrl)
+        public override (Uri url, HttpContent request) EditTracker(string hash, Uri trackerUrl, Uri newTrackerUrl)
         {
             return BuildForm(Url.EditTracker(),
                 ("hash", hash),
@@ -75,11 +75,19 @@ namespace QBittorrent.Client.Internal
                 ("newUrl", newTrackerUrl.AbsoluteUri));
         }
 
-        public override (Uri url, HttpContent) DeleteTrackers(string hash, IEnumerable<Uri> trackerUrls)
+        public override (Uri url, HttpContent request) DeleteTrackers(string hash, IEnumerable<Uri> trackerUrls)
         {
             return BuildForm(Url.EditTracker(),
                 ("hash", hash),
                 ("urls", string.Join("|", trackerUrls.Select(u => u.AbsoluteUri))));
+        }
+
+        public override (Uri url, HttpContent request) SetFilePriority(string hash, IEnumerable<int> fileIds, TorrentContentPriority priority)
+        {
+            return BuildForm(Url.SetFilePriority(),
+                ("hash", hash),
+                ("id", string.Join("|", fileIds)),
+                ("priority", priority.ToString("D")));
         }
 
         public override (Uri url, HttpContent request) AddTorrents(AddTorrentsRequest request)

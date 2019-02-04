@@ -150,6 +150,8 @@ namespace QBittorrent.Client.Internal
 
         public Uri Reannounce() => Create("/api/v2/torrents/reannounce");
 
+        public Uri GetCategories() => Create("/api/v2/torrents/categories");
+
         public Uri AddRssFolder() => Create("/api/v2/rss/addFolder");
 
         public Uri AddRssFeed() => Create("/api/v2/rss/addFeed");

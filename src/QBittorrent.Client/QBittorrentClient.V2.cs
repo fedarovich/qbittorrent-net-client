@@ -22,6 +22,9 @@ namespace QBittorrent.Client
         [SuppressMessage("ReSharper", "InconsistentNaming")]
         private static readonly ApiVersion Version_2_1_0 = new ApiVersion(2, 1);
 
+        [SuppressMessage("ReSharper", "InconsistentNaming")]
+        private static readonly ApiVersion Version_2_1_1 = new ApiVersion(2, 1, 1);
+
         /// <summary>
         /// Gets the peer log.
         /// </summary>
@@ -331,6 +334,22 @@ namespace QBittorrent.Client
         }
 
         /// <summary>
+        /// Gets all categories.
+        /// </summary>
+        /// <param name="token">The cancellation token.</param>
+        /// <returns></returns>
+        [ApiLevel(ApiLevel.V2, MinVersion = "2.1.1")]
+        public async Task<IReadOnlyDictionary<string, Category>> GetCategoriesAsync(CancellationToken token = default)
+        {
+            var provider = await _requestProvider.GetValueAsync(token).ConfigureAwait(false);
+            await EnsureApiVersion(provider, token, ApiLevel.V2, Version_2_1_1);
+
+            var uri = provider.Url.GetCategories();
+            var json = await _client.GetStringAsync(uri, token).ConfigureAwait(false);
+            return JsonConvert.DeserializeObject<Dictionary<string, Category>>(json);
+        }
+
+        /// <summary>
         /// Adds the RSS folder.
         /// </summary>
         /// <param name="path">Full path of added folder.</param>
@@ -484,9 +503,7 @@ namespace QBittorrent.Client
         public async Task<IReadOnlyDictionary<string, RssAutoDownloadingRule>> GetRssAutoDownloadingRulesAsync(CancellationToken token = default)
         {
             var provider = await _requestProvider.GetValueAsync(token).ConfigureAwait(false);
-            if (provider.ApiLevel < ApiLevel.V2
-                || await GetApiVersionAsync(token).ConfigureAwait(false) < Version_2_1_0)
-                throw new ApiNotSupportedException(ApiLevel.V2);
+            await EnsureApiVersion(provider, token, ApiLevel.V2, Version_2_1_0).ConfigureAwait(false);
 
             var uri = provider.Url.GetRssAutoDownloadingRules();
             var json = await _client.GetStringAsync(uri, token).ConfigureAwait(false);

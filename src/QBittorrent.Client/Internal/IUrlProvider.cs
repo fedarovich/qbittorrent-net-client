@@ -124,6 +124,8 @@ namespace QBittorrent.Client.Internal
 
         Uri Reannounce();
 
+        Uri GetCategories();
+
         // RSS
 
         Uri AddRssFolder();

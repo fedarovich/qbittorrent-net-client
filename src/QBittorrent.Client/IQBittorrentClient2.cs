@@ -235,6 +235,15 @@ namespace QBittorrent.Client
             string savePath,
             CancellationToken token = default);
 
+        /// <summary>
+        /// Gets all categories.
+        /// </summary>
+        /// <param name="token">The cancellation token.</param>
+        /// <returns></returns>
+        [ApiLevel(ApiLevel.V2, MinVersion = "2.1.1")]
+        Task<IReadOnlyDictionary<string, Category>> GetCategoriesAsync(
+            CancellationToken token = default);
+
         // RSS
 
         /// <summary>

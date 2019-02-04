@@ -602,6 +602,116 @@ namespace QBittorrent.Client
         [JsonProperty("bittorrent_protocol")]
         public BittorrentProtocol? BittorrentProtocol { get; set; }
 
+        /* API 2.2.0 */
+
+        /// <summary>
+        /// True if a subfolder should be created when adding a torrent
+        /// </summary>
+        [JsonProperty("create_subfolder_enabled")]
+        [ApiLevel(ApiLevel.V2, MinVersion = "2.2.0")]
+        public bool? CreateTorrentSubfolder { get; set; }
+
+        /// <summary>
+        /// True if torrents should be added in a Paused state
+        /// </summary>
+        [JsonProperty("start_paused_enabled")]
+        [ApiLevel(ApiLevel.V2, MinVersion = "2.2.0")]
+        public bool? AddTorrentPaused { get; set; }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        [JsonProperty("auto_delete_mode")]
+        [ApiLevel(ApiLevel.V2, MinVersion = "2.2.0")]
+        public TorrentFileAutoDeleteMode? TorrentFileAutoDeleteMode { get; set; }
+
+        /// <summary>
+        /// True if Automatic Torrent Management is enabled by default
+        /// </summary>
+        [JsonProperty("auto_tmm_enabled")]
+        [ApiLevel(ApiLevel.V2, MinVersion = "2.2.0")]
+        [SuppressMessage("ReSharper", "InconsistentNaming")]
+        public bool? AutoTMMEnabledByDefault { get; set; }
+
+        /// <summary>
+        /// True if torrent should be relocated when its category changes
+        /// </summary>
+        [JsonProperty("torrent_changed_tmm_enabled")]
+        [ApiLevel(ApiLevel.V2, MinVersion = "2.2.0")]
+        [SuppressMessage("ReSharper", "InconsistentNaming")]
+        public bool? AutoTMMRetainedWhenCategoryChanges { get; set; }
+
+        /// <summary>
+        /// True if torrent should be relocated when the default save path changes
+        /// </summary>
+        [JsonProperty("save_path_changed_tmm_enabled")]
+        [ApiLevel(ApiLevel.V2, MinVersion = "2.2.0")]
+        [SuppressMessage("ReSharper", "InconsistentNaming")]
+        public bool? AutoTMMRetainedWhenDefaultSavePathChanges { get; set; }
+
+
+        /// <summary>
+        /// True if torrent should be relocated when its category's save path changes
+        /// </summary>
+        [JsonProperty("category_changed_tmm_enabled")]
+        [ApiLevel(ApiLevel.V2, MinVersion = "2.2.0")]
+        [SuppressMessage("ReSharper", "InconsistentNaming")]
+        public bool? AutoTMMRetainedWhenCategorySavePathChanges { get; set; }
+
+        /// <summary>
+        /// E-mail where notifications should originate from
+        /// </summary>
+        [JsonProperty("mail_notification_sender")]
+        [ApiLevel(ApiLevel.V2, MinVersion = "2.2.0")]
+        public string MailNotificationSender { get; set; }
+
+        /// <summary>
+        /// True if <see cref="DownloadLimit" /> and <seealso cref="UploadLimit"/> should be applied to peers on the LAN
+        /// </summary>
+        [JsonProperty("limit_lan_peers")]
+        [ApiLevel(ApiLevel.V2, MinVersion = "2.2.0")]
+        [SuppressMessage("ReSharper", "InconsistentNaming")]
+        public bool? LimitLAN { get; set; }
+
+        /// <summary>
+        /// Download rate in KiB/s for a torrent to be considered "slow"
+        /// </summary>
+        [JsonProperty("slow_torrent_dl_rate_threshold")]
+        [ApiLevel(ApiLevel.V2, MinVersion = "2.2.0")]
+        public int? SlowTorrentDownloadRateThreshold { get; set; }
+
+        /// <summary>
+        /// Upload rate in KiB/s for a torrent to be considered "slow"
+        /// </summary>
+        [JsonProperty("slow_torrent_ul_rate_threshold")]
+        [ApiLevel(ApiLevel.V2, MinVersion = "2.2.0")]
+        public int? SlowTorrentUploadRateThreshold { get; set; }
+
+        /// <summary>
+        /// Time in seconds a torrent should be inactive before considered "slow"
+        /// </summary>
+        [JsonProperty("slow_torrent_inactive_timer")]
+        [ApiLevel(ApiLevel.V2, MinVersion = "2.2.0")]
+        public int? SlowTorrentInactiveTime { get; set; }
+
+        /// <summary>
+        /// True if an alternative WebUI should be used
+        /// </summary>
+        [JsonProperty("alternative_webui_enabled")]
+        [SuppressMessage("ReSharper", "InconsistentNaming")]
+        [ApiLevel(ApiLevel.V2, MinVersion = "2.2.0")]
+        public bool? AlternativeWebUIEnabled { get; set; }
+
+        /// <summary>
+        /// File path to the alternative WebUI
+        /// </summary>
+        [JsonProperty("alternative_webui_path")]
+        [SuppressMessage("ReSharper", "InconsistentNaming")]
+        [ApiLevel(ApiLevel.V2, MinVersion = "2.2.0")]
+        public string AlternativeWebUIPath { get; set; }
+
+        /* Other */
+
         /// <summary>
         /// Additional properties not handled by this library.
         /// </summary>

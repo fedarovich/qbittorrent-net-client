@@ -62,7 +62,8 @@ namespace QBittorrent.Client.Tests
                 ExposedPorts = new Dictionary<string, EmptyStruct>
                 {
                     ["8080/tcp"] = new EmptyStruct(),
-                    ["9090/tcp"] = new EmptyStruct()
+                    ["9090/tcp"] = new EmptyStruct(),
+                    ["6881/tcp"] = new EmptyStruct()
                 },
                 HostConfig = new HostConfig
                 {
@@ -82,6 +83,14 @@ namespace QBittorrent.Client.Tests
                             {
                                 HostIP = Utils.IsWindows ? null : "0.0.0.0",
                                 HostPort = "9090"
+                            }
+                        },
+                        ["6881/tcp"] = new List<PortBinding>
+                        {
+                            new PortBinding
+                            {
+                                HostIP = Utils.IsWindows ? null : "0.0.0.0",
+                                HostPort = "6881"
                             }
                         }
                     }

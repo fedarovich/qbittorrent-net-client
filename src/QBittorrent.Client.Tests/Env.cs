@@ -21,7 +21,7 @@ namespace QBittorrent.Client.Tests
         [JsonConverter(typeof(VersionConverter))]
         public Version QBittorrentVersion { get; set; }
 
-        [JsonProperty("binaries")]
-        public IDictionary<string, string> Binaries { get; set; }
+        [JsonProperty("docker-image")]
+        public string Image { get; set; }
     }
 }

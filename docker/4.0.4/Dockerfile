@@ -30,12 +30,14 @@ RUN set -x \
  && cd /tmp/libtorrent-rasterbar/* \
  && mkdir build \
  && cd build \
- && cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_CXX_STANDARD=11 .. \
+ && cmake -DCMAKE_BUILD_TYPE=Release .. \
  && make install \
     # Clean-up
  && cd / \
  && apk del --purge .build-deps \
  && rm -rf /tmp/*
+
+COPY patches/stacktrace.patch /
 
 RUN set -x \
     # Install build dependencies
@@ -52,6 +54,11 @@ RUN set -x \
  && git checkout release-4.0.4 \
     # Compile
  && PKG_CONFIG_PATH=/usr/local/lib/pkgconfig ./configure --disable-gui --disable-stacktrace \
+    # Patch: Disable stack trace because it requires libexecline-dev which isn't available on Alpine 3.6.
+ && cd src/app \
+ && patch -i /stacktrace.patch \
+ && rm /stacktrace.patch \
+ && cd ../.. \
  && make install \
     # Clean-up
  && cd / \

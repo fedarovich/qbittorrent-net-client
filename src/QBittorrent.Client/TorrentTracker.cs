@@ -38,6 +38,7 @@ namespace QBittorrent.Client
         /// <para>Until API v2.2.0 this property might return localized status string.</para>
         /// <para>Starting from API v2.2.0 this property always returns English status string.</para>
         /// </remarks>
+        [JsonIgnore]
         public string Status { get; set; }
 
         /// <summary>
@@ -47,6 +48,7 @@ namespace QBittorrent.Client
         /// <remarks>
         /// Until API v2.2.0 this property might always return null on non-English localizations.
         /// </remarks>
+        [JsonIgnore]
         public TorrentTrackerStatus? TrackerStatus { get; set; }
 
         /// <summary>
@@ -112,11 +114,13 @@ namespace QBittorrent.Client
                 {
                     Status = status.ToObject<string>();
                     TrackerStatus = StringToStatus(Status);
+                    AdditionalData.Remove(statusKey);
                 }
                 else if (status.Type == JTokenType.Integer)
                 {
                     TrackerStatus = status.ToObject<TorrentTrackerStatus>();
                     Status = StatusToString(TrackerStatus);
+                    AdditionalData.Remove(statusKey);
                 }
             }
         }

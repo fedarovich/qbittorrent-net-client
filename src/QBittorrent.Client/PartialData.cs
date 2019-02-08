@@ -53,11 +53,13 @@ namespace QBittorrent.Client
         /// </remarks>
         /// <seealso cref="CategoriesChanged"/>
         [Obsolete("Use CategoriesChanged property instead.")]
+        [JsonIgnore]
         public IReadOnlyList<string> CategoriesAdded { get; set; }
 
         /// <summary>
         /// Gets or sets the changed categories with their save paths.
         /// </summary>
+        [JsonIgnore]
         public IReadOnlyDictionary<string, Category> CategoriesChanged { get; set; }
 
         /// <summary>

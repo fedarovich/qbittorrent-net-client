@@ -501,6 +501,9 @@ namespace QBittorrent.Client.Tests
 
                 var trackerUrls = trackers.Where(t => t.Url.IsAbsoluteUri).Select(t => t.Url.AbsoluteUri).ToList();
                 trackerUrls.Should().BeEquivalentTo(torrent.Trackers.SelectMany(x => x));
+
+                trackers.Select(t => t.Status).Should().NotContainNulls();
+                trackers.Select(t => t.TrackerStatus).Should().NotContainNulls();
             });
         }
 
@@ -770,6 +773,10 @@ namespace QBittorrent.Client.Tests
             partialData.CategoriesAdded.Should().BeEmpty();
             partialData.CategoriesChanged.Should().BeEmpty();
             partialData.CategoriesRemoved.Should().BeNull();
+            if (!ApiVersionLessThan(2, 1, 1))
+            {
+                partialData.ServerState.FreeSpaceOnDisk.Should().BeGreaterThan(0);
+            }
             responseId = partialData.ResponseId;
             var refreshInterval = partialData.ServerState.RefreshInterval ?? 1000;
 
@@ -978,6 +985,48 @@ namespace QBittorrent.Client.Tests
             {
                 list = await Client.GetTorrentListAsync();
                 list.Should().OnlyContain(t => t.State != TorrentState.PausedDownload);
+            });
+        }
+
+        #endregion
+
+        #region AddCategoryAsync/EditCategoryAsync/GetCategoriesAsync
+
+        [SkippableFact]
+        [PrintTestName]
+        public async Task Categories()
+        {
+            Skip.If(ApiVersionLessThan(2, 1, 1), "API 2.1.1+ required for this test.");
+
+            await Client.LoginAsync(UserName, Password);
+            var categories = await Client.GetCategoriesAsync();
+            categories.Should().BeEmpty();
+
+            await Client.AddCategoryAsync("Default");
+            await Client.AddCategoryAsync("Test", "/downloads/test1");
+
+            await Utils.Retry(async () =>
+            {
+                categories = await Client.GetCategoriesAsync();
+                categories.Should().NotBeEmpty();
+                categories.Should().BeEquivalentTo(new Dictionary<string, Category>()
+                {
+                    ["Default"] = new Category { Name = "Default", SavePath = "" },
+                    ["Test"] = new Category { Name = "Test", SavePath = "/downloads/test1" },
+                });
+            });
+
+            await Client.EditCategoryAsync("Test", "/downloads/test2");
+
+            await Utils.Retry(async () =>
+            {
+                categories = await Client.GetCategoriesAsync();
+                categories.Should().NotBeEmpty();
+                categories.Should().BeEquivalentTo(new Dictionary<string, Category>()
+                {
+                    ["Default"] = new Category { Name = "Default", SavePath = "" },
+                    ["Test"] = new Category { Name = "Test", SavePath = "/downloads/test2" },
+                });
             });
         }
 
@@ -1697,6 +1746,67 @@ namespace QBittorrent.Client.Tests
             });
         }
 
+        [SkippableFact]
+        [PrintTestName]
+        public async Task AddEditDeleteTracker()
+        {
+            Skip.If(ApiVersionLessThan(2, 2), "API 2.2+ required for this test.");
+
+            await Client.LoginAsync(UserName, Password);
+
+            var fileToAdd = Path.Combine(Utils.TorrentsFolder, "ubuntu-16.04.4-desktop-amd64.iso.torrent");
+            await Client.AddTorrentsAsync(new AddTorrentFilesRequest(fileToAdd));
+
+            var torrent = await Utils.Retry(async () =>
+            {
+                var list = await Client.GetTorrentListAsync();
+                return list.Single();
+            });
+
+            var tracker1 = new Uri("http://torrent.ubuntu.com:6969/announce");
+            var tracker2 = new Uri("http://ipv6.torrent.ubuntu.com:6969/announce");
+
+            var trackers = await Client.GetTorrentTrackersAsync(torrent.Hash);
+            trackers.Select(t => t.Url).Where(url => url.IsAbsoluteUri)
+                .Should().BeEquivalentTo(tracker1, tracker2);
+
+            var newTracker = new Uri("http://retracker.mgts.by:80/announce");
+            await Client.AddTrackerAsync(torrent.Hash, newTracker);
+
+            await Utils.Retry(async () =>
+            {
+                trackers = await Client.GetTorrentTrackersAsync(torrent.Hash);
+                trackers.Select(t => t.Url).Where(url => url.IsAbsoluteUri)
+                    .Should().BeEquivalentTo(tracker1, tracker2, newTracker);
+            });
+
+            await Client.DeleteTrackersAsync(torrent.Hash, new[] {tracker1, newTracker});
+
+            await Utils.Retry(async () =>
+            {
+                trackers = await Client.GetTorrentTrackersAsync(torrent.Hash);
+                trackers.Select(t => t.Url).Where(url => url.IsAbsoluteUri)
+                    .Should().BeEquivalentTo(tracker2);
+            });
+
+            await Client.EditTrackerAsync(torrent.Hash, tracker2, tracker1);
+
+            await Utils.Retry(async () =>
+            {
+                trackers = await Client.GetTorrentTrackersAsync(torrent.Hash);
+                trackers.Select(t => t.Url).Where(url => url.IsAbsoluteUri)
+                    .Should().BeEquivalentTo(tracker1);
+            });
+
+            await Client.DeleteTrackerAsync(torrent.Hash, tracker1);
+            await Utils.Retry(async () =>
+            {
+                trackers = await Client.GetTorrentTrackersAsync(torrent.Hash);
+                trackers.Select(t => t.Url).Where(url => url.IsAbsoluteUri)
+                    .Should().BeEmpty();
+            });
+        }
+
         #endregion
 
         #region GetLogAsync
@@ -1850,6 +1960,44 @@ namespace QBittorrent.Client.Tests
                 var list = await Client.GetTorrentListAsync();
                 list.Select(t => t.AutomaticTorrentManagement)
                     .Should().AllBeEquivalentTo(false);
+            });
+        }
+
+        [SkippableFact]
+        [PrintTestName]
+        public async Task AutomaticTorrentManagementOnAdd()
+        {
+            Skip.If(ApiVersionLessThan(2, 2), "API 2.2+ required for this test.");
+
+            await Client.LoginAsync(UserName, Password);
+
+            var fileToAdd = Path.Combine(Utils.TorrentsFolder, "ubuntu-16.04.4-desktop-amd64.iso.torrent");
+            await Utils.Retry(() => Client.AddTorrentsAsync(
+                new AddTorrentFilesRequest(fileToAdd)
+                {
+                    AutomaticTorrentManagement = true
+                }));
+
+            var torrent = await Utils.Retry(async () =>
+            {
+                var list = await Client.GetTorrentListAsync();
+                return list.Single();
+            });
+
+            torrent.AutomaticTorrentManagement.Should().Be(true);
+
+            await Client.SetAutomaticTorrentManagementAsync(torrent.Hash, false);
+            await Utils.Retry(async () =>
+            {
+                var list = await Client.GetTorrentListAsync();
+                list.Single().AutomaticTorrentManagement.Should().Be(false);
+            });
+
+            await Client.SetAutomaticTorrentManagementAsync(torrent.Hash, true);
+            await Utils.Retry(async () =>
+            {
+                var list = await Client.GetTorrentListAsync();
+                list.Single().AutomaticTorrentManagement.Should().Be(true);
             });
         }
 
@@ -2230,6 +2378,50 @@ namespace QBittorrent.Client.Tests
         public async Task SetPreference(string name, object oldValue, object newValue,
             string[] ignoredProperties = null)
         {
+            var prop = typeof(Preferences).GetProperty(name);
+            ignoredProperties = ignoredProperties ?? new string[0];
+
+            await Client.LoginAsync(UserName, Password);
+
+            var oldPrefs = await Client.GetPreferencesAsync();
+            prop.GetValue(oldPrefs).Should().BeEquivalentTo(oldValue);
+
+            var setPrefs = new Preferences();
+            prop.SetValue(setPrefs, newValue);
+            await Utils.Retry(() => Client.SetPreferencesAsync(setPrefs));
+
+            await Utils.Retry(async () =>
+            {
+                var newPrefs = await Client.GetPreferencesAsync();
+                prop.GetValue(newPrefs).Should().BeEquivalentTo(newValue);
+                newPrefs.Should().BeEquivalentTo(oldPrefs, options => options
+                    .Excluding(ctx => ctx.SelectedMemberPath == name)
+                    .Excluding(ctx => ignoredProperties.Contains(ctx.SelectedMemberPath)));
+            });
+        }
+
+        [SkippableTheory]
+        [InlineData(nameof(Preferences.CreateTorrentSubfolder), true, false)]
+        [InlineData(nameof(Preferences.AddTorrentPaused), false, true)]
+        [InlineData(nameof(Preferences.TorrentFileAutoDeleteMode), TorrentFileAutoDeleteMode.Never, TorrentFileAutoDeleteMode.Always)]
+        [InlineData(nameof(Preferences.TorrentFileAutoDeleteMode), TorrentFileAutoDeleteMode.Never, TorrentFileAutoDeleteMode.IfAdded)]
+        [InlineData(nameof(Preferences.AutoTMMEnabledByDefault), false, true)]
+        [InlineData(nameof(Preferences.AutoTMMRetainedWhenCategoryChanges), true, false)]
+        [InlineData(nameof(Preferences.AutoTMMRetainedWhenCategorySavePathChanges), false, true)]
+        [InlineData(nameof(Preferences.AutoTMMRetainedWhenDefaultSavePathChanges), false, true)]
+        [InlineData(nameof(Preferences.MailNotificationSender), "qBittorrent_notification@example.com", "test@example.com")]
+        [InlineData(nameof(Preferences.LimitLAN), false, true)]
+        [InlineData(nameof(Preferences.SlowTorrentDownloadRateThreshold), 2, 50)]
+        [InlineData(nameof(Preferences.SlowTorrentUploadRateThreshold), 2, 50)]
+        [InlineData(nameof(Preferences.SlowTorrentInactiveTime), 60, 120)]
+        [InlineData(nameof(Preferences.AlternativeWebUIEnabled), false, true)]
+        [InlineData(nameof(Preferences.AlternativeWebUIPath), "", "/tmp/alt-ui")]
+        [PrintTestName]
+        public async Task SetPreference_2_2(string name, object oldValue, object newValue,
+            string[] ignoredProperties = null)
+        {
+            Skip.If(ApiVersionLessThan(2, 2));
+
             var prop = typeof(Preferences).GetProperty(name);
             ignoredProperties = ignoredProperties ?? new string[0];
 

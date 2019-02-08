@@ -2160,9 +2160,9 @@ namespace QBittorrent.Client.Tests
 
         [SkippableTheory]
         [InlineData(nameof(Preferences.Locale), "C", "de")]
-        [InlineData(nameof(Preferences.SavePath), "/root/Downloads/", "/tmp/")]
+        [InlineData(nameof(Preferences.SavePath), "/downloads/", "/tmp/")]
         [InlineData(nameof(Preferences.TempPathEnabled), false, true)]
-        [InlineData(nameof(Preferences.TempPath), "/root/Downloads/temp/", "/tmp/")]
+        [InlineData(nameof(Preferences.TempPath), "/downloads/temp/", "/tmp/")]
         [InlineData(nameof(Preferences.ExportDirectory), "", "/tmp/")]
         [InlineData(nameof(Preferences.ExportDirectoryForFinished), "", "/tmp/")]
         [InlineData(nameof(Preferences.MailNotificationEnabled), false, true)]
@@ -2182,7 +2182,7 @@ namespace QBittorrent.Client.Tests
         [InlineData(nameof(Preferences.DoNotCountSlowTorrents), false, true)]
         [InlineData(nameof(Preferences.MaxRatioAction), MaxRatioAction.Pause, MaxRatioAction.Remove)]
         [InlineData(nameof(Preferences.AppendExtensionToIncompleteFiles), false, true)]
-        [InlineData(nameof(Preferences.ListenPort), 8999, 8888)]
+        [InlineData(nameof(Preferences.ListenPort), 6881, 8888)]
         [InlineData(nameof(Preferences.UpnpEnabled), true, false)]
         [InlineData(nameof(Preferences.RandomPort), false, true, new[] {nameof(Preferences.ListenPort)})]
         [InlineData(nameof(Preferences.DownloadLimit), 0, 40960)]
@@ -2228,8 +2228,6 @@ namespace QBittorrent.Client.Tests
         public async Task SetPreference(string name, object oldValue, object newValue,
             string[] ignoredProperties = null)
         {
-            Skip.If(Environment.OSVersion.Platform == PlatformID.Win32NT);
-
             var prop = typeof(Preferences).GetProperty(name);
             ignoredProperties = ignoredProperties ?? new string[0];
 
@@ -2256,8 +2254,6 @@ namespace QBittorrent.Client.Tests
         [PrintTestName]
         public async Task SetPreferenceScanDir()
         {
-            Skip.If(Environment.OSVersion.Platform == PlatformID.Win32NT);
-
             await Client.LoginAsync(UserName, Password);
 
             var oldPrefs = await Client.GetPreferencesAsync();

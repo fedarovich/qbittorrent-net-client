@@ -73,6 +73,7 @@ RUN set -x \
  && chmod go+rw -R /home/qbittorrent /downloads \
  && ln -s /home/qbittorrent/.config/qBittorrent /config \
  && ln -s /home/qbittorrent/.local/share/data/qBittorrent /torrents \
+ && mkdir /scan && mkdir /scan/1 && mkdir /scan/2 && mkdir /scan/3 \
     # Check it works
  && su qbittorrent -s /bin/sh -c 'qbittorrent-nox -v'
 

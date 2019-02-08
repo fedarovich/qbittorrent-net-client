@@ -79,14 +79,6 @@ namespace QBittorrent.Client
         public GlobalTransferExtendedInfo ServerState { get; set; }
 
         /// <summary>
-        /// Free space on disk.
-        /// </summary>
-        /// <remarks>This value is available starting from API v2.1.1.</remarks>
-        [JsonProperty("free_space_on_disk")]
-        [ApiLevel(ApiLevel.V2, MinVersion = "2.1.1")]
-        public long? FreeSpaceOnDisk { get; set; }
-
-        /// <summary>
         /// Additional properties not handled by this library.
         /// </summary>
         [JsonExtensionData]

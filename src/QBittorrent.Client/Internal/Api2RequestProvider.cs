@@ -77,7 +77,7 @@ namespace QBittorrent.Client.Internal
 
         public override (Uri url, HttpContent request) DeleteTrackers(string hash, IEnumerable<Uri> trackerUrls)
         {
-            return BuildForm(Url.EditTracker(),
+            return BuildForm(Url.DeleteTrackers(),
                 ("hash", hash),
                 ("urls", string.Join("|", trackerUrls.Select(u => u.AbsoluteUri))));
         }

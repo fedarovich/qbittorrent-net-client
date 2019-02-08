@@ -499,7 +499,7 @@ namespace QBittorrent.Client.Tests
                 var trackers = await Client.GetTorrentTrackersAsync(torrent.OriginalInfoHash.ToLower());
                 trackers.Should().NotBeNull();
 
-                var trackerUrls = trackers.Select(t => t.Url.AbsoluteUri).ToList();
+                var trackerUrls = trackers.Where(t => t.Url.IsAbsoluteUri).Select(t => t.Url.AbsoluteUri).ToList();
                 trackerUrls.Should().BeEquivalentTo(torrent.Trackers.SelectMany(x => x));
             });
         }
@@ -1683,7 +1683,8 @@ namespace QBittorrent.Client.Tests
             var tracker2 = new Uri("http://ipv6.torrent.ubuntu.com:6969/announce");
 
             var trackers = await Client.GetTorrentTrackersAsync(torrent.Hash);
-            trackers.Select(t => t.Url).Should().BeEquivalentTo(tracker1, tracker2);
+            trackers.Select(t => t.Url).Where(url => url.IsAbsoluteUri)
+                .Should().BeEquivalentTo(tracker1, tracker2);
 
             var newTracker = new Uri("http://retracker.mgts.by:80/announce");
             await Client.AddTrackerAsync(torrent.Hash, newTracker);
@@ -1691,7 +1692,8 @@ namespace QBittorrent.Client.Tests
             await Utils.Retry(async () =>
             {
                 trackers = await Client.GetTorrentTrackersAsync(torrent.Hash);
-                trackers.Select(t => t.Url).Should().BeEquivalentTo(tracker1, tracker2, newTracker);
+                trackers.Select(t => t.Url).Where(url => url.IsAbsoluteUri)
+                    .Should().BeEquivalentTo(tracker1, tracker2, newTracker);
             });
         }
 

@@ -1,5 +1,7 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Threading;
 using System.Threading.Tasks;
 using JetBrains.Annotations;
@@ -325,6 +327,151 @@ namespace QBittorrent.Client
             CancellationToken token = default)
         {
             return client.DeleteTrackersAsync(hash, new[] {trackerUrl}, token);
+        }
+
+        /// <summary>
+        /// Starts torrent search job.
+        /// </summary>
+        /// <param name="client">An <see cref="IQBittorrentClient2"/> instance.</param>
+        /// <param name="pattern">Pattern to search for (e.g. "Ubuntu 18.04").</param>
+        /// <param name="plugin">Plugin to use for searching (e.g. "legittorrents").</param>
+        /// <param name="category">
+        /// Categories to limit your search to (e.g. "legittorrents").
+        /// Available categories depend on the specified <paramref name="plugin"/>.
+        /// Also supports <c>&quot;all&quot;</c></param>
+        /// <param name="token">The cancellation token.</param>
+        /// <returns>The ID of the search job.</returns>
+        [ApiLevel(ApiLevel.V2, MinVersion = "2.1.1")]
+        public static Task<int> StartSearchAsync(
+            [NotNull] this IQBittorrentClient2 client,
+            [NotNull] string pattern,
+            [NotNull] string plugin,
+            [NotNull] string category = "all",
+            CancellationToken token = default)
+        {
+            if (plugin == null)
+                throw new ArgumentNullException(nameof(plugin));
+
+            return client.StartSearchAsync(pattern, new [] {plugin}, category, token);
+        }
+
+        /// <summary>
+        /// Starts torrent search job.
+        /// </summary>
+        /// <param name="client">An <see cref="IQBittorrentClient2"/> instance.</param>
+        /// <param name="pattern">Pattern to search for (e.g. "Ubuntu 18.04").</param>
+        /// <param name="category">
+        /// Categories to limit your search to (e.g. "legittorrents").
+        /// Also supports <c>&quot;all&quot;</c></param>
+        /// <param name="token">The cancellation token.</param>
+        /// <returns>The ID of the search job.</returns>
+        [ApiLevel(ApiLevel.V2, MinVersion = "2.1.1")]
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static Task<int> StartSearchUsingAllPluginsAsync(
+            [NotNull] this IQBittorrentClient2 client,
+            [NotNull] string pattern,
+            [NotNull] string category = "all",
+            CancellationToken token = default)
+        {
+            return client.StartSearchAsync(pattern, SearchPlugin.All, category, token);
+        }
+
+        /// <summary>
+        /// Starts torrent search job.
+        /// </summary>
+        /// <param name="client">An <see cref="IQBittorrentClient2"/> instance.</param>
+        /// <param name="pattern">Pattern to search for (e.g. "Ubuntu 18.04").</param>
+        /// <param name="category">
+        /// Categories to limit your search to (e.g. "legittorrents").
+        /// Also supports <c>&quot;all&quot;</c></param>
+        /// <param name="token">The cancellation token.</param>
+        /// <returns>The ID of the search job.</returns>
+        [ApiLevel(ApiLevel.V2, MinVersion = "2.1.1")]
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static Task<int> StartSearchUsingEnabledPluginsAsync(
+            [NotNull] this IQBittorrentClient2 client,
+            [NotNull] string pattern,
+            [NotNull] string category = "all",
+            CancellationToken token = default)
+        {
+            return client.StartSearchAsync(pattern, SearchPlugin.Enabled, category, token);
+        }
+
+        /// <summary>
+        /// Installs the search plugins.
+        /// </summary>
+        /// <param name="client">An <see cref="IQBittorrentClient2"/> instance.</param>
+        /// <param name="source">URL of the plugins to install.</param>
+        /// <param name="token">The cancellation token.</param>
+        /// <returns></returns>
+        /// <remarks>Plugin can be installed from the local file system using <c>file:///</c> URI as <paramref name="source"/>.</remarks>
+        [ApiLevel(ApiLevel.V2, MinVersion = "2.1.1")]
+        public static Task InstallSeachPluginAsync(
+            [NotNull] this IQBittorrentClient2 client,
+            [NotNull] Uri source,
+            CancellationToken token = default)
+        {
+            if (source == null)
+                throw new ArgumentNullException(nameof(source));
+
+            return client.InstallSeachPluginsAsync(new[] {source}, token);
+        }
+
+        /// <summary>
+        /// Uninstalls the search plugins.
+        /// </summary>
+        /// <param name="client">An <see cref="IQBittorrentClient2"/> instance.</param>
+        /// <param name="name">Name of the plugin to uninstall.</param>
+        /// <param name="token">The cancellation token.</param>
+        /// <returns></returns>
+        [ApiLevel(ApiLevel.V2, MinVersion = "2.1.1")]
+        public static Task UninstallSeachPluginAsync(
+            [NotNull] this IQBittorrentClient2 client,
+            [NotNull] string name,
+            CancellationToken token = default)
+        {
+            if (name == null)
+                throw new ArgumentNullException(nameof(name));
+
+            return client.UninstallSeachPluginsAsync(new[] {name}, token);
+        }
+
+        /// <summary>
+        /// Enables the search plugin.
+        /// </summary>
+        /// <param name="client">An <see cref="IQBittorrentClient2"/> instance.</param>
+        /// <param name="name">Name of the plugin to enable.</param>
+        /// <param name="token">The cancellation token.</param>
+        /// <returns></returns>
+        [ApiLevel(ApiLevel.V2, MinVersion = "2.1.1")]
+        public static Task EnableSeachPluginAsync(
+            [NotNull] this IQBittorrentClient2 client,
+            [NotNull] string name,
+            CancellationToken token = default)
+        {
+            if (name == null)
+                throw new ArgumentNullException(nameof(name));
+
+            return client.EnableSeachPluginsAsync(new[] { name }, token);
+        }
+
+        /// <summary>
+        /// Disables the search plugin.
+        /// </summary>
+        /// <param name="client">An <see cref="IQBittorrentClient2"/> instance.</param>
+        /// <param name="name">Name of the plugin to disable.</param>
+        /// <param name="token">The cancellation token.</param>
+        /// <returns></returns>
+        [ApiLevel(ApiLevel.V2, MinVersion = "2.1.1")]
+        public static Task DisableSeachPluginAsync(
+            [NotNull] this IQBittorrentClient2 client,
+            [NotNull] string name,
+            CancellationToken token = default)
+        {
+            if (name == null)
+                throw new ArgumentNullException(nameof(name));
+
+            return client.DisableSeachPluginsAsync(new[] { name }, token);
         }
     }
 }

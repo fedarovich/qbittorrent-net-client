@@ -393,5 +393,160 @@ namespace QBittorrent.Client
         [ApiLevel(ApiLevel.V2, MinVersion = "2.1.0")]
         Task<IReadOnlyDictionary<string, RssAutoDownloadingRule>> GetRssAutoDownloadingRulesAsync(
             CancellationToken token = default);
+
+        // Search
+
+        /// <summary>
+        /// Starts torrent search job.
+        /// </summary>
+        /// <param name="pattern">Pattern to search for (e.g. "Ubuntu 18.04").</param>
+        /// <param name="plugins">Plugins to use for searching (e.g. "legittorrents").</param>
+        /// <param name="category">
+        /// Categories to limit your search to (e.g. "legittorrents").
+        /// Available categories depend on the specified <paramref name="plugins"/>.
+        /// Also supports <c>&quot;all&quot;</c>
+        /// </param>
+        /// <param name="token">The cancellation token.</param>
+        /// <returns>The ID of the search job.</returns>
+        [ApiLevel(ApiLevel.V2, MinVersion = "2.1.1")]
+        Task<int> StartSearchAsync(
+            [NotNull] string pattern,
+            [NotNull, ItemNotNull] IEnumerable<string> plugins,
+            [NotNull] string category = "all",
+            CancellationToken token = default);
+
+        /// <summary>
+        /// Stops torrent search job.
+        /// </summary>
+        /// <param name="id">The ID of the search job.</param>
+        /// <param name="token">The cancellation token.</param>
+        /// <returns></returns>
+        [ApiLevel(ApiLevel.V2, MinVersion = "2.1.1")]
+        Task StopSearchAsync(
+            int id,
+            CancellationToken token = default);
+
+        /// <summary>
+        /// Gets the status of all search jobs.
+        /// </summary>
+        /// <param name="token">The cancellation token.</param>
+        /// <returns>The list containing statuses and the number of found torrents for each search job.</returns>
+        [ApiLevel(ApiLevel.V2, MinVersion = "2.1.1")]
+        Task<IReadOnlyList<SearchStatus>> GetSearchStatusAsync(
+            CancellationToken token = default);
+
+        /// <summary>
+        /// Gets the status of the search jobs with the specified <paramref name="id"/>.
+        /// </summary>
+        /// <param name="id">The ID of the search job.</param>
+        /// <param name="token">The cancellation token.</param>
+        /// <returns>The object containing the status and the number of found torrents.</returns>
+        [ApiLevel(ApiLevel.V2, MinVersion = "2.1.1")]
+        Task<SearchStatus> GetSearchStatusAsync(
+            int id,
+            CancellationToken token = default);
+
+        /// <summary>
+        /// Gets the results of the search job with the specified <paramref name="id"/>.
+        /// </summary>
+        /// <param name="id">The ID of the search job.</param>
+        /// <param name="offset">Result to start at. A negative number means count backwards (e.g. -2 returns the 2 most recent results).</param>
+        /// <param name="limit">The maximal number of results to return. 0 or negative means no limit.</param>
+        /// <param name="token">The cancellation token.</param>
+        /// <returns></returns>
+        [ApiLevel(ApiLevel.V2, MinVersion = "2.1.1")]
+        Task<SearchResults> GetSearchResultsAsync(
+            int id,
+            int offset = 0,
+            int limit = 0,
+            CancellationToken token = default);
+
+        /// <summary>
+        /// Deletes the search job with the specified <paramref name="id"/>.
+        /// </summary>
+        /// <param name="id">The ID of the search job.</param>
+        /// <param name="token">The cancellation token.</param>
+        /// <returns></returns>
+        [ApiLevel(ApiLevel.V2, MinVersion = "2.1.1")]
+        Task DeleteSearchAsync(
+            int id,
+            CancellationToken token = default);
+
+        /// <summary>
+        /// Gets the search categories.
+        /// </summary>
+        /// <param name="plugin">
+        /// Name of the plugin (e.g. "legittorrents").
+        /// Also supports <see cref="SearchPlugin.All"/> and <see cref="SearchPlugin.Enabled"/>.
+        /// </param>
+        /// <param name="token">The cancellation token.</param>
+        /// <returns>The list of the search categories.</returns>
+        [ApiLevel(ApiLevel.V2, MinVersion = "2.1.1")]
+        Task<IReadOnlyList<string>> GetSearchCategoriesAsync(
+            [NotNull] string plugin,
+            CancellationToken token = default);
+
+        /// <summary>
+        /// Gets the installed search plugins.
+        /// </summary>
+        /// <param name="token">The cancellation token.</param>
+        /// <returns>The list of the search plugins.</returns>
+        [ApiLevel(ApiLevel.V2, MinVersion = "2.1.1")]
+        Task<IReadOnlyList<SearchPlugin>> GetSearchPluginsAsync(
+            CancellationToken token = default);
+
+        /// <summary>
+        /// Installs the search plugins.
+        /// </summary>
+        /// <param name="sources">URLs of the plugins to install.</param>
+        /// <param name="token">The cancellation token.</param>
+        /// <returns></returns>
+        /// <remarks>Plugins can be installed from the local file system using <c>file:///</c> URIs as <paramref name="sources"/>.</remarks>
+        [ApiLevel(ApiLevel.V2, MinVersion = "2.1.1")]
+        Task InstallSeachPluginsAsync(
+            [NotNull, ItemNotNull] IEnumerable<Uri> sources,
+            CancellationToken token = default);
+
+        /// <summary>
+        /// Uninstalls the search plugins.
+        /// </summary>
+        /// <param name="names">Names of the plugins to uninstall.</param>
+        /// <param name="token">The cancellation token.</param>
+        /// <returns></returns>
+        [ApiLevel(ApiLevel.V2, MinVersion = "2.1.1")]
+        Task UninstallSeachPluginsAsync(
+            [NotNull, ItemNotNull] IEnumerable<string> names,
+            CancellationToken token = default);
+
+        /// <summary>
+        /// Enables the search plugins.
+        /// </summary>
+        /// <param name="names">Names of the plugins to enable.</param>
+        /// <param name="token">The cancellation token.</param>
+        /// <returns></returns>
+        [ApiLevel(ApiLevel.V2, MinVersion = "2.1.1")]
+        Task EnableSeachPluginsAsync(
+            [NotNull, ItemNotNull] IEnumerable<string> names,
+            CancellationToken token = default);
+
+        /// <summary>
+        /// Disables the search plugins.
+        /// </summary>
+        /// <param name="names">Names of the plugins to disable.</param>
+        /// <param name="token">The cancellation token.</param>
+        /// <returns></returns>
+        [ApiLevel(ApiLevel.V2, MinVersion = "2.1.1")]
+        Task DisableSeachPluginsAsync(
+            [NotNull, ItemNotNull] IEnumerable<string> names,
+            CancellationToken token = default);
+
+        /// <summary>
+        /// Updates the search plugins.
+        /// </summary>
+        /// <param name="token">The cancellation token.</param>
+        /// <returns></returns>
+        [ApiLevel(ApiLevel.V2, MinVersion = "2.1.1")]
+        Task UpdateSeachPluginsAsync(
+            CancellationToken token = default);
     }
 }

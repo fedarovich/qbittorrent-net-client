@@ -705,7 +705,7 @@ namespace QBittorrent.Client
         /// <returns></returns>
         /// <remarks>Plugins can be installed from the local file system using <c>file:///</c> URIs as <paramref name="sources"/>.</remarks>
         [ApiLevel(ApiLevel.V2, MinVersion = "2.1.1")]
-        public async Task InstallSeachPluginsAsync(IEnumerable<Uri> sources, CancellationToken token = default)
+        public async Task InstallSearchPluginsAsync(IEnumerable<Uri> sources, CancellationToken token = default)
         {
             throw new NotImplementedException();
         }
@@ -717,7 +717,7 @@ namespace QBittorrent.Client
         /// <param name="token">The cancellation token.</param>
         /// <returns></returns>
         [ApiLevel(ApiLevel.V2, MinVersion = "2.1.1")]
-        public async Task UninstallSeachPluginsAsync(IEnumerable<string> names, CancellationToken token = default)
+        public async Task UninstallSearchPluginsAsync(IEnumerable<string> names, CancellationToken token = default)
         {
             throw new NotImplementedException();
         }
@@ -729,7 +729,7 @@ namespace QBittorrent.Client
         /// <param name="token">The cancellation token.</param>
         /// <returns></returns>
         [ApiLevel(ApiLevel.V2, MinVersion = "2.1.1")]
-        public async Task EnableSeachPluginsAsync(IEnumerable<string> names, CancellationToken token = default)
+        public async Task EnableSearchPluginsAsync(IEnumerable<string> names, CancellationToken token = default)
         {
             throw new NotImplementedException();
         }
@@ -741,7 +741,7 @@ namespace QBittorrent.Client
         /// <param name="token">The cancellation token.</param>
         /// <returns></returns>
         [ApiLevel(ApiLevel.V2, MinVersion = "2.1.1")]
-        public async Task DisableSeachPluginsAsync(IEnumerable<string> names, CancellationToken token = default)
+        public async Task DisableSearchPluginsAsync(IEnumerable<string> names, CancellationToken token = default)
         {
             throw new NotImplementedException();
         }
@@ -752,7 +752,7 @@ namespace QBittorrent.Client
         /// <param name="token">The cancellation token.</param>
         /// <returns></returns>
         [ApiLevel(ApiLevel.V2, MinVersion = "2.1.1")]
-        public async Task UpdateSeachPluginsAsync(CancellationToken token = default)
+        public async Task UpdateSearchPluginsAsync(CancellationToken token = default)
         {
             throw new NotImplementedException();
         }

@@ -503,7 +503,7 @@ namespace QBittorrent.Client
         /// <returns></returns>
         /// <remarks>Plugins can be installed from the local file system using <c>file:///</c> URIs as <paramref name="sources"/>.</remarks>
         [ApiLevel(ApiLevel.V2, MinVersion = "2.1.1")]
-        Task InstallSeachPluginsAsync(
+        Task InstallSearchPluginsAsync(
             [NotNull, ItemNotNull] IEnumerable<Uri> sources,
             CancellationToken token = default);
 
@@ -514,7 +514,7 @@ namespace QBittorrent.Client
         /// <param name="token">The cancellation token.</param>
         /// <returns></returns>
         [ApiLevel(ApiLevel.V2, MinVersion = "2.1.1")]
-        Task UninstallSeachPluginsAsync(
+        Task UninstallSearchPluginsAsync(
             [NotNull, ItemNotNull] IEnumerable<string> names,
             CancellationToken token = default);
 
@@ -525,7 +525,7 @@ namespace QBittorrent.Client
         /// <param name="token">The cancellation token.</param>
         /// <returns></returns>
         [ApiLevel(ApiLevel.V2, MinVersion = "2.1.1")]
-        Task EnableSeachPluginsAsync(
+        Task EnableSearchPluginsAsync(
             [NotNull, ItemNotNull] IEnumerable<string> names,
             CancellationToken token = default);
 
@@ -536,7 +536,7 @@ namespace QBittorrent.Client
         /// <param name="token">The cancellation token.</param>
         /// <returns></returns>
         [ApiLevel(ApiLevel.V2, MinVersion = "2.1.1")]
-        Task DisableSeachPluginsAsync(
+        Task DisableSearchPluginsAsync(
             [NotNull, ItemNotNull] IEnumerable<string> names,
             CancellationToken token = default);
 
@@ -546,7 +546,7 @@ namespace QBittorrent.Client
         /// <param name="token">The cancellation token.</param>
         /// <returns></returns>
         [ApiLevel(ApiLevel.V2, MinVersion = "2.1.1")]
-        Task UpdateSeachPluginsAsync(
+        Task UpdateSearchPluginsAsync(
             CancellationToken token = default);
     }
 }

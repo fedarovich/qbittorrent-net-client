@@ -70,7 +70,7 @@ namespace QBittorrent.Client.Internal
 
         public Uri AddCategory() => Create("/command/addCategory");
 
-        public Uri EditCategory() => throw new ApiNotSupportedException(ApiLevel.V2, new Version(2, 1, 0));
+        public Uri EditCategory() => throw new ApiNotSupportedException(ApiLevel.V2, new ApiVersion(2, 1, 0));
 
         public Uri DeleteCategories() => Create("/command/removeCategories");
 
@@ -146,11 +146,11 @@ namespace QBittorrent.Client.Internal
 
         public Uri Reannounce() => throw new ApiNotSupportedException(ApiLevel.V2);
 
-        public Uri GetCategories() => throw new ApiNotSupportedException(ApiLevel.V2, new Version(2, 1, 1));
+        public Uri GetCategories() => throw new ApiNotSupportedException(ApiLevel.V2, new ApiVersion(2, 1, 1));
 
-        public Uri EditTracker() => throw new ApiNotSupportedException(ApiLevel.V2, new Version(2, 2, 0));
+        public Uri EditTracker() => throw new ApiNotSupportedException(ApiLevel.V2, new ApiVersion(2, 2, 0));
 
-        public Uri DeleteTrackers() => throw new ApiNotSupportedException(ApiLevel.V2, new Version(2, 2, 0));
+        public Uri DeleteTrackers() => throw new ApiNotSupportedException(ApiLevel.V2, new ApiVersion(2, 2, 0));
 
         public Uri AddRssFolder() => throw new ApiNotSupportedException(ApiLevel.V2);
 
@@ -169,5 +169,27 @@ namespace QBittorrent.Client.Internal
         public Uri DeleteRssAutoDownloadingRule() => throw new ApiNotSupportedException(ApiLevel.V2);
 
         public Uri GetRssAutoDownloadingRules() => throw new ApiNotSupportedException(ApiLevel.V2);
+
+        public Uri StartSearch() => throw new ApiNotSupportedException(ApiLevel.V2, new ApiVersion(2, 1, 1));
+
+        public Uri StopSearch() => throw new ApiNotSupportedException(ApiLevel.V2, new ApiVersion(2, 1, 1));
+
+        public Uri GetSearchStatus() => throw new ApiNotSupportedException(ApiLevel.V2, new ApiVersion(2, 1, 1));
+
+        public Uri GetSearchResults() => throw new ApiNotSupportedException(ApiLevel.V2, new ApiVersion(2, 1, 1));
+
+        public Uri DeleteSearch() => throw new ApiNotSupportedException(ApiLevel.V2, new ApiVersion(2, 1, 1));
+
+        public Uri GetSearchCategories() => throw new ApiNotSupportedException(ApiLevel.V2, new ApiVersion(2, 1, 1));
+
+        public Uri GetSearchPlugins() => throw new ApiNotSupportedException(ApiLevel.V2, new ApiVersion(2, 1, 1));
+
+        public Uri InstallSearchPlugins() => throw new ApiNotSupportedException(ApiLevel.V2, new ApiVersion(2, 1, 1));
+
+        public Uri UninstallSearchPlugins() => throw new ApiNotSupportedException(ApiLevel.V2, new ApiVersion(2, 1, 1));
+
+        public Uri EnableDisableSearchPlugins() => throw new ApiNotSupportedException(ApiLevel.V2, new ApiVersion(2, 1, 1));
+
+        public Uri UpdateSearchPlugins() => throw new ApiNotSupportedException(ApiLevel.V2, new ApiVersion(2, 1, 1));
     }
 }

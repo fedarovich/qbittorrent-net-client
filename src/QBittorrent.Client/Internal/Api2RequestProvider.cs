@@ -150,5 +150,49 @@ namespace QBittorrent.Client.Internal
             return BuildForm(Url.DeleteRssAutoDownloadingRule(),
                 ("ruleName", name));
         }
+
+        public override (Uri url, HttpContent request) StartSearch(string pattern, IEnumerable<string> plugins, string category)
+        {
+            return BuildForm(Url.StartSearch(),
+                ("pattern", pattern),
+                ("plugins", string.Join("|", plugins)),
+                ("category", category));
+        }
+
+        public override (Uri url, HttpContent request) StopSearch(int id)
+        {
+            return BuildForm(Url.StopSearch(),
+                ("id", id.ToString()));
+        }
+
+        public override (Uri url, HttpContent request) DeleteSearch(int id)
+        {
+            return BuildForm(Url.DeleteSearch(),
+                ("id", id.ToString()));
+        }
+
+        public override (Uri url, HttpContent request) InstallSearchPlugins(IEnumerable<Uri> sources)
+        {
+            return BuildForm(Url.InstallSearchPlugins(),
+                ("sources", string.Join("|", sources.Select(u => u.AbsoluteUri))));
+        }
+
+        public override (Uri url, HttpContent request) UninstallSearchPlugins(IEnumerable<string> names)
+        {
+            return BuildForm(Url.UninstallSearchPlugins(),
+                ("names", string.Join("|", names)));
+        }
+
+        public override (Uri url, HttpContent request) EnableDisableSearchPlugins(IEnumerable<string> names, bool enable)
+        {
+            return BuildForm(Url.EnableDisableSearchPlugins(),
+                ("names", string.Join("|", names)),
+                ("enable", enable.ToLowerString()));
+        }
+
+        public override (Uri url, HttpContent request) UpdateSearchPlugins()
+        {
+            return BuildForm(Url.UpdateSearchPlugins());
+        }
     }
 }

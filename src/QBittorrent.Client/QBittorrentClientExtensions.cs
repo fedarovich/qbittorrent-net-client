@@ -356,31 +356,14 @@ namespace QBittorrent.Client
         }
 
         /// <summary>
-        /// Starts torrent search job.
+        /// Starts torrent search job using all or enabled plugins.
         /// </summary>
         /// <param name="client">An <see cref="IQBittorrentClient2"/> instance.</param>
         /// <param name="pattern">Pattern to search for (e.g. "Ubuntu 18.04").</param>
-        /// <param name="category">
-        /// Categories to limit your search to (e.g. "legittorrents").
-        /// Also supports <c>&quot;all&quot;</c></param>
-        /// <param name="token">The cancellation token.</param>
-        /// <returns>The ID of the search job.</returns>
-        [ApiLevel(ApiLevel.V2, MinVersion = "2.1.1")]
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static Task<int> StartSearchUsingAllPluginsAsync(
-            [NotNull] this IQBittorrentClient2 client,
-            [NotNull] string pattern,
-            [NotNull] string category = "all",
-            CancellationToken token = default)
-        {
-            return client.StartSearchAsync(pattern, SearchPlugin.All, category, token);
-        }
-
-        /// <summary>
-        /// Starts torrent search job.
-        /// </summary>
-        /// <param name="client">An <see cref="IQBittorrentClient2"/> instance.</param>
-        /// <param name="pattern">Pattern to search for (e.g. "Ubuntu 18.04").</param>
+        /// <param name="disabledPluginsToo">
+        /// <see langword="false" /> to search using all enabled plugins;
+        /// <see langword="true" /> to search using all (enabled and disabled) plugins.
+        /// </param>
         /// <param name="category">
         /// Categories to limit your search to (e.g. "legittorrents").
         /// Also supports <c>&quot;all&quot;</c></param>
@@ -391,10 +374,14 @@ namespace QBittorrent.Client
         public static Task<int> StartSearchUsingEnabledPluginsAsync(
             [NotNull] this IQBittorrentClient2 client,
             [NotNull] string pattern,
+            bool disabledPluginsToo = false,
             [NotNull] string category = "all",
             CancellationToken token = default)
         {
-            return client.StartSearchAsync(pattern, SearchPlugin.Enabled, category, token);
+            return client.StartSearchAsync(pattern, 
+                disabledPluginsToo ? SearchPlugin.All : SearchPlugin.Enabled, 
+                category, 
+                token);
         }
 
         /// <summary>
@@ -406,7 +393,7 @@ namespace QBittorrent.Client
         /// <returns></returns>
         /// <remarks>Plugin can be installed from the local file system using <c>file:///</c> URI as <paramref name="source"/>.</remarks>
         [ApiLevel(ApiLevel.V2, MinVersion = "2.1.1")]
-        public static Task InstallSeachPluginAsync(
+        public static Task InstallSearchPluginAsync(
             [NotNull] this IQBittorrentClient2 client,
             [NotNull] Uri source,
             CancellationToken token = default)
@@ -414,7 +401,7 @@ namespace QBittorrent.Client
             if (source == null)
                 throw new ArgumentNullException(nameof(source));
 
-            return client.InstallSeachPluginsAsync(new[] {source}, token);
+            return client.InstallSearchPluginsAsync(new[] {source}, token);
         }
 
         /// <summary>
@@ -425,7 +412,7 @@ namespace QBittorrent.Client
         /// <param name="token">The cancellation token.</param>
         /// <returns></returns>
         [ApiLevel(ApiLevel.V2, MinVersion = "2.1.1")]
-        public static Task UninstallSeachPluginAsync(
+        public static Task UninstallSearchPluginAsync(
             [NotNull] this IQBittorrentClient2 client,
             [NotNull] string name,
             CancellationToken token = default)
@@ -433,7 +420,7 @@ namespace QBittorrent.Client
             if (name == null)
                 throw new ArgumentNullException(nameof(name));
 
-            return client.UninstallSeachPluginsAsync(new[] {name}, token);
+            return client.UninstallSearchPluginsAsync(new[] {name}, token);
         }
 
         /// <summary>
@@ -444,7 +431,7 @@ namespace QBittorrent.Client
         /// <param name="token">The cancellation token.</param>
         /// <returns></returns>
         [ApiLevel(ApiLevel.V2, MinVersion = "2.1.1")]
-        public static Task EnableSeachPluginAsync(
+        public static Task EnableSearchPluginAsync(
             [NotNull] this IQBittorrentClient2 client,
             [NotNull] string name,
             CancellationToken token = default)
@@ -452,7 +439,7 @@ namespace QBittorrent.Client
             if (name == null)
                 throw new ArgumentNullException(nameof(name));
 
-            return client.EnableSeachPluginsAsync(new[] { name }, token);
+            return client.EnableSearchPluginsAsync(new[] { name }, token);
         }
 
         /// <summary>
@@ -463,7 +450,7 @@ namespace QBittorrent.Client
         /// <param name="token">The cancellation token.</param>
         /// <returns></returns>
         [ApiLevel(ApiLevel.V2, MinVersion = "2.1.1")]
-        public static Task DisableSeachPluginAsync(
+        public static Task DisableSearchPluginAsync(
             [NotNull] this IQBittorrentClient2 client,
             [NotNull] string name,
             CancellationToken token = default)
@@ -471,7 +458,7 @@ namespace QBittorrent.Client
             if (name == null)
                 throw new ArgumentNullException(nameof(name));
 
-            return client.DisableSeachPluginsAsync(new[] { name }, token);
+            return client.DisableSearchPluginsAsync(new[] { name }, token);
         }
     }
 }

@@ -173,5 +173,27 @@ namespace QBittorrent.Client.Internal
         public Uri DeleteRssAutoDownloadingRule() => Create("/api/v2/rss/removeRule");
 
         public Uri GetRssAutoDownloadingRules() => Create("/api/v2/rss/rules");
+
+        public Uri StartSearch() => Create("/api/v2/search/start");
+
+        public Uri StopSearch() => Create("/api/v2/search/stop");
+
+        public Uri GetSearchStatus() => Create("/api/v2/search/status");
+
+        public Uri GetSearchResults() => Create("/api/v2/search/results");
+
+        public Uri DeleteSearch() => Create("/api/v2/search/delete");
+
+        public Uri GetSearchCategories() => Create("/api/v2/search/categories");
+
+        public Uri GetSearchPlugins() => Create("/api/v2/search/plugins");
+
+        public Uri InstallSearchPlugins() => Create("/api/v2/search/installPlugin");
+
+        public Uri UninstallSearchPlugins() => Create("/api/v2/search/uninstallPlugin");
+
+        public Uri EnableDisableSearchPlugins() => Create("/api/v2/search/enablePlugin");
+
+        public Uri UpdateSearchPlugins() => Create("/api/v2/search/updatePlugins");
     }
 }

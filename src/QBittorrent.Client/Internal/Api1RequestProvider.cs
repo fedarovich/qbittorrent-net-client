@@ -75,11 +75,11 @@ namespace QBittorrent.Client.Internal
 
         public override (Uri url, HttpContent request) Reannounce(IEnumerable<string> hashes) => throw new ApiNotSupportedException(ApiLevel.V2);
 
-        public override (Uri url, HttpContent request) EditTracker(string hash, Uri trackerUrl, Uri newTrackerUrl) => throw new ApiNotSupportedException(ApiLevel.V2, new Version(2, 2, 0));
+        public override (Uri url, HttpContent request) EditTracker(string hash, Uri trackerUrl, Uri newTrackerUrl) => throw new ApiNotSupportedException(ApiLevel.V2, new ApiVersion(2, 2, 0));
 
-        public override (Uri url, HttpContent request) DeleteTrackers(string hash, IEnumerable<Uri> trackerUrls) => throw new ApiNotSupportedException(ApiLevel.V2, new Version(2, 2, 0));
+        public override (Uri url, HttpContent request) DeleteTrackers(string hash, IEnumerable<Uri> trackerUrls) => throw new ApiNotSupportedException(ApiLevel.V2, new ApiVersion(2, 2, 0));
 
-        public override (Uri url, HttpContent request) SetFilePriority(string hash, IEnumerable<int> fileIds, TorrentContentPriority priority) => throw new ApiNotSupportedException(ApiLevel.V2, new Version(2, 2, 0));
+        public override (Uri url, HttpContent request) SetFilePriority(string hash, IEnumerable<int> fileIds, TorrentContentPriority priority) => throw new ApiNotSupportedException(ApiLevel.V2, new ApiVersion(2, 2, 0));
 
         public override (Uri url, HttpContent request) AddTorrents(AddTorrentsRequest request) => throw new ApiNotSupportedException(ApiLevel.V2);
 
@@ -96,5 +96,19 @@ namespace QBittorrent.Client.Internal
         public override (Uri url, HttpContent request) RenameRssAutoDownloadingRule(string name, string newName) => throw new ApiNotSupportedException(ApiLevel.V2);
 
         public override (Uri url, HttpContent request) DeleteRssAutoDownloadingRule(string name) => throw new ApiNotSupportedException(ApiLevel.V2);
+
+        public override (Uri url, HttpContent request) StartSearch(string pattern, IEnumerable<string> plugins, string category) => throw new ApiNotSupportedException(ApiLevel.V2, new ApiVersion(2, 1, 1));
+
+        public override (Uri url, HttpContent request) StopSearch(int id) => throw new ApiNotSupportedException(ApiLevel.V2, new ApiVersion(2, 1, 1));
+
+        public override (Uri url, HttpContent request) DeleteSearch(int id) => throw new ApiNotSupportedException(ApiLevel.V2, new ApiVersion(2, 1, 1));
+
+        public override (Uri url, HttpContent request) InstallSearchPlugins(IEnumerable<Uri> sources) => throw new ApiNotSupportedException(ApiLevel.V2, new ApiVersion(2, 1, 1));
+
+        public override (Uri url, HttpContent request) UninstallSearchPlugins(IEnumerable<string> names) => throw new ApiNotSupportedException(ApiLevel.V2, new ApiVersion(2, 1, 1));
+
+        public override (Uri url, HttpContent request) EnableDisableSearchPlugins(IEnumerable<string> names, bool enable) => throw new ApiNotSupportedException(ApiLevel.V2, new ApiVersion(2, 1, 1));
+
+        public override (Uri url, HttpContent request) UpdateSearchPlugins() => throw new ApiNotSupportedException(ApiLevel.V2, new ApiVersion(2, 1, 1));
     }
 }

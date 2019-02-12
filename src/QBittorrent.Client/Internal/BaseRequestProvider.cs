@@ -314,7 +314,21 @@ namespace QBittorrent.Client.Internal
         public abstract (Uri url, HttpContent request) RenameRssAutoDownloadingRule(string name, string newName);
 
         public abstract (Uri url, HttpContent request) DeleteRssAutoDownloadingRule(string name);
-        
+
+        public abstract (Uri url, HttpContent request) StartSearch(string pattern, IEnumerable<string> plugins, string category);
+
+        public abstract (Uri url, HttpContent request) StopSearch(int id);
+
+        public abstract (Uri url, HttpContent request) DeleteSearch(int id);
+
+        public abstract (Uri url, HttpContent request) InstallSearchPlugins(IEnumerable<Uri> sources);
+
+        public abstract (Uri url, HttpContent request) UninstallSearchPlugins(IEnumerable<string> names);
+
+        public abstract (Uri url, HttpContent request) EnableDisableSearchPlugins(IEnumerable<string> names, bool enable);
+
+        public abstract (Uri url, HttpContent request) UpdateSearchPlugins();
+
         protected (Uri, HttpContent) BuildForm(Uri uri, params (string key, string value)[] fields)
         {
             return (uri, new CompatibleFormUrlEncodedContent(fields));

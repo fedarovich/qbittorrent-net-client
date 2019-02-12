@@ -149,5 +149,29 @@ namespace QBittorrent.Client.Internal
         Uri DeleteRssAutoDownloadingRule();
 
         Uri GetRssAutoDownloadingRules();
+
+        // Search
+
+        Uri StartSearch();
+
+        Uri StopSearch();
+
+        Uri GetSearchStatus();
+
+        Uri GetSearchResults();
+
+        Uri DeleteSearch();
+
+        Uri GetSearchCategories();
+
+        Uri GetSearchPlugins();
+
+        Uri InstallSearchPlugins();
+
+        Uri UninstallSearchPlugins();
+
+        Uri EnableDisableSearchPlugins();
+
+        Uri UpdateSearchPlugins();
     }
 }

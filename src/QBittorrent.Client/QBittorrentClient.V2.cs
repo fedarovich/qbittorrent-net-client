@@ -509,9 +509,7 @@ namespace QBittorrent.Client
         public async Task<RssFolder> GetRssItemsAsync(bool withData = false, CancellationToken token = default)
         {
             var provider = await _requestProvider.GetValueAsync(token).ConfigureAwait(false);
-            if (provider.ApiLevel < ApiLevel.V2 
-                || await GetApiVersionAsync(token).ConfigureAwait(false) < Version_2_1_0)
-                throw new ApiNotSupportedException(ApiLevel.V2);
+            await EnsureApiVersionAsync(provider, token, ApiLevel.V2, Version_2_1_0).ConfigureAwait(false);
 
             var uri = provider.Url.GetRssItems(withData);
             var json = await _client.GetStringAsync(uri, token).ConfigureAwait(false);
@@ -577,15 +575,11 @@ namespace QBittorrent.Client
         /// <param name="token">The cancellation token.</param>
         /// <returns></returns>
         [ApiLevel(ApiLevel.V2, MinVersion = "2.1.0")]
-        public async Task<IReadOnlyDictionary<string, RssAutoDownloadingRule>> GetRssAutoDownloadingRulesAsync(CancellationToken token = default)
+        public Task<IReadOnlyDictionary<string, RssAutoDownloadingRule>> GetRssAutoDownloadingRulesAsync(CancellationToken token = default)
         {
-            var provider = await _requestProvider.GetValueAsync(token).ConfigureAwait(false);
-            await EnsureApiVersionAsync(provider, token, ApiLevel.V2, Version_2_1_0).ConfigureAwait(false);
-
-            var uri = provider.Url.GetRssAutoDownloadingRules();
-            var json = await _client.GetStringAsync(uri, token).ConfigureAwait(false);
-            var result = JsonConvert.DeserializeObject<Dictionary<string, RssAutoDownloadingRule>>(json);
-            return result;
+            return GetJsonAsync<IReadOnlyDictionary<string, RssAutoDownloadingRule>>(
+                p => p.GetRssAutoDownloadingRules(), token,
+                ApiLevel.V2, Version_2_1_0);
         }
 
         #endregion
@@ -605,9 +599,23 @@ namespace QBittorrent.Client
         /// <param name="token">The cancellation token.</param>
         /// <returns>The ID of the search job.</returns>
         [ApiLevel(ApiLevel.V2, MinVersion = "2.1.1")]
-        public async Task<int> StartSearchAsync(string pattern, IEnumerable<string> plugins, string category = "all", CancellationToken token = default)
+        public Task<int> StartSearchAsync(string pattern, IEnumerable<string> plugins, string category = "all", CancellationToken token = default)
         {
-            throw new NotImplementedException();
+            if (pattern == null)
+                throw new ArgumentNullException(nameof(pattern));
+            if (plugins == null)
+                throw new ArgumentNullException(nameof(plugins));
+            if (category == null)
+                throw new ArgumentNullException(nameof(category));
+
+            return PostAsync(
+                p => p.StartSearch(pattern, plugins, category), token, 
+                async response =>
+                {
+                    var json = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
+                    return JObject.Parse(json)["id"].ToObject<int>();
+                },
+                ApiLevel.V2, Version_2_1_1);
         }
 
         /// <summary>
@@ -617,9 +625,9 @@ namespace QBittorrent.Client
         /// <param name="token">The cancellation token.</param>
         /// <returns></returns>
         [ApiLevel(ApiLevel.V2, MinVersion = "2.1.1")]
-        public async Task StopSearchAsync(int id, CancellationToken token = default)
+        public Task StopSearchAsync(int id, CancellationToken token = default)
         {
-            throw new NotImplementedException();
+            return PostAsync(p => p.StopSearch(id), token, ApiLevel.V2, Version_2_1_1);
         }
 
         /// <summary>
@@ -628,9 +636,10 @@ namespace QBittorrent.Client
         /// <param name="token">The cancellation token.</param>
         /// <returns>The list containing statuses and the number of found torrents for each search job.</returns>
         [ApiLevel(ApiLevel.V2, MinVersion = "2.1.1")]
-        public async Task<IReadOnlyList<SearchStatus>> GetSearchStatusAsync(CancellationToken token = default)
+        public Task<IReadOnlyList<SearchStatus>> GetSearchStatusAsync(CancellationToken token = default)
         {
-            throw new NotImplementedException();
+            return GetJsonAsync<IReadOnlyList<SearchStatus>>(p => p.GetSearchStatus(), token,
+                ApiLevel.V2, Version_2_1_1);
         }
 
         /// <summary>
@@ -640,9 +649,12 @@ namespace QBittorrent.Client
         /// <param name="token">The cancellation token.</param>
         /// <returns>The object containing the status and the number of found torrents.</returns>
         [ApiLevel(ApiLevel.V2, MinVersion = "2.1.1")]
-        public async Task<SearchStatus> GetSearchStatusAsync(int id, CancellationToken token = default)
+        public Task<SearchStatus> GetSearchStatusAsync(int id, CancellationToken token = default)
         {
-            throw new NotImplementedException();
+            return GetJsonAsync<IReadOnlyList<SearchStatus>, SearchStatus>(
+                p => p.GetSearchStatus(id), token,
+                list => list.SingleOrDefault(),
+                ApiLevel.V2, Version_2_1_1);
         }
 
         /// <summary>
@@ -654,9 +666,11 @@ namespace QBittorrent.Client
         /// <param name="token">The cancellation token.</param>
         /// <returns></returns>
         [ApiLevel(ApiLevel.V2, MinVersion = "2.1.1")]
-        public async Task<SearchResults> GetSearchResultsAsync(int id, int offset = 0, int limit = 0, CancellationToken token = default)
+        public Task<SearchResults> GetSearchResultsAsync(int id, int offset = 0, int limit = 0, CancellationToken token = default)
         {
-            throw new NotImplementedException();
+            return GetJsonAsync<SearchResults>(
+                p => p.GetSearchResults(id, offset, limit), token,
+                ApiLevel.V2, Version_2_1_1);
         }
 
         /// <summary>
@@ -666,9 +680,9 @@ namespace QBittorrent.Client
         /// <param name="token">The cancellation token.</param>
         /// <returns></returns>
         [ApiLevel(ApiLevel.V2, MinVersion = "2.1.1")]
-        public async Task DeleteSearchAsync(int id, CancellationToken token = default)
+        public Task DeleteSearchAsync(int id, CancellationToken token = default)
         {
-            throw new NotImplementedException();
+            return PostAsync(p => p.DeleteSearch(id), token, ApiLevel.V2, Version_2_1_1);
         }
 
         /// <summary>
@@ -681,9 +695,13 @@ namespace QBittorrent.Client
         /// <param name="token">The cancellation token.</param>
         /// <returns>The list of the search categories.</returns>
         [ApiLevel(ApiLevel.V2, MinVersion = "2.1.1")]
-        public async Task<IReadOnlyList<string>> GetSearchCategoriesAsync(string plugin, CancellationToken token = default)
+        public Task<IReadOnlyList<string>> GetSearchCategoriesAsync(string plugin, CancellationToken token = default)
         {
-            throw new NotImplementedException();
+            if (plugin == null)
+                throw new ArgumentNullException(nameof(plugin));
+
+            return GetJsonAsync<IReadOnlyList<string>>(p => p.GetSearchCategories(plugin), token,
+                ApiLevel.V2, Version_2_1_1);
         }
 
         /// <summary>
@@ -692,9 +710,10 @@ namespace QBittorrent.Client
         /// <param name="token">The cancellation token.</param>
         /// <returns>The list of the search plugins.</returns>
         [ApiLevel(ApiLevel.V2, MinVersion = "2.1.1")]
-        public async Task<IReadOnlyList<SearchPlugin>> GetSearchPluginsAsync(CancellationToken token = default)
+        public Task<IReadOnlyList<SearchPlugin>> GetSearchPluginsAsync(CancellationToken token = default)
         {
-            throw new NotImplementedException();
+            return GetJsonAsync<IReadOnlyList<SearchPlugin>>(p => p.GetSearchPlugins(), token,
+                ApiLevel.V2, Version_2_1_1);
         }
 
         /// <summary>
@@ -705,9 +724,12 @@ namespace QBittorrent.Client
         /// <returns></returns>
         /// <remarks>Plugins can be installed from the local file system using <c>file:///</c> URIs as <paramref name="sources"/>.</remarks>
         [ApiLevel(ApiLevel.V2, MinVersion = "2.1.1")]
-        public async Task InstallSearchPluginsAsync(IEnumerable<Uri> sources, CancellationToken token = default)
+        public Task InstallSearchPluginsAsync(IEnumerable<Uri> sources, CancellationToken token = default)
         {
-            throw new NotImplementedException();
+            if (sources == null)
+                throw new ArgumentNullException(nameof(sources));
+
+            return PostAsync(p => p.InstallSearchPlugins(sources), token, ApiLevel.V2, Version_2_1_1);
         }
 
         /// <summary>
@@ -717,9 +739,12 @@ namespace QBittorrent.Client
         /// <param name="token">The cancellation token.</param>
         /// <returns></returns>
         [ApiLevel(ApiLevel.V2, MinVersion = "2.1.1")]
-        public async Task UninstallSearchPluginsAsync(IEnumerable<string> names, CancellationToken token = default)
+        public Task UninstallSearchPluginsAsync(IEnumerable<string> names, CancellationToken token = default)
         {
-            throw new NotImplementedException();
+            if (names == null)
+                throw new ArgumentNullException(nameof(names));
+
+            return PostAsync(p => p.UninstallSearchPlugins(names), token, ApiLevel.V2, Version_2_1_1);
         }
 
         /// <summary>
@@ -729,9 +754,12 @@ namespace QBittorrent.Client
         /// <param name="token">The cancellation token.</param>
         /// <returns></returns>
         [ApiLevel(ApiLevel.V2, MinVersion = "2.1.1")]
-        public async Task EnableSearchPluginsAsync(IEnumerable<string> names, CancellationToken token = default)
+        public Task EnableSearchPluginsAsync(IEnumerable<string> names, CancellationToken token = default)
         {
-            throw new NotImplementedException();
+            if (names == null)
+                throw new ArgumentNullException(nameof(names));
+
+            return PostAsync(p => p.EnableDisableSearchPlugins(names, true), token, ApiLevel.V2, Version_2_1_1);
         }
 
         /// <summary>
@@ -741,9 +769,12 @@ namespace QBittorrent.Client
         /// <param name="token">The cancellation token.</param>
         /// <returns></returns>
         [ApiLevel(ApiLevel.V2, MinVersion = "2.1.1")]
-        public async Task DisableSearchPluginsAsync(IEnumerable<string> names, CancellationToken token = default)
+        public Task DisableSearchPluginsAsync(IEnumerable<string> names, CancellationToken token = default)
         {
-            throw new NotImplementedException();
+            if (names == null)
+                throw new ArgumentNullException(nameof(names));
+
+            return PostAsync(p => p.EnableDisableSearchPlugins(names, false), token, ApiLevel.V2, Version_2_1_1);
         }
 
         /// <summary>
@@ -752,9 +783,9 @@ namespace QBittorrent.Client
         /// <param name="token">The cancellation token.</param>
         /// <returns></returns>
         [ApiLevel(ApiLevel.V2, MinVersion = "2.1.1")]
-        public async Task UpdateSearchPluginsAsync(CancellationToken token = default)
+        public Task UpdateSearchPluginsAsync(CancellationToken token = default)
         {
-            throw new NotImplementedException();
+            return PostAsync(p => p.UpdateSearchPlugins(), token, ApiLevel.V2, Version_2_1_1);
         }
 
         #endregion

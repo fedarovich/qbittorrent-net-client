@@ -158,11 +158,13 @@ namespace QBittorrent.Client.Internal
 
         Uri GetSearchStatus();
 
-        Uri GetSearchResults();
+        Uri GetSearchStatus(int id);
+
+        Uri GetSearchResults(int id, int offset, int limit);
 
         Uri DeleteSearch();
 
-        Uri GetSearchCategories();
+        Uri GetSearchCategories(string plugin);
 
         Uri GetSearchPlugins();
 

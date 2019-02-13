@@ -1,4 +1,4 @@
-FROM alpine:3.8
+FROM python:3.7.2-alpine3.8
 
 COPY ["rss", "rss"]
 
@@ -79,6 +79,8 @@ ENV HOME=/home/qbittorrent
 USER qbittorrent
 
 EXPOSE 8080 6881
+
+VOLUME /data
 
 ENTRYPOINT ["dumb-init", "/entrypoint.sh"]
 CMD ["qbittorrent-nox"]

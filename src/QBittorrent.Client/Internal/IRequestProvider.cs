@@ -120,15 +120,7 @@ namespace QBittorrent.Client.Internal
 
         (Uri url, HttpContent request) StopSearch(int id);
 
-        //(Uri url, HttpContent request) GetSearchStatus();
-
-        //(Uri url, HttpContent request) GetSearchResults();
-
         (Uri url, HttpContent request) DeleteSearch(int id);
-
-        //(Uri url, HttpContent request) GetSearchCategories();
-
-        //(Uri url, HttpContent request) GetSearchPlugins();
 
         (Uri url, HttpContent request) InstallSearchPlugins(IEnumerable<Uri> sources);
 

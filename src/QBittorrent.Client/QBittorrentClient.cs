@@ -1147,6 +1147,37 @@ namespace QBittorrent.Client
             }
         }
 
+        private async Task<T> GetJsonAsync<T>(
+            Func<IUrlProvider, Uri> builder,
+            CancellationToken token,
+            ApiLevel minApiLevel = ApiLevel.V1,
+            ApiVersion minApiVersion = default)
+        {
+            var provider = await _requestProvider.GetValueAsync(token).ConfigureAwait(false);
+            await EnsureApiVersionAsync(provider, token, minApiLevel, minApiVersion).ConfigureAwait(false);
+
+            var uri = builder(provider.Url);
+            var json = await _client.GetStringAsync(uri, token).ConfigureAwait(false);
+            var result = JsonConvert.DeserializeObject<T>(json);
+            return result;
+        }
+
+        private async Task<TResult> GetJsonAsync<T, TResult>(
+            Func<IUrlProvider, Uri> builder,
+            CancellationToken token,
+            Func<T, TResult> transform,
+            ApiLevel minApiLevel = ApiLevel.V1,
+            ApiVersion minApiVersion = default)
+        {
+            var provider = await _requestProvider.GetValueAsync(token).ConfigureAwait(false);
+            await EnsureApiVersionAsync(provider, token, minApiLevel, minApiVersion).ConfigureAwait(false);
+
+            var uri = builder(provider.Url);
+            var json = await _client.GetStringAsync(uri, token).ConfigureAwait(false);
+            var result = JsonConvert.DeserializeObject<T>(json);
+            return transform(result);
+        }
+
         private async Task EnsureApiVersionAsync(IRequestProvider provider, 
             CancellationToken token, 
             ApiLevel minApiLevel = ApiLevel.V1,

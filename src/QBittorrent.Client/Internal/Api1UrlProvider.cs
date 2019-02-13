@@ -176,11 +176,13 @@ namespace QBittorrent.Client.Internal
 
         public Uri GetSearchStatus() => throw new ApiNotSupportedException(ApiLevel.V2, new ApiVersion(2, 1, 1));
 
-        public Uri GetSearchResults() => throw new ApiNotSupportedException(ApiLevel.V2, new ApiVersion(2, 1, 1));
+        public Uri GetSearchStatus(int id) => throw new ApiNotSupportedException(ApiLevel.V2, new ApiVersion(2, 1, 1));
+
+        public Uri GetSearchResults(int id, int offset, int limit) => throw new ApiNotSupportedException(ApiLevel.V2, new ApiVersion(2, 1, 1));
 
         public Uri DeleteSearch() => throw new ApiNotSupportedException(ApiLevel.V2, new ApiVersion(2, 1, 1));
 
-        public Uri GetSearchCategories() => throw new ApiNotSupportedException(ApiLevel.V2, new ApiVersion(2, 1, 1));
+        public Uri GetSearchCategories(string plugin) => throw new ApiNotSupportedException(ApiLevel.V2, new ApiVersion(2, 1, 1));
 
         public Uri GetSearchPlugins() => throw new ApiNotSupportedException(ApiLevel.V2, new ApiVersion(2, 1, 1));
 

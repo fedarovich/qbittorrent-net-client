@@ -371,7 +371,7 @@ namespace QBittorrent.Client
         /// <returns>The ID of the search job.</returns>
         [ApiLevel(ApiLevel.V2, MinVersion = "2.1.1")]
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static Task<int> StartSearchUsingEnabledPluginsAsync(
+        public static Task<int> StartSearchAsync(
             [NotNull] this IQBittorrentClient2 client,
             [NotNull] string pattern,
             bool disabledPluginsToo = false,

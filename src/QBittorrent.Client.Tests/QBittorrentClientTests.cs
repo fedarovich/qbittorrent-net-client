@@ -3216,7 +3216,123 @@ namespace QBittorrent.Client.Tests
             rules = await Client.GetRssAutoDownloadingRulesAsync();
             rules.Should().BeEmpty();
         }
-        
+
+        #endregion
+
+        #region Search
+
+        [SkippableFact]
+        public async Task ManageSearchPlugins()
+        {
+            Skip.If(ApiVersionLessThan(2, 1, 1));
+
+            await Client.LoginAsync(UserName, Password);
+
+            var plugins = await Client.GetSearchPluginsAsync();
+            plugins.Should().BeEmpty();
+
+            // TODO: It would be better to use a custom mock plugin here.
+            await Client.InstallSearchPluginAsync(
+                new Uri("https://raw.githubusercontent.com/MadeOfMagicAndWires/qBit-plugins/730482f630bb7a5bab69fbc7ad1b42bda55c144c/engines/linuxtracker.py"));
+
+            var plugin = await Utils.Retry(async () =>
+            {
+                plugins = await Client.GetSearchPluginsAsync();
+                plugins.Should().HaveCount(1);
+                return plugins.Single();
+            }, attempts: 10);
+
+            plugin.Should().BeEquivalentTo(
+                new SearchPlugin
+                {
+                    Name = "linuxtracker",
+                    FullName = "Linux Tracker",
+                    IsEnabled = true,
+                    Url = new Uri("http://linuxtracker.org/"),
+                    Version = new System.Version(1, 1),
+                    SupportedCategories = new[] { "software" }
+                });
+
+            await Client.DisableSearchPluginAsync(plugin.Name);
+            await Utils.Retry(async () =>
+            {
+                plugins = await Client.GetSearchPluginsAsync();
+                plugins.Should().HaveCount(1);
+                plugins.Single().IsEnabled.Should().BeFalse();
+            });
+
+            await Client.EnableSearchPluginAsync(plugin.Name);
+            await Utils.Retry(async () =>
+            {
+                plugins = await Client.GetSearchPluginsAsync();
+                plugins.Should().HaveCount(1);
+                plugins.Single().IsEnabled.Should().BeTrue();
+            });
+
+            await Client.UninstallSearchPluginAsync(plugin.Name);
+            await Utils.Retry(async () =>
+            {
+                plugins = await Client.GetSearchPluginsAsync();
+                plugins.Should().BeEmpty();
+            });
+
+            await Client.UpdateSearchPluginsAsync();
+            await Utils.Retry(async () =>
+            {
+                plugins = await Client.GetSearchPluginsAsync();
+                plugins.Should().HaveCountGreaterThan(1);
+            });
+        }
+
+        [SkippableFact]
+        public async Task Search()
+        {
+            Skip.If(ApiVersionLessThan(2, 1, 1));
+
+            await Client.LoginAsync(UserName, Password);
+
+            // TODO: It would be better to use a custom mock plugin here.
+            await Client.InstallSearchPluginAsync(
+                new Uri("https://raw.githubusercontent.com/MadeOfMagicAndWires/qBit-plugins/730482f630bb7a5bab69fbc7ad1b42bda55c144c/engines/linuxtracker.py"));
+
+            var plugin = await Utils.Retry(async () =>
+            {
+                var plugins = await Client.GetSearchPluginsAsync();
+                plugins.Should().HaveCount(1);
+                return plugins.Single();
+            });
+
+            var ubuntuSearch = await Client.StartSearchAsync("Ubuntu", true);
+            var fedoraSearch = await Client.StartSearchAsync("Fedora", plugin.Name);
+
+            var statuses = await Client.GetSearchStatusAsync();
+            statuses.Select(s => s.Status).Should().AllBeEquivalentTo(SearchJobStatus.Running);
+
+            await Client.StopSearchAsync(fedoraSearch);
+            var fedoraStatus = await Client.GetSearchStatusAsync(fedoraSearch);
+            fedoraStatus.Status.Should().Be(SearchJobStatus.Stopped);
+
+            // Wait for ubuntu search to complete for about 1 minute:
+            var ubuntuStatus = await Utils.Retry(async () =>
+            {
+                var status = await Client.GetSearchStatusAsync(ubuntuSearch);
+                status.Status.Should().Be(SearchJobStatus.Stopped);
+                return status;
+            }, attempts: 21, delayMs: 3000);
+
+            var results = await Client.GetSearchResultsAsync(ubuntuSearch, 0, 10);
+            results.Results.Should().HaveCount(10);
+            results.Status.Should().Be(SearchJobStatus.Stopped);
+            results.Total.Should().Be(ubuntuStatus.Total);
+
+            await Client.DeleteSearchAsync(ubuntuSearch);
+            await Utils.Retry(async () =>
+            {
+                var st = await Client.GetSearchStatusAsync();
+                st.Should().HaveCount(1);
+            });
+        }
+
         #endregion
 
         private bool ApiVersionLessThan(byte major, byte minor = 0, byte build = 0)

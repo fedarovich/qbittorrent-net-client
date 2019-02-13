@@ -180,11 +180,16 @@ namespace QBittorrent.Client.Internal
 
         public Uri GetSearchStatus() => Create("/api/v2/search/status");
 
-        public Uri GetSearchResults() => Create("/api/v2/search/results");
+        public Uri GetSearchStatus(int id) => Create("/api/v2/search/status", ("id", id.ToString()));
+
+        public Uri GetSearchResults(int id, int offset, int limit) => Create("/api/v2/search/results",
+            ("id", id.ToString()),
+            ("offset", offset.ToString()),
+            ("limit", limit.ToString()));
 
         public Uri DeleteSearch() => Create("/api/v2/search/delete");
 
-        public Uri GetSearchCategories() => Create("/api/v2/search/categories");
+        public Uri GetSearchCategories(string plugin) => Create("/api/v2/search/categories", ("plugin", plugin));
 
         public Uri GetSearchPlugins() => Create("/api/v2/search/plugins");
 

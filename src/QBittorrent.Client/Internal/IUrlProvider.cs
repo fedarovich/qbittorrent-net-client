@@ -130,6 +130,8 @@ namespace QBittorrent.Client.Internal
 
         Uri DeleteTrackers();
 
+        Uri SetShareLimits();
+
         // RSS
 
         Uri AddRssFolder();

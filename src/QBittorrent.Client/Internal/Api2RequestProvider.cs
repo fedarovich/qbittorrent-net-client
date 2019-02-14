@@ -90,6 +90,14 @@ namespace QBittorrent.Client.Internal
                 ("priority", priority.ToString("D")));
         }
 
+        public override (Uri url, HttpContent request) SetShareLimits(IEnumerable<string> hashes, double ratio, TimeSpan seedingTime)
+        {
+            return BuildForm(Url.SetShareLimits(),
+                ("hashes", JoinHashes(hashes)),
+                ("ratioLimit", ratio.ToString("R")),
+                ("seedingTimeLimit", seedingTime.TotalSeconds.ToString("F0")));
+        }
+
         public override (Uri url, HttpContent request) AddTorrents(AddTorrentsRequest request)
         {
             var data = AddTorrentsCore(request);

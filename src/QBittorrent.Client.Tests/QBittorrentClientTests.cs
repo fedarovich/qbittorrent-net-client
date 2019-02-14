@@ -2298,6 +2298,74 @@ namespace QBittorrent.Client.Tests
 
         #endregion
 
+        #region Set Share Limits
+
+        [SkippableFact]
+        [PrintTestName]
+        public async Task SetShareLimit()
+        {
+            Skip.If(ApiVersionLessThan(2, 0, 1));
+
+            await Client.LoginAsync(UserName, Password);
+            var list = await Client.GetTorrentListAsync();
+            list.Should().BeEmpty();
+
+            var fileToAdd = Path.Combine(Utils.TorrentsFolder, "ubuntu-16.04.4-desktop-amd64.iso.torrent");
+            await Utils.Retry(() => Client.AddTorrentsAsync(new AddTorrentFilesRequest(fileToAdd)));
+
+            var torrent = await Utils.Retry(async () =>
+            {
+                list = await Client.GetTorrentListAsync();
+                return list.Single();
+            });
+
+            int responseId = 0;
+            var partialData = await Client.GetPartialDataAsync(responseId);
+            partialData.TorrentsChanged.Should().HaveCount(1);
+
+            var info = partialData.TorrentsChanged[torrent.Hash];
+            info.RatioLimit.Should().Be(ShareLimits.Ratio.Global);
+            info.SeedingTimeLimit.Should().Be(ShareLimits.SeedingTime.Global);
+
+            await Client.SetShareLimitsAsync(torrent.Hash, ShareLimits.Ratio.Unlimited, TimeSpan.FromHours(1));
+            await Task.Delay(1000);
+            partialData = await Client.GetPartialDataAsync(responseId);
+            partialData.TorrentsChanged.Should().HaveCount(1);
+
+            info = partialData.TorrentsChanged[torrent.Hash];
+            info.RatioLimit.Should().Be(ShareLimits.Ratio.Unlimited);
+            info.SeedingTimeLimit.Should().Be(TimeSpan.FromHours(1));
+
+            await Client.SetShareLimitsAsync(torrent.Hash, 10, ShareLimits.SeedingTime.Unlimited);
+            await Task.Delay(1000);
+            partialData = await Client.GetPartialDataAsync(responseId);
+            partialData.TorrentsChanged.Should().HaveCount(1);
+
+            info = partialData.TorrentsChanged[torrent.Hash];
+            info.RatioLimit.Should().Be(10.0);
+            info.SeedingTimeLimit.Should().Be(ShareLimits.SeedingTime.Unlimited);
+
+            await Client.SetShareLimitsAsync(torrent.Hash, 0, ShareLimits.SeedingTime.Global);
+            await Task.Delay(1000);
+            partialData = await Client.GetPartialDataAsync(responseId);
+            partialData.TorrentsChanged.Should().HaveCount(1);
+
+            info = partialData.TorrentsChanged[torrent.Hash];
+            info.RatioLimit.Should().Be(0);
+            info.SeedingTimeLimit.Should().Be(ShareLimits.SeedingTime.Global);
+
+            await Client.SetShareLimitsAsync(torrent.Hash, ShareLimits.Ratio.Global, TimeSpan.Zero);
+            await Task.Delay(1000);
+            partialData = await Client.GetPartialDataAsync(responseId);
+            partialData.TorrentsChanged.Should().HaveCount(1);
+
+            info = partialData.TorrentsChanged[torrent.Hash];
+            info.RatioLimit.Should().Be(ShareLimits.Ratio.Global);
+            info.SeedingTimeLimit.Should().Be(TimeSpan.Zero);
+        }
+
+        #endregion
+
         #region Preferences
 
         [Fact]
@@ -2779,6 +2847,7 @@ namespace QBittorrent.Client.Tests
         #region RSS
 
         [SkippableFact]
+        [PrintTestName]
         public async Task AddRssFeed()
         {
             Skip.If(ApiVersionLessThan(2, 1));
@@ -2793,6 +2862,7 @@ namespace QBittorrent.Client.Tests
         }
 
         [SkippableFact]
+        [PrintTestName]
         public async Task AddRssFolder()
         {
             Skip.If(ApiVersionLessThan(2, 1));
@@ -2809,6 +2879,7 @@ namespace QBittorrent.Client.Tests
 
         
         [SkippableFact]
+        [PrintTestName]
         public async Task AddRssFeedWithFolder()
         {
             Skip.If(ApiVersionLessThan(2, 1));
@@ -2825,6 +2896,7 @@ namespace QBittorrent.Client.Tests
         }
         
         [SkippableFact]
+        [PrintTestName]
         public async Task AddAndProcessRssItems()
         {
             Skip.If(ApiVersionLessThan(2, 1));
@@ -2934,6 +3006,7 @@ namespace QBittorrent.Client.Tests
         }
         
         [SkippableFact]
+        [PrintTestName]
         public async Task DeleteRssItems()
         {
             Skip.If(ApiVersionLessThan(2, 1));
@@ -3014,6 +3087,7 @@ namespace QBittorrent.Client.Tests
         }
         
         [SkippableFact]
+        [PrintTestName]
         public async Task MoveRssItems()
         {
             Skip.If(ApiVersionLessThan(2, 1));
@@ -3111,6 +3185,7 @@ namespace QBittorrent.Client.Tests
         }
 
         [SkippableFact]
+        [PrintTestName]
         public async Task AddRssAutoDownloadingRule()
         {
             Skip.If(ApiVersionLessThan(2, 1));
@@ -3133,6 +3208,7 @@ namespace QBittorrent.Client.Tests
         }
         
         [SkippableFact]
+        [PrintTestName]
         public async Task UpdateRssAutoDownloadingRule()
         {
             Skip.If(ApiVersionLessThan(2, 1));
@@ -3162,6 +3238,7 @@ namespace QBittorrent.Client.Tests
         }
         
         [SkippableFact(Skip = "This functionality does not work in current versions of qBittorrent")]
+        [PrintTestName]
         public async Task RenameRssAutoDownloadingRule()
         {
             Skip.If(ApiVersionLessThan(2, 1));
@@ -3192,6 +3269,7 @@ namespace QBittorrent.Client.Tests
         }
 
         [SkippableFact]
+        [PrintTestName]
         public async Task DeleteRssAutoDownloadingRule()
         {
             Skip.If(ApiVersionLessThan(2, 1));
@@ -3222,6 +3300,7 @@ namespace QBittorrent.Client.Tests
         #region Search
 
         [SkippableFact]
+        [PrintTestName]
         public async Task ManageSearchPlugins()
         {
             Skip.If(ApiVersionLessThan(2, 1, 1));
@@ -3285,6 +3364,7 @@ namespace QBittorrent.Client.Tests
         }
 
         [SkippableFact]
+        [PrintTestName]
         public async Task Search()
         {
             Skip.If(ApiVersionLessThan(2, 1, 1));

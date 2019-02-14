@@ -7,10 +7,10 @@ namespace QBittorrent.Client.Tests
     [AttributeUsage(AttributeTargets.Method)]
     public class PrintTestNameAttribute : BeforeAfterTestAttribute
     {
-        public override void After(MethodInfo methodUnderTest)
+        public override void Before(MethodInfo methodUnderTest)
         {
             Console.WriteLine("\tRunning test {0}.{1}...", methodUnderTest.DeclaringType.Name, methodUnderTest.Name);
-            base.After(methodUnderTest);
+            base.Before(methodUnderTest);
         }
     }
 }

@@ -287,7 +287,32 @@ namespace QBittorrent.Client
             TorrentContentPriority priority,
             CancellationToken token = default);
 
-        // RSS
+        /// <summary>
+        /// Sets the torrent share limits.
+        /// </summary>
+        /// <param name="hashes">The torrent hashes.</param>
+        /// <param name="ratio">
+        /// The ratio limit.
+        /// Use <see cref="ShareLimits.Ratio.Global"/> in order to use global limit.
+        /// Use <see cref="ShareLimits.Ratio.Unlimited"/> in order to set no limit.
+        /// </param>
+        /// <param name="seedingTime">
+        /// The seeding time limit.
+        /// Use <see cref="ShareLimits.SeedingTime.Global"/> in order to use global limit.
+        /// Use <see cref="ShareLimits.SeedingTime.Unlimited"/> in order to set no limit.
+        /// </param>
+        /// <param name="token">The cancellation token.</param>
+        /// <returns></returns>
+        /// <seealso cref="ShareLimits.Ratio" />
+        /// <seealso cref="ShareLimits.SeedingTime" />
+        [ApiLevel(ApiLevel.V2, MinVersion = "2.0.1")]
+        Task SetShareLimitsAsync(
+            [NotNull, ItemNotNull] IEnumerable<string> hashes,
+            double ratio,
+            TimeSpan seedingTime,
+            CancellationToken token = default);
+
+        #region RSS
 
         /// <summary>
         /// Adds the RSS folder.
@@ -394,7 +419,9 @@ namespace QBittorrent.Client
         Task<IReadOnlyDictionary<string, RssAutoDownloadingRule>> GetRssAutoDownloadingRulesAsync(
             CancellationToken token = default);
 
-        // Search
+        #endregion RSS
+
+        #region Search
 
         /// <summary>
         /// Starts torrent search job.
@@ -548,5 +575,7 @@ namespace QBittorrent.Client
         [ApiLevel(ApiLevel.V2, MinVersion = "2.1.1")]
         Task UpdateSearchPluginsAsync(
             CancellationToken token = default);
+
+        #endregion Search
     }
 }

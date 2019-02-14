@@ -97,6 +97,7 @@ namespace QBittorrent.Client.Internal
 
         (Uri url, HttpContent request) SetFilePriority(string hash, IEnumerable<int> fileIds, TorrentContentPriority priority);
 
+        (Uri url, HttpContent request) SetShareLimits(IEnumerable<string> hashes, double ratio, TimeSpan seedingTime);
 
         // RSS
 

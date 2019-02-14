@@ -73,6 +73,7 @@ namespace QBittorrent.Client.Internal
                 ("hash", hashList[0]));
         }
 
+
         public override (Uri url, HttpContent request) Reannounce(IEnumerable<string> hashes) => throw new ApiNotSupportedException(ApiLevel.V2);
 
         public override (Uri url, HttpContent request) EditTracker(string hash, Uri trackerUrl, Uri newTrackerUrl) => throw new ApiNotSupportedException(ApiLevel.V2, new ApiVersion(2, 2, 0));
@@ -80,6 +81,8 @@ namespace QBittorrent.Client.Internal
         public override (Uri url, HttpContent request) DeleteTrackers(string hash, IEnumerable<Uri> trackerUrls) => throw new ApiNotSupportedException(ApiLevel.V2, new ApiVersion(2, 2, 0));
 
         public override (Uri url, HttpContent request) SetFilePriority(string hash, IEnumerable<int> fileIds, TorrentContentPriority priority) => throw new ApiNotSupportedException(ApiLevel.V2, new ApiVersion(2, 2, 0));
+
+        public override (Uri url, HttpContent request) SetShareLimits(IEnumerable<string> hashes, double ratio, TimeSpan seedingTime) => throw new ApiNotSupportedException(ApiLevel.V2, new ApiVersion(2, 0, 1));
 
         public override (Uri url, HttpContent request) AddTorrents(AddTorrentsRequest request) => throw new ApiNotSupportedException(ApiLevel.V2);
 

@@ -18,6 +18,9 @@ namespace QBittorrent.Client
         private static readonly IEnumerable<string> All = new[] { "all" };
 
         [SuppressMessage("ReSharper", "InconsistentNaming")]
+        private static readonly ApiVersion Version_2_0_1 = new ApiVersion(2, 0, 1);
+
+        [SuppressMessage("ReSharper", "InconsistentNaming")]
         private static readonly ApiVersion Version_2_0_2 = new ApiVersion(2, 0, 2);
 
         [SuppressMessage("ReSharper", "InconsistentNaming")]
@@ -422,6 +425,32 @@ namespace QBittorrent.Client
                 throw new ArgumentException("The file IDs must be non-negative numbers.", nameof(fileIds));
 
             return PostAsync(p => p.SetFilePriority(hash, ids, priority), token, ApiLevel.V2, Version_2_2_0);
+        }
+
+        /// <summary>
+        /// Sets the torrent share limits.
+        /// </summary>
+        /// <param name="hashes">The torrent hashes.</param>
+        /// <param name="ratio">
+        /// The ratio limit.
+        /// Use <see cref="ShareLimits.Ratio.Global"/> in order to use global limit.
+        /// Use <see cref="ShareLimits.Ratio.Unlimited"/> in order to set no limit.
+        /// </param>
+        /// <param name="seedingTime">
+        /// The seeding time limit.
+        /// Use <see cref="ShareLimits.SeedingTime.Global"/> in order to use global limit.
+        /// Use <see cref="ShareLimits.SeedingTime.Unlimited"/> in order to set no limit.
+        /// </param>
+        /// <param name="token">The cancellation token.</param>
+        /// <returns></returns>
+        /// <seealso cref="ShareLimits.Ratio" />
+        /// <seealso cref="ShareLimits.SeedingTime" />
+        [ApiLevel(ApiLevel.V2, MinVersion = "2.0.1")]
+        public Task SetShareLimitsAsync(IEnumerable<string> hashes, double ratio, TimeSpan seedingTime, CancellationToken token = default)
+        {
+            ValidateHashes(ref hashes);
+
+            return PostAsync(p => p.SetShareLimits(hashes, ratio, seedingTime), token, ApiLevel.V2, Version_2_0_1);
         }
 
         #region RSS

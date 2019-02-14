@@ -156,6 +156,8 @@ namespace QBittorrent.Client.Internal
 
         public Uri DeleteTrackers() => Create("/api/v2/torrents/removeTrackers");
 
+        public Uri SetShareLimits() => Create("/api/v2/torrents/setShareLimits");
+
         public Uri AddRssFolder() => Create("/api/v2/rss/addFolder");
 
         public Uri AddRssFeed() => Create("/api/v2/rss/addFeed");

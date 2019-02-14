@@ -227,6 +227,13 @@ namespace QBittorrent.Client
         public double? RatioLimit { get; set; }
 
         /// <summary>
+        /// Upload seeding time limit 
+        /// </summary>
+        [JsonProperty("seeding_time_limit")]
+        [JsonConverter(typeof(SecondsToTimeSpanConverter))]
+        public TimeSpan? SeedingTimeLimit { get; set; }
+
+        /// <summary>
         /// The date and time when this torrent was seen complete for the last time
         /// </summary>
         [JsonProperty("seen_complete")]

@@ -47,6 +47,9 @@ namespace QBittorrent.Client.Tests
                     PruneChildren = true,
                     Force = true
                 });
+
+            Console.WriteLine("\t Clearing dangling volumes...");
+            await Client.Volumes.PruneAsync(new VolumesPruneParameters());
         }
     }
 }

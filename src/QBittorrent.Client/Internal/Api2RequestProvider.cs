@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Net.Http;
 using QBittorrent.Client.Extensions;
@@ -94,7 +95,7 @@ namespace QBittorrent.Client.Internal
         {
             return BuildForm(Url.SetShareLimits(),
                 ("hashes", JoinHashes(hashes)),
-                ("ratioLimit", ratio.ToString("R")),
+                ("ratioLimit", ratio.ToString("R", CultureInfo.InvariantCulture)),
                 ("seedingTimeLimit", seedingTime.TotalSeconds.ToString("F0")));
         }
 

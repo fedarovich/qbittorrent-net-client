@@ -120,6 +120,12 @@ namespace QBittorrent.Client
         /// Resume data is being checked
         /// </summary>
         [EnumMember(Value = "checkingResumeData")]
-        CheckingResumeData
+        CheckingResumeData,
+
+        /// <summary>
+        /// Data is being moved from the temporary folder
+        /// </summary>
+        [EnumMember(Value = "moving")]
+        Moving
     }
 }

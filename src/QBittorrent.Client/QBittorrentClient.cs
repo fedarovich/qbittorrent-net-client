@@ -24,6 +24,11 @@ namespace QBittorrent.Client
     /// <seealso cref="QBittorrentClientExtensions"/>
     public partial class QBittorrentClient : IQBittorrentClient, IDisposable
     {
+        /// <summary>
+        /// The legacy API version returned by qBittorrent 4.2 or later.
+        /// </summary>
+        public const int NewApiLegacyFallbackVersion = 25;
+
         private const int NewApiLegacyVersion = 18;
 
         private readonly Uri _uri;
@@ -191,6 +196,10 @@ namespace QBittorrent.Client
         /// Gets the current API version of the server for qBittorrent versions up to 4.0.4.
         /// </summary>
         /// <param name="token">The cancellation token.</param>
+        /// <remarks>
+        /// Starting from version 4.2 qBittorrent does not return a legacy version.
+        /// But in order to retain compatibility, this library will return <see cref="NewApiLegacyFallbackVersion"/>.
+        /// </remarks>
         /// <returns></returns>
         public Task<int> GetLegacyApiVersionAsync(CancellationToken token = default)
         {
@@ -200,7 +209,8 @@ namespace QBittorrent.Client
         private async Task<int> GetLegacyApiVersionPrivateAsync(CancellationToken token)
         {
             var uri = BuildUri("/version/api");
-            var version = Convert.ToInt32(await _client.GetStringAsync(uri, token).ConfigureAwait(false));
+            var versionString = await _client.GetStringAsync(uri, true, token).ConfigureAwait(false);
+            var version = !string.IsNullOrEmpty(versionString) ? Convert.ToInt32(versionString) : NewApiLegacyFallbackVersion;
             return version;
         }
 
@@ -208,12 +218,17 @@ namespace QBittorrent.Client
         /// Get the minimum API version supported by server. Any application designed to work with an API version greater than or equal to the minimum API version is guaranteed to work.
         /// </summary>
         /// <param name="token">The cancellation token.</param>
+        /// <remarks>
+        /// Starting from version 4.2 qBittorrent does not return a legacy version.
+        /// But in order to retain compatibility, this library will return <see cref="NewApiLegacyFallbackVersion"/>.
+        /// </remarks>
         /// <returns></returns>
         public async Task<int> GetLegacyMinApiVersionAsync(CancellationToken token = default)
         {
             var uri = BuildUri("/version/api_min");
-            var version = await _client.GetStringAsync(uri, token).ConfigureAwait(false);
-            return Convert.ToInt32(version);
+            var versionString = await _client.GetStringAsync(uri, true, token).ConfigureAwait(false);
+            var version = !string.IsNullOrEmpty(versionString) ? Convert.ToInt32(versionString) : NewApiLegacyFallbackVersion;
+            return version;
         }
 
         /// <summary>

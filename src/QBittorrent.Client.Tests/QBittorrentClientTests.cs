@@ -2428,12 +2428,16 @@ namespace QBittorrent.Client.Tests
         [InlineData(nameof(Preferences.ProxyPort), 8080, 8888)]
         [InlineData(nameof(Preferences.ProxyPeerConnections), false, true)]
         [InlineData(nameof(Preferences.ForceProxy), true, false)]
+        [InlineData(nameof(Preferences.ProxyTorrentsOnly), false, true)]
         [InlineData(nameof(Preferences.ProxyUsername), "", "testuser")]
         [InlineData(nameof(Preferences.ProxyPassword), "", "testpassword")]
         [InlineData(nameof(Preferences.IpFilterEnabled), false, true)]
         [InlineData(nameof(Preferences.IpFilterPath), "", "/tmp/ipfilter.dat")]
         [InlineData(nameof(Preferences.IpFilterTrackers), false, true)]
         [InlineData(nameof(Preferences.WebUIUpnp), true, false)]
+        [InlineData(nameof(Preferences.WebUIClickjackingProtection), true, false)]
+        [InlineData(nameof(Preferences.WebUICsrfProtection), true, false)]
+        [InlineData(nameof(Preferences.WebUIHostHeaderValidation), true, false)]
         [InlineData(nameof(Preferences.DynamicDnsEnabled), false, true)]
         [InlineData(nameof(Preferences.DynamicDnsService), DynamicDnsService.DynDNS, DynamicDnsService.NoIP)]
         [InlineData(nameof(Preferences.DynamicDnsDomain), "changeme.dyndns.org", "test.example.com")]
@@ -2449,6 +2453,15 @@ namespace QBittorrent.Client.Tests
         {
             var prop = typeof(Preferences).GetProperty(name);
             ignoredProperties = ignoredProperties ?? new string[0];
+
+            var apiLevelAttr = prop.GetCustomAttribute<ApiLevelAttribute>();
+            if (apiLevelAttr != null && apiLevelAttr.Level >= ApiLevel.V2)
+            {
+                var minVersion = string.IsNullOrEmpty(apiLevelAttr.MinVersion)
+                    ? new ApiVersion(2)
+                    : ApiVersion.Parse(apiLevelAttr.MinVersion);
+                Skip.If(DockerFixture.Env.ApiVersion < minVersion);
+            }
 
             var deprecatedAttr = prop.GetCustomAttribute<DeprecatedAttribute>();
             if (deprecatedAttr != null)
@@ -2500,6 +2513,22 @@ namespace QBittorrent.Client.Tests
 
             var prop = typeof(Preferences).GetProperty(name);
             ignoredProperties = ignoredProperties ?? new string[0];
+
+            var apiLevelAttr = prop.GetCustomAttribute<ApiLevelAttribute>();
+            if (apiLevelAttr != null && apiLevelAttr.Level >= ApiLevel.V2)
+            {
+                var minVersion = string.IsNullOrEmpty(apiLevelAttr.MinVersion)
+                    ? new ApiVersion(2)
+                    : ApiVersion.Parse(apiLevelAttr.MinVersion);
+                Skip.If(DockerFixture.Env.ApiVersion < minVersion);
+            }
+
+            var deprecatedAttr = prop.GetCustomAttribute<DeprecatedAttribute>();
+            if (deprecatedAttr != null)
+            {
+                var deprecatedFromVersion = ApiVersion.Parse(deprecatedAttr.FromVersion);
+                Skip.If(DockerFixture.Env.ApiVersion >= deprecatedFromVersion, $"Deprecated starting from API {deprecatedAttr.FromVersion}");
+            }
 
             await Client.LoginAsync(UserName, Password);
 

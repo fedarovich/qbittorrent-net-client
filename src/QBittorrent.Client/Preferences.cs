@@ -387,6 +387,13 @@ namespace QBittorrent.Client
         public bool? ForceProxy { get; set; }
 
         /// <summary>
+        /// True if proxy should be used only for torrents.
+        /// </summary>
+        [JsonProperty("proxy_torrents_only")]
+        [ApiLevel(ApiLevel.V2)]
+        public bool ProxyTorrentsOnly { get; set; }
+
+        /// <summary>
         /// True if proxy requires authentication; doesn't apply to SOCKS4 proxies.
         /// </summary>
         [JsonProperty("proxy_auth_enabled")]
@@ -518,6 +525,30 @@ namespace QBittorrent.Client
         [SuppressMessage("ReSharper", "InconsistentNaming")]
         [ApiLevel(ApiLevel.V2, MinVersion = "2.3")]
         public string WebUISslCertificatePath { get; set; }
+
+        /// <summary>
+        /// True if WebUI clickjacking protection is enabled
+        /// </summary>
+        [JsonProperty("web_ui_clickjacking_protection_enabled")]
+        [SuppressMessage("ReSharper", "InconsistentNaming")]
+        [ApiLevel(ApiLevel.V2, MinVersion = "2.0.2")]
+        public bool? WebUIClickjackingProtection { get; set; }
+
+        /// <summary>
+        /// True if WebUI CSRF protection is enabled
+        /// </summary>
+        [JsonProperty("web_ui_csrf_protection_enabled")]
+        [SuppressMessage("ReSharper", "InconsistentNaming")]
+        [ApiLevel(ApiLevel.V2, MinVersion = "2.0.2")]
+        public bool? WebUICsrfProtection { get; set; }
+
+        /// <summary>
+        /// True if WebUI host header validation is enabled
+        /// </summary>
+        [JsonProperty("web_ui_host_header_validation_enabled")]
+        [SuppressMessage("ReSharper", "InconsistentNaming")]
+        [ApiLevel(ApiLevel.V2, MinVersion = "2.2")]
+        public bool? WebUIHostHeaderValidation { get; set; }
 
         /// <summary>
         /// True if authentication challenge for loopback address (127.0.0.1) should be disabled.

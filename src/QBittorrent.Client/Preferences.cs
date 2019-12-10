@@ -391,7 +391,7 @@ namespace QBittorrent.Client
         /// </summary>
         [JsonProperty("proxy_torrents_only")]
         [ApiLevel(ApiLevel.V2)]
-        public bool ProxyTorrentsOnly { get; set; }
+        public bool? ProxyTorrentsOnly { get; set; }
 
         /// <summary>
         /// True if proxy requires authentication; doesn't apply to SOCKS4 proxies.

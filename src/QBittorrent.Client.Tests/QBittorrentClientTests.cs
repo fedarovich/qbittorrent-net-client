@@ -2426,7 +2426,6 @@ namespace QBittorrent.Client.Tests
         [InlineData(nameof(Preferences.ProxyAddress), "0.0.0.0", "192.168.254.200")]
         [InlineData(nameof(Preferences.ProxyPort), 8080, 8888)]
         [InlineData(nameof(Preferences.ProxyPeerConnections), false, true)]
-        [InlineData(nameof(Preferences.ForceProxy), true, false)]
         [InlineData(nameof(Preferences.ProxyUsername), "", "testuser")]
         [InlineData(nameof(Preferences.ProxyPassword), "", "testpassword")]
         [InlineData(nameof(Preferences.IpFilterEnabled), false, true)]
@@ -2509,6 +2508,32 @@ namespace QBittorrent.Client.Tests
                 newPrefs.Should().BeEquivalentTo(oldPrefs, options => options
                     .Excluding(ctx => ctx.SelectedMemberPath == name)
                     .Excluding(ctx => ignoredProperties.Contains(ctx.SelectedMemberPath)));
+            });
+        }
+
+        [SkippableTheory]
+        [InlineData(false)]
+        [InlineData(true)]
+        [PrintTestName]
+        public async Task SetForceProxy(bool newValue)
+        {
+            Skip.IfNot(ApiVersionLessThan(2, 3));
+
+            await Client.LoginAsync(UserName, Password);
+
+            var oldPrefs = await Client.GetPreferencesAsync();
+            oldPrefs.ForceProxy.Should().Be(ApiVersionLessThan(2, 3) ? false : (bool?)null);
+
+            var setPrefs = new Preferences();
+            setPrefs.ForceProxy = newValue;
+            await Utils.Retry(() => Client.SetPreferencesAsync(setPrefs));
+
+            await Utils.Retry(async () =>
+            {
+                var newPrefs = await Client.GetPreferencesAsync();
+                newPrefs.ForceProxy.Should().Be(newValue);
+                newPrefs.Should().BeEquivalentTo(oldPrefs, options => options
+                    .Excluding(ctx => ctx.SelectedMemberPath == nameof(Preferences.ForceProxy)));
             });
         }
 
@@ -2672,7 +2697,7 @@ namespace QBittorrent.Client.Tests
 
             var oldPrefs = await Client.GetPreferencesAsync();
             oldPrefs.WebUIUsername.Should().Be(UserName);
-            oldPrefs.WebUIPasswordHash.Should().Be(Hash(Password));
+            oldPrefs.WebUIPasswordHash.Should().Be(ApiVersionLessThan(2, 3) ? Hash(Password) : null);
 
             var setPrefs = new Preferences
             {
@@ -2686,7 +2711,7 @@ namespace QBittorrent.Client.Tests
 
             var newPrefs = await newClient.GetPreferencesAsync();
             newPrefs.WebUIUsername.Should().Be(setPrefs.WebUIUsername);
-            newPrefs.WebUIPasswordHash.Should().Be(Hash(setPrefs.WebUIPassword));
+            newPrefs.WebUIPasswordHash.Should().Be(ApiVersionLessThan(2, 3) ? Hash(setPrefs.WebUIPassword) : null);
             newPrefs.Should().BeEquivalentTo(oldPrefs, options => options
                 .Excluding(p => p.WebUIUsername)
                 .Excluding(p => p.WebUIPasswordHash));
@@ -2729,10 +2754,12 @@ namespace QBittorrent.Client.Tests
                 .Excluding(p => p.WebUIPort));
         }
 
-        [Fact]
+        [SkippableFact]
         [PrintTestName]
         public async Task SetPreferenceWebUIHttps()
         {
+            //Skip.IfNot(ApiVersionLessThan(2, 3), "QBittorrent 4.2.0 has some issues with HTTPS");
+
             await Client.LoginAsync(UserName, Password);
 
             var oldPrefs = await Client.GetPreferencesAsync();

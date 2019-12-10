@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Diagnostics.CodeAnalysis;
 using System.Runtime.Serialization;
 using System.Text;
@@ -488,15 +489,17 @@ namespace QBittorrent.Client
         /// <summary>
         /// SSL keyfile contents (this is a not a path).
         /// </summary>
-        [JsonProperty("ssl_key")]
+        [JsonProperty("ssl_key", DefaultValueHandling = DefaultValueHandling.IgnoreAndPopulate)]
         [SuppressMessage("ReSharper", "InconsistentNaming")]
+        [DefaultValue("")]
         public string WebUISslKey { get; set; }
 
         /// <summary>
         /// SSL certificate contents (this is a not a path).
         /// </summary>
-        [JsonProperty("ssl_cert")]
+        [JsonProperty("ssl_cert", DefaultValueHandling = DefaultValueHandling.IgnoreAndPopulate)]
         [SuppressMessage("ReSharper", "InconsistentNaming")]
+        [DefaultValue("")]
         public string WebUISslCertificate { get; set; }
 
         /// <summary>

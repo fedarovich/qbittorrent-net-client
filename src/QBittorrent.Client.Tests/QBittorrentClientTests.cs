@@ -7,6 +7,7 @@ using System.Net;
 using System.Net.Http;
 using System.Net.NetworkInformation;
 using System.Net.Sockets;
+using System.Reflection;
 using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
@@ -2426,6 +2427,7 @@ namespace QBittorrent.Client.Tests
         [InlineData(nameof(Preferences.ProxyAddress), "0.0.0.0", "192.168.254.200")]
         [InlineData(nameof(Preferences.ProxyPort), 8080, 8888)]
         [InlineData(nameof(Preferences.ProxyPeerConnections), false, true)]
+        [InlineData(nameof(Preferences.ForceProxy), true, false)]
         [InlineData(nameof(Preferences.ProxyUsername), "", "testuser")]
         [InlineData(nameof(Preferences.ProxyPassword), "", "testpassword")]
         [InlineData(nameof(Preferences.IpFilterEnabled), false, true)]
@@ -2447,6 +2449,13 @@ namespace QBittorrent.Client.Tests
         {
             var prop = typeof(Preferences).GetProperty(name);
             ignoredProperties = ignoredProperties ?? new string[0];
+
+            var deprecatedAttr = prop.GetCustomAttribute<DeprecatedAttribute>();
+            if (deprecatedAttr != null)
+            {
+                var deprecatedFromVersion = ApiVersion.Parse(deprecatedAttr.FromVersion);
+                Skip.If(DockerFixture.Env.ApiVersion >= deprecatedFromVersion, $"Deprecated starting from API {deprecatedAttr.FromVersion}");
+            }
 
             await Client.LoginAsync(UserName, Password);
 
@@ -2508,32 +2517,6 @@ namespace QBittorrent.Client.Tests
                 newPrefs.Should().BeEquivalentTo(oldPrefs, options => options
                     .Excluding(ctx => ctx.SelectedMemberPath == name)
                     .Excluding(ctx => ignoredProperties.Contains(ctx.SelectedMemberPath)));
-            });
-        }
-
-        [SkippableTheory]
-        [InlineData(false)]
-        [InlineData(true)]
-        [PrintTestName]
-        public async Task SetForceProxy(bool newValue)
-        {
-            Skip.IfNot(ApiVersionLessThan(2, 3));
-
-            await Client.LoginAsync(UserName, Password);
-
-            var oldPrefs = await Client.GetPreferencesAsync();
-            oldPrefs.ForceProxy.Should().Be(ApiVersionLessThan(2, 3) ? false : (bool?)null);
-
-            var setPrefs = new Preferences();
-            setPrefs.ForceProxy = newValue;
-            await Utils.Retry(() => Client.SetPreferencesAsync(setPrefs));
-
-            await Utils.Retry(async () =>
-            {
-                var newPrefs = await Client.GetPreferencesAsync();
-                newPrefs.ForceProxy.Should().Be(newValue);
-                newPrefs.Should().BeEquivalentTo(oldPrefs, options => options
-                    .Excluding(ctx => ctx.SelectedMemberPath == nameof(Preferences.ForceProxy)));
             });
         }
 
@@ -2758,7 +2741,7 @@ namespace QBittorrent.Client.Tests
         [PrintTestName]
         public async Task SetPreferenceWebUIHttps()
         {
-            //Skip.IfNot(ApiVersionLessThan(2, 3), "QBittorrent 4.2.0 has some issues with HTTPS");
+            Skip.IfNot(ApiVersionLessThan(2, 3), "QBittorrent 4.2.0 has changed the procedure of setting certificate.");
 
             await Client.LoginAsync(UserName, Password);
 
@@ -2766,6 +2749,8 @@ namespace QBittorrent.Client.Tests
             oldPrefs.WebUIHttps.Should().BeFalse();
             oldPrefs.WebUISslCertificate.Should().BeEmpty();
             oldPrefs.WebUISslKey.Should().BeEmpty();
+            oldPrefs.WebUISslCertificatePath.Should().BeNull();
+            oldPrefs.WebUISslKeyPath.Should().BeNull();
 
             var (cert, key) = CreateCertificate();
 
@@ -2797,16 +2782,63 @@ namespace QBittorrent.Client.Tests
                 .Excluding(p => p.WebUIPort));
         }
 
-        [Fact]
+        [SkippableFact]
+        [PrintTestName]
+        public async Task SetPreferenceWebUIHttps_2_3()
+        {
+            Skip.If(ApiVersionLessThan(2, 3));
+
+            await Client.LoginAsync(UserName, Password);
+
+            var oldPrefs = await Client.GetPreferencesAsync();
+            oldPrefs.WebUIHttps.Should().BeFalse();
+            oldPrefs.WebUISslCertificate.Should().BeNull();
+            oldPrefs.WebUISslKey.Should().BeNull();
+            oldPrefs.WebUISslCertificatePath.Should().BeEmpty();
+            oldPrefs.WebUISslKeyPath.Should().BeEmpty();
+
+            var setPrefs = new Preferences
+            {
+                WebUIHttps = true,
+                WebUISslCertificatePath = "/cert/cert.pem",
+                WebUISslKeyPath = "/cert/key.pem",
+                WebUIPort = 9090
+            };
+            await Client.SetPreferencesAsync(setPrefs);
+
+            var handler = new HttpClientHandler
+            {
+                ServerCertificateCustomValidationCallback = delegate { return true; }
+            };
+            var newClient = new QBittorrentClient(new Uri("https://localhost:9090/"), handler, true);
+            await newClient.LoginAsync(UserName, Password);
+
+            var newPrefs = await newClient.GetPreferencesAsync();
+            newPrefs.WebUIHttps.Should().BeTrue();
+            newPrefs.WebUISslCertificatePath.Should().Be(setPrefs.WebUISslCertificatePath);
+            newPrefs.WebUISslKeyPath.Should().Be(setPrefs.WebUISslKeyPath);
+            newPrefs.WebUIPort.Should().Be(setPrefs.WebUIPort);
+            newPrefs.Should().BeEquivalentTo(oldPrefs, options => options
+                .Excluding(p => p.WebUIHttps)
+                .Excluding(p => p.WebUISslCertificatePath)
+                .Excluding(p => p.WebUISslKeyPath)
+                .Excluding(p => p.WebUIPort));
+        }
+
+        [SkippableFact]
         [PrintTestName]
         public async Task SetPreferenceWebUIHttpsWithInvalidCertificate()
         {
+            Skip.IfNot(ApiVersionLessThan(2, 3), "QBittorrent 4.2.0 has changed the procedure of setting certificate.");
+
             await Client.LoginAsync(UserName, Password);
 
             var oldPrefs = await Client.GetPreferencesAsync();
             oldPrefs.WebUIHttps.Should().BeFalse();
             oldPrefs.WebUISslCertificate.Should().BeEmpty();
-            oldPrefs.WebUISslKey.Should().BeEmpty();
+            oldPrefs.WebUISslKey.Should().BeEmpty(); 
+            oldPrefs.WebUISslCertificatePath.Should().BeNull();
+            oldPrefs.WebUISslKeyPath.Should().BeNull();
 
             var (cert, key) = CreateCertificate();
 
@@ -2815,6 +2847,35 @@ namespace QBittorrent.Client.Tests
                 WebUIHttps = true,
                 WebUISslCertificate = cert,
                 WebUISslKey = key,
+                WebUIPort = 9090
+            };
+            await Client.SetPreferencesAsync(setPrefs);
+
+            var newClient = new QBittorrentClient(new Uri("https://localhost:9090/"));
+            await Assert.ThrowsAsync<HttpRequestException>(() => newClient.LoginAsync(UserName, Password));
+        }
+
+        [SkippableFact]
+        [PrintTestName]
+        public async Task SetPreferenceWebUIHttpsWithInvalidCertificate_2_3()
+        {
+            Skip.If(ApiVersionLessThan(2, 3));
+
+            await Client.LoginAsync(UserName, Password);
+
+            var oldPrefs = await Client.GetPreferencesAsync();
+            oldPrefs.WebUIHttps.Should().BeFalse();
+            oldPrefs.WebUISslCertificate.Should().BeNull();
+            oldPrefs.WebUISslKey.Should().BeNull();
+            oldPrefs.WebUISslCertificatePath.Should().BeEmpty();
+            oldPrefs.WebUISslKeyPath.Should().BeEmpty();
+
+
+            var setPrefs = new Preferences
+            {
+                WebUIHttps = true,
+                WebUISslCertificatePath = "/cert/cert.pem",
+                WebUISslKeyPath = "/cert/key.pem",
                 WebUIPort = 9090
             };
             await Client.SetPreferencesAsync(setPrefs);

@@ -383,6 +383,7 @@ namespace QBittorrent.Client
         /// True if the connections not supported by the proxy are disabled.
         /// </summary>
         [JsonProperty("force_proxy")]
+        [Deprecated("2.3")]
         public bool? ForceProxy { get; set; }
 
         /// <summary>
@@ -489,18 +490,34 @@ namespace QBittorrent.Client
         /// <summary>
         /// SSL keyfile contents (this is a not a path).
         /// </summary>
-        [JsonProperty("ssl_key", DefaultValueHandling = DefaultValueHandling.IgnoreAndPopulate)]
+        [JsonProperty("ssl_key")]
         [SuppressMessage("ReSharper", "InconsistentNaming")]
-        [DefaultValue("")]
+        [Deprecated("2.3", Description = "Use WebUISslKeyPath on API 2.3 or later.")]
         public string WebUISslKey { get; set; }
 
         /// <summary>
         /// SSL certificate contents (this is a not a path).
         /// </summary>
-        [JsonProperty("ssl_cert", DefaultValueHandling = DefaultValueHandling.IgnoreAndPopulate)]
+        [JsonProperty("ssl_cert")]
         [SuppressMessage("ReSharper", "InconsistentNaming")]
-        [DefaultValue("")]
+        [Deprecated("2.3", Description = "Use WebUISslCertificatePath on API 2.3 or later.")]
         public string WebUISslCertificate { get; set; }
+
+        /// <summary>
+        /// SSL key file path on the server.
+        /// </summary>
+        [JsonProperty("web_ui_https_key_path")]
+        [SuppressMessage("ReSharper", "InconsistentNaming")]
+        [ApiLevel(ApiLevel.V2, MinVersion = "2.3")]
+        public string WebUISslKeyPath { get; set; }
+
+        /// <summary>
+        /// SSL certificate file path on the server.
+        /// </summary>
+        [JsonProperty("web_ui_https_cert_path")]
+        [SuppressMessage("ReSharper", "InconsistentNaming")]
+        [ApiLevel(ApiLevel.V2, MinVersion = "2.3")]
+        public string WebUISslCertificatePath { get; set; }
 
         /// <summary>
         /// True if authentication challenge for loopback address (127.0.0.1) should be disabled.

@@ -1,6 +1,7 @@
 FROM python:3.8.0-alpine3.10
 
 COPY ["rss", "rss"]
+COPY ["cert", "cert"]
 
 # Install required packages
 RUN apk add --no-cache \

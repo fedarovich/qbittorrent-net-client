@@ -1055,7 +1055,7 @@ namespace QBittorrent.Client
         /// <seealso cref="LibtorrentEnableEmbeddedTracker"/>
         [JsonProperty("embedded_tracker_port")]
         [ApiLevel(ApiLevel.V2, MinVersion = "2.3")]
-        public bool? LibtorrentEmbeddedTrackerPort { get; set; }
+        public int? LibtorrentEmbeddedTrackerPort { get; set; }
 
         /// <summary>
         /// Specifies which algorithm to use to determine which peers to unchoke.

@@ -480,6 +480,16 @@ namespace QBittorrent.Client
                 ApiLevel.V2, Version_2_3_0);
         }
 
+        /// <summary>
+        /// Gets the build information.
+        /// </summary>
+        /// <param name="token">The cancellation token.</param>
+        /// <returns></returns>
+        public Task<BuildInfo> GetBuildInfoAsync(CancellationToken token = default)
+        {
+            return GetJsonAsync<BuildInfo>(p => p.GetBuildInfo(), token, ApiLevel.V2, Version_2_3_0);
+        }
+
         #region RSS
 
         /// <summary>

@@ -23,5 +23,8 @@ namespace QBittorrent.Client.Tests
 
         [JsonProperty("docker-image")]
         public string Image { get; set; }
+
+        [JsonProperty("build-info")]
+        public BuildInfo BuildInfo { get; set; }
     }
 }

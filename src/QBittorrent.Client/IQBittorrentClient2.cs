@@ -335,6 +335,15 @@ namespace QBittorrent.Client
             string networkInterfaceId,
             CancellationToken token = default);
 
+        /// <summary>
+        /// Gets the build information.
+        /// </summary>
+        /// <param name="token">The cancellation token.</param>
+        /// <returns></returns>
+        [ApiLevel(ApiLevel.V2, MinVersion = "2.3.0")]
+        Task<BuildInfo> GetBuildInfoAsync(
+            CancellationToken token = default);
+
         #region RSS
 
         /// <summary>

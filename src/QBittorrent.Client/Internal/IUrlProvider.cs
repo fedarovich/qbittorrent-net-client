@@ -138,6 +138,8 @@ namespace QBittorrent.Client.Internal
 
         Uri GetNetworkInterfaceAddresses(string networkInterfaceId);
 
+        Uri GetBuildInfo();
+
         // RSS
 
         Uri AddRssFolder();

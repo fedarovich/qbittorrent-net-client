@@ -180,6 +180,17 @@ namespace QBittorrent.Client.Tests
             version.Should().Be(DockerFixture.Env.QBittorrentVersion);
         }
 
+        [SkippableFact]
+        [PrintTestName]
+        public async Task GetBuildInfo()
+        {
+            Skip.If(ApiVersionLessThan(2, 3));
+
+            await Client.LoginAsync(UserName, Password);
+            var buildInfo = await Client.GetBuildInfoAsync();
+            buildInfo.Should().BeEquivalentTo(DockerFixture.Env.BuildInfo);
+        }
+
         #endregion
 
         #region Login/Logout

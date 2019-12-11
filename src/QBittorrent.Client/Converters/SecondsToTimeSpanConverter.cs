@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Numerics;
 using Newtonsoft.Json;
 
 namespace QBittorrent.Client.Converters
@@ -13,7 +14,7 @@ namespace QBittorrent.Client.Converters
                 return;
             }
 
-            writer.WriteValue(value);
+            writer.WriteValue((long)((TimeSpan)value).TotalSeconds);
         }
 
         public override object ReadJson(JsonReader reader, Type objectType, object existingValue,
@@ -24,6 +25,9 @@ namespace QBittorrent.Client.Converters
 
             if (reader.TokenType == JsonToken.Integer)
             {
+                if (reader.Value is BigInteger)
+                    return TimeSpan.MaxValue;
+
                 long totalSeconds = Convert.ToInt64(reader.Value);
                 if (totalSeconds >= 0)
                 {

@@ -2447,49 +2447,7 @@ namespace QBittorrent.Client.Tests
             new[] {"192.168.254.201", "2001:db8::ff00:42:8329"})]
         [InlineData(nameof(Preferences.AdditinalTrackers), new string[0],
             new[] {"http://test1.example.com", "http://test2.example.com"})]
-        [PrintTestName]
-        public async Task SetPreference(string name, object oldValue, object newValue,
-            string[] ignoredProperties = null)
-        {
-            var prop = typeof(Preferences).GetProperty(name);
-            ignoredProperties = ignoredProperties ?? new string[0];
-
-            var apiLevelAttr = prop.GetCustomAttribute<ApiLevelAttribute>();
-            if (apiLevelAttr != null && apiLevelAttr.Level >= ApiLevel.V2)
-            {
-                var minVersion = string.IsNullOrEmpty(apiLevelAttr.MinVersion)
-                    ? new ApiVersion(2)
-                    : ApiVersion.Parse(apiLevelAttr.MinVersion);
-                Skip.If(DockerFixture.Env.ApiVersion < minVersion);
-            }
-
-            var deprecatedAttr = prop.GetCustomAttribute<DeprecatedAttribute>();
-            if (deprecatedAttr != null)
-            {
-                var deprecatedFromVersion = ApiVersion.Parse(deprecatedAttr.FromVersion);
-                Skip.If(DockerFixture.Env.ApiVersion >= deprecatedFromVersion, $"Deprecated starting from API {deprecatedAttr.FromVersion}");
-            }
-
-            await Client.LoginAsync(UserName, Password);
-
-            var oldPrefs = await Client.GetPreferencesAsync();
-            prop.GetValue(oldPrefs).Should().BeEquivalentTo(oldValue);
-
-            var setPrefs = new Preferences();
-            prop.SetValue(setPrefs, newValue);
-            await Utils.Retry(() => Client.SetPreferencesAsync(setPrefs));
-
-            await Utils.Retry(async () =>
-            {
-                var newPrefs = await Client.GetPreferencesAsync();
-                prop.GetValue(newPrefs).Should().BeEquivalentTo(newValue);
-                newPrefs.Should().BeEquivalentTo(oldPrefs, options => options
-                    .Excluding(ctx => ctx.SelectedMemberPath == name)
-                    .Excluding(ctx => ignoredProperties.Contains(ctx.SelectedMemberPath)));
-            });
-        }
-
-        [SkippableTheory]
+        // API 2.2
         [InlineData(nameof(Preferences.CreateTorrentSubfolder), true, false)]
         [InlineData(nameof(Preferences.AddTorrentPaused), false, true)]
         [InlineData(nameof(Preferences.TorrentFileAutoDeleteMode), TorrentFileAutoDeleteMode.Never, TorrentFileAutoDeleteMode.Always)]
@@ -2505,12 +2463,16 @@ namespace QBittorrent.Client.Tests
         [InlineData(nameof(Preferences.SlowTorrentInactiveTime), 60, 120)]
         [InlineData(nameof(Preferences.AlternativeWebUIEnabled), false, true)]
         [InlineData(nameof(Preferences.AlternativeWebUIPath), "", "/tmp/alt-ui")]
+        // API 2.3
+        [InlineData(nameof(Preferences.WebUISessionTimeout), 3600, 7200)]
+        [InlineData(nameof(Preferences.ListenOnIPv6Address), false, true)]
+        [InlineData(nameof(Preferences.SaveResumeDataInterval), 60, 30)]
+        [InlineData(nameof(Preferences.RecheckCompletedTorrents), false, true)]
+        [InlineData(nameof(Preferences.ResolvePeerCountries), true, false)]
         [PrintTestName]
-        public async Task SetPreference_2_2(string name, object oldValue, object newValue,
+        public async Task SetPreference(string name, object oldValue, object newValue,
             string[] ignoredProperties = null)
         {
-            Skip.If(ApiVersionLessThan(2, 2));
-
             var prop = typeof(Preferences).GetProperty(name);
             ignoredProperties = ignoredProperties ?? new string[0];
 
@@ -2520,7 +2482,7 @@ namespace QBittorrent.Client.Tests
                 var minVersion = string.IsNullOrEmpty(apiLevelAttr.MinVersion)
                     ? new ApiVersion(2)
                     : ApiVersion.Parse(apiLevelAttr.MinVersion);
-                Skip.If(DockerFixture.Env.ApiVersion < minVersion);
+                Skip.If(DockerFixture.Env.ApiVersion < minVersion, $"API version is less than {minVersion}.");
             }
 
             var deprecatedAttr = prop.GetCustomAttribute<DeprecatedAttribute>();
@@ -2958,7 +2920,7 @@ namespace QBittorrent.Client.Tests
                 return stringWriter.ToString();
             }
         }
-
+        
         #endregion
 
         #region RSS

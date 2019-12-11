@@ -511,22 +511,6 @@ namespace QBittorrent.Client
         public string WebUISslCertificate { get; set; }
 
         /// <summary>
-        /// SSL key file path on the server.
-        /// </summary>
-        [JsonProperty("web_ui_https_key_path")]
-        [SuppressMessage("ReSharper", "InconsistentNaming")]
-        [ApiLevel(ApiLevel.V2, MinVersion = "2.3")]
-        public string WebUISslKeyPath { get; set; }
-
-        /// <summary>
-        /// SSL certificate file path on the server.
-        /// </summary>
-        [JsonProperty("web_ui_https_cert_path")]
-        [SuppressMessage("ReSharper", "InconsistentNaming")]
-        [ApiLevel(ApiLevel.V2, MinVersion = "2.3")]
-        public string WebUISslCertificatePath { get; set; }
-
-        /// <summary>
         /// True if WebUI clickjacking protection is enabled
         /// </summary>
         [JsonProperty("web_ui_clickjacking_protection_enabled")]
@@ -541,14 +525,6 @@ namespace QBittorrent.Client
         [SuppressMessage("ReSharper", "InconsistentNaming")]
         [ApiLevel(ApiLevel.V2, MinVersion = "2.0.2")]
         public bool? WebUICsrfProtection { get; set; }
-
-        /// <summary>
-        /// True if WebUI host header validation is enabled
-        /// </summary>
-        [JsonProperty("web_ui_host_header_validation_enabled")]
-        [SuppressMessage("ReSharper", "InconsistentNaming")]
-        [ApiLevel(ApiLevel.V2, MinVersion = "2.2")]
-        public bool? WebUIHostHeaderValidation { get; set; }
 
         /// <summary>
         /// True if authentication challenge for loopback address (127.0.0.1) should be disabled.
@@ -760,6 +736,383 @@ namespace QBittorrent.Client
         [SuppressMessage("ReSharper", "InconsistentNaming")]
         [ApiLevel(ApiLevel.V2, MinVersion = "2.2.0")]
         public string AlternativeWebUIPath { get; set; }
+
+        /// <summary>
+        /// True if WebUI host header validation is enabled
+        /// </summary>
+        [JsonProperty("web_ui_host_header_validation_enabled")]
+        [SuppressMessage("ReSharper", "InconsistentNaming")]
+        [ApiLevel(ApiLevel.V2, MinVersion = "2.2")]
+        public bool? WebUIHostHeaderValidation { get; set; }
+
+        /* API 2.3.0 */
+
+        /// <summary>
+        /// SSL key file path on the server.
+        /// </summary>
+        [JsonProperty("web_ui_https_key_path")]
+        [SuppressMessage("ReSharper", "InconsistentNaming")]
+        [ApiLevel(ApiLevel.V2, MinVersion = "2.3")]
+        public string WebUISslKeyPath { get; set; }
+
+        /// <summary>
+        /// SSL certificate file path on the server.
+        /// </summary>
+        [JsonProperty("web_ui_https_cert_path")]
+        [SuppressMessage("ReSharper", "InconsistentNaming")]
+        [ApiLevel(ApiLevel.V2, MinVersion = "2.3")]
+        public string WebUISslCertificatePath { get; set; }
+
+        /// <summary>
+        /// Web UI session timeout in seconds
+        /// </summary>
+        [JsonProperty("web_ui_session_timeout")]
+        [SuppressMessage("ReSharper", "InconsistentNaming")]
+        [ApiLevel(ApiLevel.V2, MinVersion = "2.3")]
+        public int? WebUISessionTimeout { get; set; }
+
+        /// <summary>
+        /// Specifies which network interfaces qBittorrent listens on.
+        /// On multi-nic systems (e.g. device has an ethernet port and wifi)
+        /// you may limit which interface should be used to send and transmit data.
+        /// </summary>
+        [JsonProperty("current_network_interface")]
+        [ApiLevel(ApiLevel.V2, MinVersion = "2.3")]
+        public string CurrentNetworkInterface { get; set; }
+
+        /// <summary>
+        /// Current network interface address
+        /// </summary>
+        [JsonProperty("current_interface_address")]
+        [ApiLevel(ApiLevel.V2, MinVersion = "2.3")]
+        public string CurrentInterfaceAddress { get; set; }
+
+        /// <summary>
+        /// Allows qBittorrent to listen on IPv6 address in addition to the old, standard IPv4.
+        /// </summary>
+        [JsonProperty("listen_on_ipv6_address")]
+        [ApiLevel(ApiLevel.V2, MinVersion = "2.3")]
+        public bool? ListenOnIPv6Address { get; set; }
+
+        /// <summary>
+        /// Duration in minutes on which the resume data is saved to the disk.
+        /// </summary>
+        [JsonProperty("save_resume_data_interval")]
+        [ApiLevel(ApiLevel.V2, MinVersion = "2.3")]
+        public int? SaveResumeDataInterval { get; set; }
+
+        /// <summary>
+        /// When enabled, after the torrent is completely downloaded a recheck operation is performed on the torrent.
+        /// </summary>
+        [JsonProperty("recheck_completed_torrents")]
+        [ApiLevel(ApiLevel.V2, MinVersion = "2.3")]
+        public bool? RecheckCompletedTorrents { get; set; }
+
+        /// <summary>
+        /// When enabled, qBittorrent tries to lookup the originating country of each peer using GeoIP database.
+        /// </summary>
+        [JsonProperty("resolve_peer_countries")]
+        [ApiLevel(ApiLevel.V2, MinVersion = "2.3")]
+        public bool? ResolvePeerCountries { get; set; }
+
+        /// <summary>
+        /// I/O threads that <c>libtorrent</c> will use.
+        /// </summary>
+        /// <remarks>
+        /// The number of threads actually used for SHA-1 hashing is n/4 (where n is the value of the setting),
+        /// so for maximum performance, especially during torrent recheck,
+        /// this setting should be set to 4 times the number of hardware threads on your machine.
+        /// So for example, if your CPU is 4c/4t or 2c/4t, set this to 16, if your CPU is 4c/8t or 8c/8t set this to 32, etc.
+        /// It is unlikely that setting this any higher than this will bring a performance benefit.
+        /// </remarks>
+        [JsonProperty("async_io_threads")]
+        [SuppressMessage("ReSharper", "InconsistentNaming")]
+        [ApiLevel(ApiLevel.V2, MinVersion = "2.3")]
+        public int? LibtorrentAsynchronousIOThreads { get; set; }
+
+        /// <summary>
+        /// The upper limit on the total number of files the session will keep open.
+        /// </summary>
+        /// <remarks>
+        /// The reason why files are left open at all is that some anti virus software
+        /// hooks on every file close, and scans the file for viruses.
+        /// Deferring the closing of the files will be the difference between a usable system and a completely hogged down system.
+        /// Most operating systems also has a limit on the total number of file descriptors a process may have open.
+        /// </remarks>
+        [JsonProperty("file_pool_size")]
+        [ApiLevel(ApiLevel.V2, MinVersion = "2.3")]
+        public int? LibtorrentFilePoolSize { get; set; }
+
+        /// <summary>
+        /// The amount of memory (in MiB) to use when checking torrents. Higher numbers give faster rechecks but use more memory.
+        /// </summary>
+        [JsonProperty("checking_memory_use")]
+        [ApiLevel(ApiLevel.V2, MinVersion = "2.3")]
+        public int? LibtorrentOutstandingMemoryWhenCheckingTorrent { get; set; }
+
+        /// <summary>
+        /// Amount of data (in MiB) that will remain in RAM before being written to disk.
+        /// If set to <c>0</c>, no data will be kept in RAM and instead it will be immediately written to disk (you might see performance impact.)
+        /// </summary>
+        /// <seealso cref="LibtorrentDiskCacheExpiryInterval"/>
+        [JsonProperty("disk_cache")]
+        [ApiLevel(ApiLevel.V2, MinVersion = "2.3")]
+        public int? LibtorrentDiskCache { get; set; }
+
+        /// <summary>
+        /// The number of seconds from the last cached write to a piece in the write cache, to when it's forcefully flushed to disk.
+        /// </summary>
+        /// <seealso cref="LibtorrentDiskCache"/>
+        [JsonProperty("disk_cache_ttl")]
+        [ApiLevel(ApiLevel.V2, MinVersion = "2.3")]
+        public int? LibtorrentDiskCacheExpiryInterval { get; set; }
+
+        /// <summary>
+        /// When enabled, files are opened normally, with the OS caching reads and writes.
+        /// </summary>
+        /// <remarks>
+        /// Enable for better performance, disable if you also disabled libtorrent's read cache,
+        /// or to help preventing the operating system from growing its file cache indefinitely,
+        /// or if you want to prevent qbittorrent from potentially evicting all other processes' cache
+        /// (which may result in lower perceived system responsiveness).
+        /// </remarks>
+        [JsonProperty("enable_os_cache")]
+        [SuppressMessage("ReSharper", "InconsistentNaming")]
+        [ApiLevel(ApiLevel.V2, MinVersion = "2.3")]
+        public bool? LibtorrentUseOSCache { get; set; }
+
+        /// <summary>
+        /// When enabled, qbittorrent will allocate separate, contiguous, buffers for read and write calls.
+        /// </summary>
+        /// <remarks>
+        /// Only used where writev/readv cannot be used, and will use more RAM but may improve performance.
+        /// </remarks>
+        [JsonProperty("enable_coalesce_read_write")]
+        [ApiLevel(ApiLevel.V2, MinVersion = "2.3")]
+        public bool? LibtorrentCoalesceReadsAndWrites { get; set; }
+
+        /// <summary>
+        /// Controls whether or not libtorrent will send out suggest messages to create a bias of its peers to request certain pieces.
+        /// If enabled, libtorrent will send out suggest messages for the most recent pieces that are in the read cache.
+        /// </summary>
+        [JsonProperty("enable_upload_suggestions")]
+        [ApiLevel(ApiLevel.V2, MinVersion = "2.3")]
+        public bool? LibtorrentSendUploadPieceSuggestions { get; set; }
+
+        /// <summary>
+        /// The upper limit for the send buffer size in kiB.
+        /// </summary>
+        /// <remarks>
+        /// If the send buffer has fewer bytes than this, another 16kiB block will be read into it.
+        /// If set too small, upload rate capacity will suffer. If set too high, memory will be wasted.
+        /// The actual watermark may be lower than this in case the upload rate is low.
+        /// </remarks>
+        /// <seealso cref="LibtorrentSendBufferLowWatermark"/>
+        /// <seealso cref="LibtorrentSendBufferWatermarkFactor"/>
+        [JsonProperty("send_buffer_watermark")]
+        [ApiLevel(ApiLevel.V2, MinVersion = "2.3")]
+        public int? LibtorrentSendBufferWatermark { get; set; }
+
+        /// <summary>
+        /// The minimum send buffer target size in kiB.
+        /// </summary>
+        /// <remarks>
+        /// <para>
+        /// Send buffer includes bytes pending being read from disk.
+        /// </para>
+        /// <para>
+        /// For good and snappy seeding performance, set this fairly high, to at least fit a few blocks.
+        /// This is essentially the initial window size which will determine how fast we can ramp up the send rate.
+        /// </para>
+        /// </remarks>
+        /// <seealso cref="LibtorrentSendBufferWatermark"/>
+        /// <seealso cref="LibtorrentSendBufferWatermarkFactor"/>
+        [JsonProperty("send_buffer_low_watermark")]
+        [ApiLevel(ApiLevel.V2, MinVersion = "2.3")]
+        public int? LibtorrentSendBufferLowWatermark { get; set; }
+
+        /// <summary>
+        /// The send buffer watermark factor in percent.
+        /// </summary>
+        /// <remarks>
+        /// The current upload rate to a peer is multiplied by this factor (in percent) to get the send buffer watermark.
+        /// This product is clamped to the <see cref="LibtorrentSendBufferWatermark"/> setting so as to not exceed the max.
+        /// For high speed upload, this should be set to a greater value than 100.
+        /// For high capacity connections, setting this higher can improve upload performance and disk throughput.
+        /// Setting it too high may waste RAM and create a bias towards read jobs over write jobs.
+        /// </remarks>
+        /// <seealso cref="LibtorrentSendBufferWatermark"/>
+        /// <seealso cref="LibtorrentSendBufferLowWatermark"/>
+        [JsonProperty("send_buffer_watermark_factor")]
+        [ApiLevel(ApiLevel.V2, MinVersion = "2.3")]
+        public int? LibtorrentSendBufferWatermarkFactor { get; set; }
+
+        /// <summary>
+        /// The number of outstanding incoming connections to queue up while we're not actively waiting for a connection to be accepted.
+        /// </summary>
+        /// <remarks>
+        /// The default is 5 which should be sufficient for any normal client.
+        /// If this is a high performance server which expects to receive a lot of connections,
+        /// or used in a simulator or test, it might make sense to raise this number.
+        /// </remarks>
+        [JsonProperty("socket_backlog_size")]
+        [ApiLevel(ApiLevel.V2, MinVersion = "2.3")]
+        public int? LibtorrentSocketBacklogSize { get; set; }
+
+
+        /// <summary>
+        /// The start of the range of ports to use for binding outgoing connections to.
+        /// </summary>
+        /// <remarks>
+        /// <para>
+        /// This property together with <see cref="LibtorrentOutgoingPortsMax"/> defines the range of ports to use for binding outgoing connections to.
+        /// The range shouldn't be too small.
+        /// </para>
+        /// <para>
+        /// The value of <c>0</c> disables this setting.
+        /// </para>
+        /// <para>
+        /// Setting outgoing ports will limit the ability to keep multiple connections to the same client, even for different torrents.
+        /// It is not recommended to change this setting.
+        /// Its main purpose is to use it as an escape hatch for cheap routers with QoS capability but can only classify flows based on port numbers.
+        /// It is a range instead of a single port because of the problems with failing to reconnect to peers
+        /// if a previous socket to that peer and port is in the waiting state.
+        /// </para>
+        /// </remarks>
+        /// <seealso cref="LibtorrentOutgoingPortsMax"/>
+        [JsonProperty("outgoing_ports_min")]
+        [ApiLevel(ApiLevel.V2, MinVersion = "2.3")]
+        public int? LibtorrentOutgoingPortsMin { get; set; }
+
+        /// <summary>
+        /// The end of the range of ports to use for binding outgoing connections to.
+        /// </summary>
+        /// <remarks>
+        /// <para>
+        /// This property together with <see cref="LibtorrentOutgoingPortsMin"/> defines the range of ports to use for binding outgoing connections to.
+        /// The range shouldn't be too small.
+        /// </para>
+        /// <para>
+        /// The value of <c>0</c> disables this setting.
+        /// </para>
+        /// <para>
+        /// Setting outgoing ports will limit the ability to keep multiple connections to the same client, even for different torrents.
+        /// It is not recommended to change this setting.
+        /// Its main purpose is to use it as an escape hatch for cheap routers with QoS capability but can only classify flows based on port numbers.
+        /// It is a range instead of a single port because of the problems with failing to reconnect to peers
+        /// if a previous socket to that peer and port is in the waiting state.
+        /// </para>
+        /// </remarks>
+        /// <seealso cref="LibtorrentOutgoingPortsMin"/>
+        [JsonProperty("outgoing_ports_max")]
+        [ApiLevel(ApiLevel.V2, MinVersion = "2.3")]
+        public int? LibtorrentOutgoingPortsMax { get; set; }
+
+        /// <summary>
+        /// Determines how to treat TCP connections when there are uTP connections.
+        /// </summary>
+        /// <remarks>
+        /// <para>
+        /// Since uTP is designed to yield to TCP, there's an inherent problem when using swarms that have both TCP and uTP connections.
+        /// If nothing is done, uTP connections would often be starved out for bandwidth by the TCP connections.
+        /// This mode is called <see cref="Client.UtpTcpMixedModeAlgorithm.PreferTcp"/> in qBittorrent.
+        /// </para>
+        /// The <see cref="Client.UtpTcpMixedModeAlgorithm.PeerProportional"/> mode on the other hand,
+        /// simply looks at the current throughput
+        /// and rate limits all TCP connections to their proportional share based on how many of the connections are TCP.
+        /// This works best if uTP connections are not rate limited by the global rate limiter.
+        /// </remarks>
+        [JsonProperty("utp_tcp_mixed_mode")]
+        [ApiLevel(ApiLevel.V2, MinVersion = "2.3")]
+        public UtpTcpMixedModeAlgorithm? LibtorrentUtpTcpMixedModeAlgorithm { get; set; }
+
+        /// <summary>
+        /// Determines if connections from the same IP address as existing connections should be rejected or not.
+        /// </summary>
+        /// <remarks>
+        /// This option is disabled by default to prevent abusive behavior by peers.
+        /// It may be useful to allow such connections in cases where simulations are run on the same machine,
+        /// and all peers in a swarm has the same IP address.
+        /// </remarks>
+        [JsonProperty("enable_multi_connections_from_same_ip")]
+        [ApiLevel(ApiLevel.V2, MinVersion = "2.3")]
+        public bool? LibtorrentAllowMultipleConnectionsFromSameIp { get; set; }
+
+        /// <summary>
+        /// Enable qbittorrent's tracker functionality.
+        /// </summary>
+        /// <remarks>
+        /// It is not a fully-featured bittorrent tracker, but it supports the basic features need for sharing a few torrents.
+        /// </remarks>
+        /// <seealso cref="LibtorrentEmbeddedTrackerPort"/>
+        [JsonProperty("enable_embedded_tracker")]
+        [ApiLevel(ApiLevel.V2, MinVersion = "2.3")]
+        public bool? LibtorrentEnableEmbeddedTracker { get; set; }
+
+        /// <summary>
+        /// The port the embedded tracker should listen on.
+        /// </summary>
+        /// <seealso cref="LibtorrentEnableEmbeddedTracker"/>
+        [JsonProperty("embedded_tracker_port")]
+        [ApiLevel(ApiLevel.V2, MinVersion = "2.3")]
+        public bool? LibtorrentEmbeddedTrackerPort { get; set; }
+
+        /// <summary>
+        /// Specifies which algorithm to use to determine which peers to unchoke.
+        /// </summary>
+        [JsonProperty("upload_slots_behavior")]
+        [ApiLevel(ApiLevel.V2, MinVersion = "2.3")]
+        public ChokingAlgorithm? LibtorrentUploadSlotsBehavior { get; set; }
+
+        /// <summary>
+        /// Controls the seeding unchoke behavior.
+        /// </summary>
+        [JsonProperty("upload_choking_algorithm")]
+        [ApiLevel(ApiLevel.V2, MinVersion = "2.3")]
+        public SeedChokingAlgorithm? LibtorrentUploadChokingAlgorithm { get; set; }
+
+        /// <summary>
+        /// Activate libtorrent's strict mode for super seeding.
+        /// </summary>
+        /// <remarks>
+        /// When this is set to <see langword="true"/>, a piece has to have been forwarded to a third peer before another one is handed out.
+        /// This is the traditional definition of super seeding.
+        /// </remarks>
+        [JsonProperty("enable_super_seeding")]
+        [ApiLevel(ApiLevel.V2, MinVersion = "2.3")]
+        public bool? LibtorrentStrictSuperSeeding { get; set; }
+
+        /// <summary>
+        /// Controls how multi tracker torrents are treated.
+        /// </summary>
+        /// <remarks>
+        /// If this is set to <see langword="true"/>, all trackers in the same tier are announced to in parallel.
+        /// If all trackers in tier 0 fails, all trackers in tier 1 are announced as well.
+        /// Otherwise the behavior is as defined by the multi tracker specification.
+        /// </remarks>
+        /// <seealso cref="LibtorrentAnnounceToAllTiers"/>
+        [JsonProperty("announce_to_all_trackers")]
+        [ApiLevel(ApiLevel.V2, MinVersion = "2.3")]
+        public bool? LibtorrentAnnounceToAllTrackers { get; set; }
+
+        /// <summary>
+        /// Controls how multi tracker torrents are treated.
+        /// </summary>
+        /// <remarks>
+        /// When this is set to <see langword="true"/>, one tracker from each tier is announced to.
+        /// This is the uTorrent behavior. This is false by default in order to comply with the multi-tracker specification.
+        /// </remarks>
+        /// <seealso cref="LibtorrentAnnounceToAllTrackers"/>
+        [JsonProperty("announce_to_all_tiers")]
+        [ApiLevel(ApiLevel.V2, MinVersion = "2.3")]
+        public bool? LibtorrentAnnounceToAllTiers { get; set; }
+
+        /// <summary>
+        /// The ip address passed along to trackers. If this value is blank, the parameter will be omitted.
+        /// </summary>
+        [JsonProperty("announce_ip")]
+        [ApiLevel(ApiLevel.V2, MinVersion = "2.3")]
+        public string LibtorrentAnnounceIp { get; set; }
 
         /* Other */
 

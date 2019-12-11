@@ -118,7 +118,7 @@ namespace QBittorrent.Client.Internal
 
         Uri ShutdownApplication();
 
-        // API 2.0+
+        // API 2.0
 
         Uri GetPeerLog(int afterId = -1);
 
@@ -131,6 +131,12 @@ namespace QBittorrent.Client.Internal
         Uri DeleteTrackers();
 
         Uri SetShareLimits();
+
+        // API 2.3
+
+        Uri GetNetworkInterfaces();
+
+        Uri GetNetworkInterfaceAddresses(string networkInterfaceId);
 
         // RSS
 

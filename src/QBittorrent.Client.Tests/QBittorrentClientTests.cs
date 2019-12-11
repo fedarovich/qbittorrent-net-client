@@ -2944,7 +2944,101 @@ namespace QBittorrent.Client.Tests
                 return stringWriter.ToString();
             }
         }
-        
+
+        [SkippableFact]
+        [PrintTestName]
+        public async Task SetCurrentNetworkInterfaceAndAddress()
+        {
+            Skip.If(ApiVersionLessThan(2, 3));
+
+            await Client.LoginAsync(UserName, Password);
+
+            var oldPrefs = await Client.GetPreferencesAsync();
+            oldPrefs.CurrentNetworkInterface.Should().BeEmpty();
+            oldPrefs.CurrentInterfaceAddress.Should().BeEmpty();
+
+            var iface = "eth0";
+            var address = (await Client.GetNetworkInterfaceAddressesAsync(iface)).Single();
+
+            var setPrefs = new Preferences
+            {
+                CurrentNetworkInterface = iface,
+                CurrentInterfaceAddress = address
+            };
+            await Client.SetPreferencesAsync(setPrefs);
+
+            var newPrefs = await Client.GetPreferencesAsync();
+            newPrefs.CurrentNetworkInterface.Should().Be(iface);
+            newPrefs.CurrentInterfaceAddress.Should().Be(address);
+            newPrefs.Should().BeEquivalentTo(oldPrefs, options => options
+                .Excluding(p => p.CurrentNetworkInterface)
+                .Excluding(p => p.CurrentInterfaceAddress));
+        }
+
+        #endregion
+
+        #region Network Interfaces
+
+        [SkippableFact]
+        [PrintTestName]
+        public async Task GetNetworkInterfaces()
+        {
+            Skip.If(ApiVersionLessThan(2, 3));
+
+            await Client.LoginAsync(UserName, Password);
+            var interfaces = await Client.GetNetworkInterfacesAsync();
+            interfaces.Should().BeEquivalentTo(
+                new NetInterface { Id = "lo", Name = "lo" },
+                new NetInterface { Id = "eth0", Name = "eth0"});
+        }
+
+        [SkippableFact]
+        [PrintTestName]
+        public async Task GetNetworkInterfaceAddressesForAll()
+        {
+            Skip.If(ApiVersionLessThan(2, 3));
+
+            await Client.LoginAsync(UserName, Password);
+            var addresses = await Client.GetNetworkInterfaceAddressesAsync();
+            addresses.Should().HaveCount(2);
+            addresses.Should().Contain("127.0.0.1");
+        }
+
+        [SkippableFact]
+        [PrintTestName]
+        public async Task GetNetworkInterfaceAddressesForLoopback()
+        {
+            Skip.If(ApiVersionLessThan(2, 3));
+
+            await Client.LoginAsync(UserName, Password);
+            var addresses = await Client.GetNetworkInterfaceAddressesAsync("lo");
+            addresses.Should().HaveCount(1);
+            addresses.Should().Contain("127.0.0.1");
+        }
+
+        [SkippableFact]
+        [PrintTestName]
+        public async Task GetNetworkInterfaceAddressesForEth()
+        {
+            Skip.If(ApiVersionLessThan(2, 3));
+
+            await Client.LoginAsync(UserName, Password);
+            var addresses = await Client.GetNetworkInterfaceAddressesAsync(new NetInterface { Id = "eth0", Name = "eth0" });
+            addresses.Should().HaveCount(1);
+            addresses.Should().NotContain("127.0.0.1");
+        }
+
+        [SkippableFact]
+        [PrintTestName]
+        public async Task GetNetworkInterfaceAddressesForUnknown()
+        {
+            Skip.If(ApiVersionLessThan(2, 3));
+
+            await Client.LoginAsync(UserName, Password);
+            var addresses = await Client.GetNetworkInterfaceAddressesAsync("fake");
+            addresses.Should().BeEmpty();
+        }
+
         #endregion
 
         #region RSS

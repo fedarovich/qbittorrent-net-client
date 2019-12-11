@@ -32,6 +32,9 @@ namespace QBittorrent.Client
         [SuppressMessage("ReSharper", "InconsistentNaming")]
         private static readonly ApiVersion Version_2_2_0 = new ApiVersion(2, 2, 0);
 
+        [SuppressMessage("ReSharper", "InconsistentNaming")]
+        private static readonly ApiVersion Version_2_3_0 = new ApiVersion(2, 3, 0);
+
         /// <summary>
         /// Gets the peer log.
         /// </summary>
@@ -346,14 +349,10 @@ namespace QBittorrent.Client
         /// <param name="token">The cancellation token.</param>
         /// <returns></returns>
         [ApiLevel(ApiLevel.V2, MinVersion = "2.1.1")]
-        public async Task<IReadOnlyDictionary<string, Category>> GetCategoriesAsync(CancellationToken token = default)
+        public Task<IReadOnlyDictionary<string, Category>> GetCategoriesAsync(CancellationToken token = default)
         {
-            var provider = await _requestProvider.GetValueAsync(token).ConfigureAwait(false);
-            await EnsureApiVersionAsync(provider, token, ApiLevel.V2, Version_2_1_1);
-
-            var uri = provider.Url.GetCategories();
-            var json = await _client.GetStringAsync(uri, token).ConfigureAwait(false);
-            return JsonConvert.DeserializeObject<Dictionary<string, Category>>(json);
+            return GetJsonAsync<IReadOnlyDictionary<string, Category>>(p => p.GetCategories(), token,
+                ApiLevel.V2, Version_2_1_1);
         }
 
         /// <summary>
@@ -451,6 +450,34 @@ namespace QBittorrent.Client
             ValidateHashes(ref hashes);
 
             return PostAsync(p => p.SetShareLimits(hashes, ratio, seedingTime), token, ApiLevel.V2, Version_2_0_1);
+        }
+
+        /// <summary>
+        /// Gets the list of network interfaces on the qBittorrent machine.
+        /// </summary>
+        /// <param name="token">The cancellation token.</param>
+        /// <returns></returns>
+        [ApiLevel(ApiLevel.V2, MinVersion = "2.3.0")]
+        public Task<IReadOnlyList<NetInterface>> GetNetworkInterfacesAsync(CancellationToken token = default)
+        {
+            return GetJsonAsync<IReadOnlyList<NetInterface>>(p => p.GetNetworkInterfaces(), token, 
+                ApiLevel.V2, Version_2_3_0);
+        }
+
+        /// <summary>
+        /// Gets the list of network interface IP addresses.
+        /// </summary>
+        /// <param name="networkInterfaceId">
+        /// The network interface id to retrieve the IP addresses for.
+        /// If <see langword="null"/> or empty, the result will include IP addresses for all interfaces.
+        /// </param>
+        /// <param name="token">The cancellation token.</param>
+        /// <returns></returns>
+        [ApiLevel(ApiLevel.V2, MinVersion = "2.3.0")]
+        public Task<IReadOnlyList<string>> GetNetworkInterfaceAddressesAsync(string networkInterfaceId, CancellationToken token = default)
+        {
+            return GetJsonAsync<IReadOnlyList<string>>(p => p.GetNetworkInterfaceAddresses(networkInterfaceId ?? string.Empty), token, 
+                ApiLevel.V2, Version_2_3_0);
         }
 
         #region RSS

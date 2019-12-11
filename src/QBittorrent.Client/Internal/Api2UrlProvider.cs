@@ -158,6 +158,10 @@ namespace QBittorrent.Client.Internal
 
         public Uri SetShareLimits() => Create("/api/v2/torrents/setShareLimits");
 
+        public Uri GetNetworkInterfaces() => Create("/api/v2/app/networkInterfaceList");
+
+        public Uri GetNetworkInterfaceAddresses(string networkInterfaceId) => Create("/api/v2/app/networkInterfaceAddressList", ("iface", networkInterfaceId));
+
         public Uri AddRssFolder() => Create("/api/v2/rss/addFolder");
 
         public Uri AddRssFeed() => Create("/api/v2/rss/addFeed");

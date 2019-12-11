@@ -361,6 +361,39 @@ namespace QBittorrent.Client
         }
 
         /// <summary>
+        /// Gets the list of IP addresses for all available network interfaces.
+        /// </summary>
+        /// <param name="client">An <see cref="IQBittorrentClient2"/> instance.</param>
+        /// <param name="token">The cancellation token.</param>
+        /// <returns></returns>
+        [ApiLevel(ApiLevel.V2, MinVersion = "2.3.0")]
+        public static Task<IReadOnlyList<string>> GetNetworkInterfaceAddressesAsync(
+            [NotNull] this IQBittorrentClient2 client,
+            CancellationToken token = default)
+        {
+            return client.GetNetworkInterfaceAddressesAsync(null, token);
+        }
+
+        /// <summary>
+        /// Gets the list of IP addresses for all available network interfaces.
+        /// </summary>
+        /// <param name="client">An <see cref="IQBittorrentClient2"/> instance.</param>
+        /// <param name="networkInterface">
+        /// The network interface to retrieve the IP addresses for.
+        /// If <see langword="null"/>, the result will include IP addresses for all interfaces.
+        /// </param>
+        /// <param name="token">The cancellation token.</param>
+        /// <returns></returns>
+        [ApiLevel(ApiLevel.V2, MinVersion = "2.3.0")]
+        public static Task<IReadOnlyList<string>> GetNetworkInterfaceAddressesAsync(
+            [NotNull] this IQBittorrentClient2 client,
+            [CanBeNull] NetInterface networkInterface,
+            CancellationToken token = default)
+        {
+            return client.GetNetworkInterfaceAddressesAsync(networkInterface?.Id, token);
+        }
+
+        /// <summary>
         /// Starts torrent search job.
         /// </summary>
         /// <param name="client">An <see cref="IQBittorrentClient2"/> instance.</param>

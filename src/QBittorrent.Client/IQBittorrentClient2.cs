@@ -312,6 +312,29 @@ namespace QBittorrent.Client
             TimeSpan seedingTime,
             CancellationToken token = default);
 
+        /// <summary>
+        /// Gets the list of network interfaces on the qBittorrent machine.
+        /// </summary>
+        /// <param name="token">The cancellation token.</param>
+        /// <returns></returns>
+        [ApiLevel(ApiLevel.V2, MinVersion = "2.3.0")]
+        Task<IReadOnlyList<NetInterface>> GetNetworkInterfacesAsync(
+            CancellationToken token = default);
+
+        /// <summary>
+        /// Gets the list of network interface IP addresses.
+        /// </summary>
+        /// <param name="networkInterfaceId">
+        /// The network interface id to retrieve the IP addresses for.
+        /// If <see langword="null"/> or empty, the result will include IP addresses for all interfaces.
+        /// </param>
+        /// <param name="token">The cancellation token.</param>
+        /// <returns></returns>
+        [ApiLevel(ApiLevel.V2, MinVersion = "2.3.0")]
+        Task<IReadOnlyList<string>> GetNetworkInterfaceAddressesAsync(
+            string networkInterfaceId,
+            CancellationToken token = default);
+
         #region RSS
 
         /// <summary>

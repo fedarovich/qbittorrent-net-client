@@ -151,7 +151,12 @@ namespace QBittorrent.Client.Internal
         public Uri EditTracker() => throw new ApiNotSupportedException(ApiLevel.V2, new ApiVersion(2, 2, 0));
 
         public Uri DeleteTrackers() => throw new ApiNotSupportedException(ApiLevel.V2, new ApiVersion(2, 2, 0));
+        
         public Uri SetShareLimits() => throw new ApiNotSupportedException(ApiLevel.V2, new ApiVersion(2, 0, 1));
+        
+        public Uri GetNetworkInterfaces() => throw new ApiNotSupportedException(ApiLevel.V2, new ApiVersion(2, 3, 0));
+
+        public Uri GetNetworkInterfaceAddresses(string networkInterfaceId) => throw new ApiNotSupportedException(ApiLevel.V2, new Version(2, 3, 0));
 
         public Uri AddRssFolder() => throw new ApiNotSupportedException(ApiLevel.V2);
 

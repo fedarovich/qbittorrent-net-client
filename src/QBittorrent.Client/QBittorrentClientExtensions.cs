@@ -437,14 +437,17 @@ namespace QBittorrent.Client
         /// <param name="token">The cancellation token.</param>
         /// <returns></returns>
         [ApiLevel(ApiLevel.V2, MinVersion = "2.3.0")]
-        public static Task AddTorrentPeersAsync(
+        public static async Task<PeerAddResult> AddTorrentPeersAsync(
             [NotNull] this IQBittorrentClient2 client,
             [NotNull] string hash,
             [NotNull, ItemNotNull] IEnumerable<string> peers,
             CancellationToken token = default)
         {
             ValidateHash(hash);
-            return client.AddTorrentPeersAsync(new[] {hash}, peers, token);
+
+            var results = await client.AddTorrentPeersAsync(new[] { hash }, peers, token).ConfigureAwait(false);
+            results.TryGetValue(hash, out var result);
+            return result;
         }
 
         /// <summary>
@@ -456,7 +459,7 @@ namespace QBittorrent.Client
         /// <param name="token">The cancellation token.</param>
         /// <returns></returns>
         [ApiLevel(ApiLevel.V2, MinVersion = "2.3.0")]
-        public static Task AddTorrentPeerAsync(
+        public static Task<IReadOnlyDictionary<string, PeerAddResult>> AddTorrentPeerAsync(
             [NotNull] this IQBittorrentClient2 client,
             [NotNull, ItemNotNull] IEnumerable<string> hashes,
             [NotNull] string peer,
@@ -475,7 +478,7 @@ namespace QBittorrent.Client
         /// <param name="token">The cancellation token.</param>
         /// <returns></returns>
         [ApiLevel(ApiLevel.V2, MinVersion = "2.3.0")]
-        public static Task AddTorrentPeerAsync(
+        public static async Task<PeerAddResult> AddTorrentPeerAsync(
             [NotNull] this IQBittorrentClient2 client,
             [NotNull] string hash,
             [NotNull] string peer,
@@ -483,7 +486,10 @@ namespace QBittorrent.Client
         {
             ValidateHash(hash);
             ValidatePeer(peer);
-            return client.AddTorrentPeersAsync(new []{ hash }, new[] { peer }, token);
+            
+            var results = await client.AddTorrentPeersAsync(new []{ hash }, new[] { peer }, token).ConfigureAwait(false);
+            results.TryGetValue(hash, out var result);
+            return result;
         }
 
         /// <summary>
@@ -495,14 +501,17 @@ namespace QBittorrent.Client
         /// <param name="token">The cancellation token.</param>
         /// <returns></returns>
         [ApiLevel(ApiLevel.V2, MinVersion = "2.3.0")]
-        public static Task AddTorrentPeersAsync(
+        public static async Task<PeerAddResult> AddTorrentPeersAsync(
             [NotNull] this IQBittorrentClient2 client,
             [NotNull] string hash,
             [NotNull, ItemNotNull] IEnumerable<IPEndPoint> peers,
             CancellationToken token = default)
         {
             ValidateHash(hash);
-            return client.AddTorrentPeersAsync(new[] { hash }, peers, token);
+
+            var results = await client.AddTorrentPeersAsync(new[] { hash }, peers, token).ConfigureAwait(false);
+            results.TryGetValue(hash, out var result);
+            return result;
         }
 
         /// <summary>
@@ -514,7 +523,7 @@ namespace QBittorrent.Client
         /// <param name="token">The cancellation token.</param>
         /// <returns></returns>
         [ApiLevel(ApiLevel.V2, MinVersion = "2.3.0")]
-        public static Task AddTorrentPeerAsync(
+        public static Task<IReadOnlyDictionary<string, PeerAddResult>> AddTorrentPeerAsync(
             [NotNull] this IQBittorrentClient2 client,
             [NotNull, ItemNotNull] IEnumerable<string> hashes,
             [NotNull] IPEndPoint peer,
@@ -533,7 +542,7 @@ namespace QBittorrent.Client
         /// <param name="token">The cancellation token.</param>
         /// <returns></returns>
         [ApiLevel(ApiLevel.V2, MinVersion = "2.3.0")]
-        public static Task AddTorrentPeerAsync(
+        public static async Task<PeerAddResult> AddTorrentPeerAsync(
             [NotNull] this IQBittorrentClient2 client,
             [NotNull] string hash,
             [NotNull] IPEndPoint peer,
@@ -541,7 +550,10 @@ namespace QBittorrent.Client
         {
             ValidateHash(hash);
             ValidatePeer(peer);
-            return client.AddTorrentPeersAsync(new[] { hash }, new[] { peer }, token);
+
+            var results = await client.AddTorrentPeersAsync(new[] { hash }, new[] { peer }, token).ConfigureAwait(false);
+            results.TryGetValue(hash, out var result);
+            return result;
         }
 
         /// <summary>

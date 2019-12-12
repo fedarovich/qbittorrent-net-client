@@ -3072,7 +3072,10 @@ namespace QBittorrent.Client.Tests
             var origProps = await Client.GetTorrentPropertiesAsync(hash);
             origProps.TotalPeers.Should().Be(0);
 
-            await Client.AddTorrentPeerAsync(hash, "127.0.0.1:12345");
+            var result = await Client.AddTorrentPeerAsync(hash, "127.0.0.1:12345");
+            result.Should().NotBe(0);
+            result.Added.Should().Be(1);
+            result.Failed.Should().Be(0);
 
             await Utils.Retry(async () =>
             {

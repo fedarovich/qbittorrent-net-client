@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Net;
+using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
 using JetBrains.Annotations;
@@ -527,12 +528,14 @@ namespace QBittorrent.Client
         /// <param name="token">The cancellation token.</param>
         /// <returns></returns>
         [ApiLevel(ApiLevel.V2, MinVersion = "2.3.0")]
-        public Task AddTorrentPeersAsync(IEnumerable<string> hashes, IEnumerable<string> peers, CancellationToken token = default)
+        public Task<IReadOnlyDictionary<string, PeerAddResult>> AddTorrentPeersAsync(
+            IEnumerable<string> hashes, IEnumerable<string> peers, CancellationToken token = default)
         {
             ValidateHashes(ref hashes);
             ValidatePeers(ref peers);
 
-            return PostAsync(p => p.AddTorrentPeers(hashes, peers), token, ApiLevel.V2, Version_2_3_0);
+            return PostAsync(p => p.AddTorrentPeers(hashes, peers), token, 
+                ParseAddTorrentPeersResponse, ApiLevel.V2, Version_2_3_0);
         }
 
         /// <summary>
@@ -542,12 +545,21 @@ namespace QBittorrent.Client
         /// <param name="peers">The list of peers to ban.</param>
         /// <param name="token">The cancellation token.</param>
         /// <returns></returns>
-        public Task AddTorrentPeersAsync(IEnumerable<string> hashes, IEnumerable<IPEndPoint> peers, CancellationToken token = default)
+        public Task<IReadOnlyDictionary<string, PeerAddResult>> AddTorrentPeersAsync(
+            IEnumerable<string> hashes, IEnumerable<IPEndPoint> peers, CancellationToken token = default)
         {
             ValidateHashes(ref hashes);
             ValidatePeers(ref peers);
 
-            return PostAsync(p => p.AddTorrentPeers(hashes, peers.Select(x => x.ToString())), token, ApiLevel.V2, Version_2_3_0);
+            return PostAsync(p => p.AddTorrentPeers(hashes, peers.Select(x => x.ToString())), token,
+                ParseAddTorrentPeersResponse, ApiLevel.V2, Version_2_3_0);
+        }
+
+        private async Task<IReadOnlyDictionary<string, PeerAddResult>> ParseAddTorrentPeersResponse(HttpResponseMessage response)
+        {
+            var json = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
+            var result = JsonConvert.DeserializeObject<IReadOnlyDictionary<string, PeerAddResult>>(json);
+            return result;
         }
 
         #region RSS

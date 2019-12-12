@@ -375,7 +375,7 @@ namespace QBittorrent.Client
         /// <param name="token">The cancellation token.</param>
         /// <returns></returns>
         [ApiLevel(ApiLevel.V2, MinVersion = "2.3.0")]
-        Task AddTorrentPeersAsync(
+        Task<IReadOnlyDictionary<string, PeerAddResult>> AddTorrentPeersAsync(
             [NotNull, ItemNotNull] IEnumerable<string> hashes,
             [NotNull, ItemNotNull] IEnumerable<string> peers,
             CancellationToken token = default);
@@ -388,7 +388,7 @@ namespace QBittorrent.Client
         /// <param name="token">The cancellation token.</param>
         /// <returns></returns>
         [ApiLevel(ApiLevel.V2, MinVersion = "2.3.0")]
-        Task AddTorrentPeersAsync(
+        Task<IReadOnlyDictionary<string, PeerAddResult>> AddTorrentPeersAsync(
             [NotNull, ItemNotNull] IEnumerable<string> hashes,
             [NotNull, ItemNotNull] IEnumerable<IPEndPoint> peers,
             CancellationToken token = default);

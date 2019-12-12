@@ -99,6 +99,19 @@ namespace QBittorrent.Client.Internal
                 ("seedingTimeLimit", seedingTime.TotalSeconds.ToString("F0")));
         }
 
+        public override (Uri url, HttpContent request) BanPeers(IEnumerable<string> peers)
+        {
+            return BuildForm(Url.BanPeers(),
+                ("peers", string.Join("|", peers)));
+        }
+
+        public override (Uri url, HttpContent request) AddTorrentPeers(IEnumerable<string> hashes, IEnumerable<string> peers)
+        {
+            return BuildForm(Url.AddTorrentPeers(),
+                ("hashes", JoinHashes(hashes)),
+                ("peers", string.Join("|", peers)));
+        }
+
         public override (Uri url, HttpContent request) AddTorrents(AddTorrentsRequest request)
         {
             var data = AddTorrentsCore(request);

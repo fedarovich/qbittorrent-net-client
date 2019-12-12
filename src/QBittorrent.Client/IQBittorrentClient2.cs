@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Net;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -342,6 +343,54 @@ namespace QBittorrent.Client
         /// <returns></returns>
         [ApiLevel(ApiLevel.V2, MinVersion = "2.3.0")]
         Task<BuildInfo> GetBuildInfoAsync(
+            CancellationToken token = default);
+
+        /// <summary>
+        /// Bans peers.
+        /// </summary>
+        /// <param name="peers">The list of peers to ban. The peers must be in form <c>ip:port</c>.</param>
+        /// <param name="token">The cancellation token.</param>
+        /// <returns></returns>
+        [ApiLevel(ApiLevel.V2, MinVersion = "2.3.0")]
+        Task BanPeersAsync(
+            [NotNull, ItemNotNull] IEnumerable<string> peers,
+            CancellationToken token = default);
+
+        /// <summary>
+        /// Bans peers.
+        /// </summary>
+        /// <param name="peers">The list of peers to ban.</param>
+        /// <param name="token">The cancellation token.</param>
+        /// <returns></returns>
+        [ApiLevel(ApiLevel.V2, MinVersion = "2.3.0")]
+        Task BanPeersAsync(
+            [NotNull, ItemNotNull] IEnumerable<IPEndPoint> peers,
+            CancellationToken token = default);
+
+        /// <summary>
+        /// Adds peers to the torrents.
+        /// </summary>
+        /// <param name="hashes">The torrent hashes.</param>
+        /// <param name="peers">The list of peers to ban. The peers must be in form <c>ip:port</c>.</param>
+        /// <param name="token">The cancellation token.</param>
+        /// <returns></returns>
+        [ApiLevel(ApiLevel.V2, MinVersion = "2.3.0")]
+        Task AddTorrentPeersAsync(
+            [NotNull, ItemNotNull] IEnumerable<string> hashes,
+            [NotNull, ItemNotNull] IEnumerable<string> peers,
+            CancellationToken token = default);
+
+        /// <summary>
+        /// Adds peers to the torrents.
+        /// </summary>
+        /// <param name="hashes">The torrent hashes.</param>
+        /// <param name="peers">The list of peers to ban.</param>
+        /// <param name="token">The cancellation token.</param>
+        /// <returns></returns>
+        [ApiLevel(ApiLevel.V2, MinVersion = "2.3.0")]
+        Task AddTorrentPeersAsync(
+            [NotNull, ItemNotNull] IEnumerable<string> hashes,
+            [NotNull, ItemNotNull] IEnumerable<IPEndPoint> peers,
             CancellationToken token = default);
 
         #region RSS

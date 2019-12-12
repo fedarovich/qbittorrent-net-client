@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net;
 using System.Runtime.CompilerServices;
 using System.Threading;
 using System.Threading.Tasks;
@@ -391,6 +392,156 @@ namespace QBittorrent.Client
             CancellationToken token = default)
         {
             return client.GetNetworkInterfaceAddressesAsync(networkInterface?.Id, token);
+        }
+
+        /// <summary>
+        /// Bans a peer.
+        /// </summary>
+        /// <param name="client">An <see cref="IQBittorrentClient2"/> instance.</param>
+        /// <param name="peer">The peer to ban in form <c>ip:port</c>.</param>
+        /// <param name="token">The cancellation token.</param>
+        /// <returns></returns>
+        [ApiLevel(ApiLevel.V2, MinVersion = "2.3.0")]
+        public static Task BanPeerAsync(
+            [NotNull] this IQBittorrentClient2 client,
+            [NotNull] string peer,
+            CancellationToken token = default)
+        {
+            ValidatePeer(peer);
+            return client.BanPeersAsync(new[] {peer}, token);
+        }
+
+        /// <summary>
+        /// Bans a peer.
+        /// </summary>
+        /// <param name="client">An <see cref="IQBittorrentClient2"/> instance.</param>
+        /// <param name="peer">The peer to ban.</param>
+        /// <param name="token">The cancellation token.</param>
+        /// <returns></returns>
+        [ApiLevel(ApiLevel.V2, MinVersion = "2.3.0")]
+        public static Task BanPeerAsync(
+            [NotNull] this IQBittorrentClient2 client,
+            [NotNull] IPEndPoint peer,
+            CancellationToken token = default)
+        {
+            ValidatePeer(peer);
+            return client.BanPeersAsync(new[] { peer }, token);
+        }
+
+        /// <summary>
+        /// Adds peers to the torrent.
+        /// </summary>
+        /// <param name="client">An <see cref="IQBittorrentClient2"/> instance.</param>
+        /// <param name="hash">The torrent hash.</param>
+        /// <param name="peers">The list of peers to ban. The peers must be in form <c>ip:port</c>.</param>
+        /// <param name="token">The cancellation token.</param>
+        /// <returns></returns>
+        [ApiLevel(ApiLevel.V2, MinVersion = "2.3.0")]
+        public static Task AddTorrentPeersAsync(
+            [NotNull] this IQBittorrentClient2 client,
+            [NotNull] string hash,
+            [NotNull, ItemNotNull] IEnumerable<string> peers,
+            CancellationToken token = default)
+        {
+            ValidateHash(hash);
+            return client.AddTorrentPeersAsync(new[] {hash}, peers, token);
+        }
+
+        /// <summary>
+        /// Adds peer to the torrents.
+        /// </summary>
+        /// <param name="client">An <see cref="IQBittorrentClient2"/> instance.</param>
+        /// <param name="hashes">The torrent hashes.</param>
+        /// <param name="peer">The peer to ban in form <c>ip:port</c>.</param>
+        /// <param name="token">The cancellation token.</param>
+        /// <returns></returns>
+        [ApiLevel(ApiLevel.V2, MinVersion = "2.3.0")]
+        public static Task AddTorrentPeerAsync(
+            [NotNull] this IQBittorrentClient2 client,
+            [NotNull, ItemNotNull] IEnumerable<string> hashes,
+            [NotNull] string peer,
+            CancellationToken token = default)
+        {
+            ValidatePeer(peer);
+            return client.AddTorrentPeersAsync(hashes, new [] {peer}, token);
+        }
+
+        /// <summary>
+        /// Adds peer to the torrent.
+        /// </summary>
+        /// <param name="client">An <see cref="IQBittorrentClient2"/> instance.</param>
+        /// <param name="hash">The torrent hash.</param>
+        /// <param name="peer">The peer to ban in form <c>ip:port</c>.</param>
+        /// <param name="token">The cancellation token.</param>
+        /// <returns></returns>
+        [ApiLevel(ApiLevel.V2, MinVersion = "2.3.0")]
+        public static Task AddTorrentPeerAsync(
+            [NotNull] this IQBittorrentClient2 client,
+            [NotNull] string hash,
+            [NotNull] string peer,
+            CancellationToken token = default)
+        {
+            ValidateHash(hash);
+            ValidatePeer(peer);
+            return client.AddTorrentPeersAsync(new []{ hash }, new[] { peer }, token);
+        }
+
+        /// <summary>
+        /// Adds peers to the torrent.
+        /// </summary>
+        /// <param name="client">An <see cref="IQBittorrentClient2"/> instance.</param>
+        /// <param name="hash">The torrent hash.</param>
+        /// <param name="peers">The list of peers to ban.</param>
+        /// <param name="token">The cancellation token.</param>
+        /// <returns></returns>
+        [ApiLevel(ApiLevel.V2, MinVersion = "2.3.0")]
+        public static Task AddTorrentPeersAsync(
+            [NotNull] this IQBittorrentClient2 client,
+            [NotNull] string hash,
+            [NotNull, ItemNotNull] IEnumerable<IPEndPoint> peers,
+            CancellationToken token = default)
+        {
+            ValidateHash(hash);
+            return client.AddTorrentPeersAsync(new[] { hash }, peers, token);
+        }
+
+        /// <summary>
+        /// Adds peer to the torrents.
+        /// </summary>
+        /// <param name="client">An <see cref="IQBittorrentClient2"/> instance.</param>
+        /// <param name="hashes">The torrent hashes.</param>
+        /// <param name="peer">The peer to ban.</param>
+        /// <param name="token">The cancellation token.</param>
+        /// <returns></returns>
+        [ApiLevel(ApiLevel.V2, MinVersion = "2.3.0")]
+        public static Task AddTorrentPeerAsync(
+            [NotNull] this IQBittorrentClient2 client,
+            [NotNull, ItemNotNull] IEnumerable<string> hashes,
+            [NotNull] IPEndPoint peer,
+            CancellationToken token = default)
+        {
+            ValidatePeer(peer);
+            return client.AddTorrentPeersAsync(hashes, new[] { peer }, token);
+        }
+
+        /// <summary>
+        /// Adds peer to the torrent.
+        /// </summary>
+        /// <param name="client">An <see cref="IQBittorrentClient2"/> instance.</param>
+        /// <param name="hash">The torrent hash.</param>
+        /// <param name="peer">The peer to ban.</param>
+        /// <param name="token">The cancellation token.</param>
+        /// <returns></returns>
+        [ApiLevel(ApiLevel.V2, MinVersion = "2.3.0")]
+        public static Task AddTorrentPeerAsync(
+            [NotNull] this IQBittorrentClient2 client,
+            [NotNull] string hash,
+            [NotNull] IPEndPoint peer,
+            CancellationToken token = default)
+        {
+            ValidateHash(hash);
+            ValidatePeer(peer);
+            return client.AddTorrentPeersAsync(new[] { hash }, new[] { peer }, token);
         }
 
         /// <summary>

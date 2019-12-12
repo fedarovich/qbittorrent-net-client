@@ -302,6 +302,10 @@ namespace QBittorrent.Client.Internal
         public abstract (Uri url, HttpContent request) SetFilePriority(string hash, IEnumerable<int> fileIds, TorrentContentPriority priority);
 
         public abstract (Uri url, HttpContent request) SetShareLimits(IEnumerable<string> hashes, double ratio, TimeSpan seedingTime);
+        
+        public abstract (Uri url, HttpContent request) BanPeers(IEnumerable<string> peers);
+        
+        public abstract (Uri url, HttpContent request) AddTorrentPeers(IEnumerable<string> hashes, IEnumerable<string> peers);
 
         public abstract (Uri url, HttpContent request) AddRssFolder(string path);
 

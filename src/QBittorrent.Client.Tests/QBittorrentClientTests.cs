@@ -3052,6 +3052,53 @@ namespace QBittorrent.Client.Tests
 
         #endregion
 
+        #region Peers
+
+        [SkippableFact]
+        public async Task AddTorrentPeers()
+        {
+            Skip.If(ApiVersionLessThan(2, 3));
+
+            await Client.LoginAsync(UserName, Password);
+
+            var torrentPath = Path.Combine(Utils.TorrentsFolder, "ubuntu-16.04.4-desktop-amd64.iso.torrent");
+            var parser = new BencodeParser();
+            var torrent = parser.Parse<Torrent>(torrentPath);
+            var hash = torrent.OriginalInfoHash.ToLower();
+
+            var addRequest = new AddTorrentFilesRequest(torrentPath) { Paused = true };
+            await Client.AddTorrentsAsync(addRequest);
+
+            var origProps = await Client.GetTorrentPropertiesAsync(hash);
+            origProps.TotalPeers.Should().Be(0);
+
+            await Client.AddTorrentPeerAsync(hash, "127.0.0.1:12345");
+
+            await Utils.Retry(async () =>
+            {
+                var newProps = await Client.GetTorrentPropertiesAsync(hash);
+                newProps.TotalPeers.Should().Be(1);
+            });
+        }
+
+        [SkippableFact]
+        public async Task BanPeers()
+        {
+            Skip.If(ApiVersionLessThan(2, 3));
+
+            await Client.LoginAsync(UserName, Password);
+            var oldPrefs = await Client.GetPreferencesAsync();
+            oldPrefs.BannedIpAddresses.Should().BeEmpty();
+
+            await Client.BanPeerAsync("192.168.253.1:12345");
+
+            var newPrefs = await Client.GetPreferencesAsync();
+            newPrefs.BannedIpAddresses.Should().Contain("192.168.253.1");
+            newPrefs.Should().BeEquivalentTo(oldPrefs, opt => opt.Excluding(x => x.BannedIpAddresses));
+        }
+
+        #endregion
+
         #region RSS
 
         [SkippableFact]

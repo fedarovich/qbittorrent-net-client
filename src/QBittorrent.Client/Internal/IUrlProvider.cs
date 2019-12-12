@@ -140,6 +140,10 @@ namespace QBittorrent.Client.Internal
 
         Uri GetBuildInfo();
 
+        Uri BanPeers();
+
+        Uri AddTorrentPeers();
+
         // RSS
 
         Uri AddRssFolder();

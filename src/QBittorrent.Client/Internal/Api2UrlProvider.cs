@@ -164,6 +164,10 @@ namespace QBittorrent.Client.Internal
 
         public Uri GetBuildInfo() => Create("/api/v2/app/buildInfo");
 
+        public Uri BanPeers() => Create("/api/v2/transfer/banPeers");
+
+        public Uri AddTorrentPeers() => Create("/api/v2/torrents/addPeers");
+
         public Uri AddRssFolder() => Create("/api/v2/rss/addFolder");
 
         public Uri AddRssFeed() => Create("/api/v2/rss/addFeed");

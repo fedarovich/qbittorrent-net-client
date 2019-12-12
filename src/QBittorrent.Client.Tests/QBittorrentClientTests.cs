@@ -3102,6 +3102,124 @@ namespace QBittorrent.Client.Tests
 
         #endregion
 
+        #region Tags
+
+        [SkippableFact]
+        public async Task TagsCrud()
+        {
+            Skip.If(ApiVersionLessThan(2, 3));
+
+            await Client.LoginAsync(UserName, Password);
+
+            var tags = await Client.GetTagsAsync();
+            tags.Should().BeEmpty();
+
+            await Client.CreateTagsAsync(new[] {"Tag 1", "Tag 2"});
+            tags = await Client.GetTagsAsync();
+            tags.Should().BeEquivalentTo("Tag 1", "Tag 2");
+
+            await Client.CreateTagsAsync(new[] { "Tag 2", "Tag 3", "Tag 4" });
+            tags = await Client.GetTagsAsync();
+            tags.Should().BeEquivalentTo("Tag 1", "Tag 2", "Tag 3", "Tag 4");
+
+            await Client.DeleteTagsAsync(new[] {"Tag 5", "Tag 4", "Tag 2"});
+            tags = await Client.GetTagsAsync();
+            tags.Should().BeEquivalentTo("Tag 1", "Tag 3");
+
+            await Client.DeleteTagsAsync(tags);
+            tags = await Client.GetTagsAsync();
+            tags.Should().BeEmpty();
+        }
+
+        [SkippableFact]
+        public async Task TorrentTagsCrud()
+        {
+            Skip.If(ApiVersionLessThan(2, 3));
+
+            await Client.LoginAsync(UserName, Password);
+
+            var torrentPath = Path.Combine(Utils.TorrentsFolder, "ubuntu-16.04.4-desktop-amd64.iso.torrent");
+            var parser = new BencodeParser();
+            var torrent = parser.Parse<Torrent>(torrentPath);
+            var hash = torrent.OriginalInfoHash.ToLower();
+            var hashes = new[] { hash };
+
+            var addRequest = new AddTorrentFilesRequest(torrentPath) { Paused = true };
+            await Client.AddTorrentsAsync(addRequest);
+
+            var tags = await Client.GetTagsAsync();
+            tags.Should().BeEmpty();
+
+            int responseId = 0;
+
+            await Client.CreateTagsAsync(new[] { "Tag 1", "Tag 2", "Tag 3", "Tag 4" });
+            tags = await Client.GetTagsAsync();
+            tags.Should().BeEquivalentTo("Tag 1", "Tag 2", "Tag 3", "Tag 4");
+            var syncData = await Client.GetPartialDataAsync(responseId);
+            syncData.TagsAdded.Should().BeEquivalentTo(tags);
+            syncData.TagsRemoved.Should().BeNullOrEmpty();
+            responseId = syncData.ResponseId;
+
+            await Client.AddTorrentTagsAsync(hashes, new [] { "Tag 2", "Tag 3", "Tag 4", "Tag 5", "Tag 6" });
+            tags = await Client.GetTagsAsync();
+            tags.Should().BeEquivalentTo("Tag 1", "Tag 2", "Tag 3", "Tag 4", "Tag 5", "Tag 6");
+            var torrentTags = (await Client.GetTorrentListAsync()).Single().Tags;
+            torrentTags.Should().BeEquivalentTo("Tag 2", "Tag 3", "Tag 4", "Tag 5", "Tag 6");
+            syncData = await Client.GetPartialDataAsync(responseId);
+            syncData.TagsAdded.Should().BeEquivalentTo("Tag 5", "Tag 6");
+            syncData.TagsRemoved.Should().BeNullOrEmpty();
+            syncData.TorrentsChanged[hash].Tags.Should().BeEquivalentTo("Tag 2", "Tag 3", "Tag 4", "Tag 5", "Tag 6");
+            responseId = syncData.ResponseId;
+
+            await Client.AddTorrentTagAsync(hash, "Tag 6");
+            tags = await Client.GetTagsAsync();
+            tags.Should().BeEquivalentTo("Tag 1", "Tag 2", "Tag 3", "Tag 4", "Tag 5", "Tag 6");
+            torrentTags = (await Client.GetTorrentListAsync()).Single().Tags;
+            torrentTags.Should().BeEquivalentTo("Tag 2", "Tag 3", "Tag 4", "Tag 5", "Tag 6");
+            syncData = await Client.GetPartialDataAsync(responseId);
+            syncData.TagsAdded.Should().BeNullOrEmpty();
+            syncData.TagsRemoved.Should().BeNullOrEmpty();
+            if (syncData.TorrentsChanged != null && syncData.TorrentsChanged.TryGetValue(hash, out var torrentPartialInfo))
+            {
+                torrentPartialInfo.Tags.Should().BeNullOrEmpty();
+            }
+            responseId = syncData.ResponseId;
+
+            await Client.DeleteTorrentTagsAsync(hashes, new[] {"Tag 2", "Tag 6"});
+            tags = await Client.GetTagsAsync();
+            tags.Should().BeEquivalentTo("Tag 1", "Tag 2", "Tag 3", "Tag 4", "Tag 5", "Tag 6");
+            torrentTags = (await Client.GetTorrentListAsync()).Single().Tags;
+            torrentTags.Should().BeEquivalentTo("Tag 3", "Tag 4", "Tag 5");
+            syncData = await Client.GetPartialDataAsync(responseId);
+            syncData.TagsAdded.Should().BeNullOrEmpty();
+            syncData.TagsRemoved.Should().BeNullOrEmpty();
+            syncData.TorrentsChanged[hash].Tags.Should().BeEquivalentTo("Tag 3", "Tag 4", "Tag 5");
+            responseId = syncData.ResponseId;
+
+            await Client.DeleteTagsAsync(new[] {"Tag 4"});
+            tags = await Client.GetTagsAsync();
+            tags.Should().BeEquivalentTo("Tag 1", "Tag 2", "Tag 3", "Tag 5", "Tag 6");
+            torrentTags = (await Client.GetTorrentListAsync()).Single().Tags;
+            torrentTags.Should().BeEquivalentTo("Tag 3", "Tag 5");
+            syncData = await Client.GetPartialDataAsync(responseId);
+            syncData.TagsAdded.Should().BeNullOrEmpty();
+            syncData.TagsRemoved.Should().BeEquivalentTo("Tag 4");
+            syncData.TorrentsChanged[hash].Tags.Should().BeEquivalentTo("Tag 3", "Tag 5");
+            responseId = syncData.ResponseId;
+
+            await Client.ClearTorrentTagsAsync();
+            tags = await Client.GetTagsAsync();
+            tags.Should().BeEquivalentTo("Tag 1", "Tag 2", "Tag 3", "Tag 5", "Tag 6");
+            torrentTags = (await Client.GetTorrentListAsync()).Single().Tags;
+            torrentTags.Should().BeEmpty();
+            syncData = await Client.GetPartialDataAsync(responseId);
+            syncData.TagsAdded.Should().BeNullOrEmpty();
+            syncData.TagsRemoved.Should().BeNullOrEmpty();
+            syncData.TorrentsChanged[hash].Tags.Should().BeNullOrEmpty();
+        }
+
+        #endregion
+
         #region RSS
 
         [SkippableFact]

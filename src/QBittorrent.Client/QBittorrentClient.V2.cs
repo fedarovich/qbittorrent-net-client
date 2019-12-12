@@ -513,6 +513,7 @@ namespace QBittorrent.Client
         /// <param name="peers">The list of peers to ban.</param>
         /// <param name="token">The cancellation token.</param>
         /// <returns></returns>
+        [ApiLevel(ApiLevel.V2, MinVersion = "2.3.0")]
         public Task BanPeersAsync(IEnumerable<IPEndPoint> peers, CancellationToken token = default)
         {
             ValidatePeers(ref peers);
@@ -545,6 +546,7 @@ namespace QBittorrent.Client
         /// <param name="peers">The list of peers to ban.</param>
         /// <param name="token">The cancellation token.</param>
         /// <returns></returns>
+        [ApiLevel(ApiLevel.V2, MinVersion = "2.3.0")]
         public Task<IReadOnlyDictionary<string, PeerAddResult>> AddTorrentPeersAsync(
             IEnumerable<string> hashes, IEnumerable<IPEndPoint> peers, CancellationToken token = default)
         {
@@ -555,11 +557,152 @@ namespace QBittorrent.Client
                 ParseAddTorrentPeersResponse, ApiLevel.V2, Version_2_3_0);
         }
 
-        private async Task<IReadOnlyDictionary<string, PeerAddResult>> ParseAddTorrentPeersResponse(HttpResponseMessage response)
+        private static async Task<IReadOnlyDictionary<string, PeerAddResult>> ParseAddTorrentPeersResponse(HttpResponseMessage response)
         {
             var json = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
             var result = JsonConvert.DeserializeObject<IReadOnlyDictionary<string, PeerAddResult>>(json);
             return result;
+        }
+
+        /// <summary>
+        /// Creates the tags.
+        /// </summary>
+        /// <param name="tags">The list of the tags to create.</param>
+        /// <param name="token">The cancellation token.</param>
+        /// <returns></returns>
+        [ApiLevel(ApiLevel.V2, MinVersion = "2.3.0")]
+        public Task CreateTagsAsync(IEnumerable<string> tags, CancellationToken token = default)
+        {
+            int count = ValidateAndCountTags(ref tags);
+            if (count == 0)
+                return Task.CompletedTask;
+
+            return PostAsync(p => p.CreateTags(tags), token, ApiLevel.V2, Version_2_3_0);
+        }
+
+        /// <summary>
+        /// Deletes the tags.
+        /// </summary>
+        /// <param name="tags">The list of the tags to delete.</param>
+        /// <param name="token">The cancellation token.</param>
+        /// <returns></returns>
+        [ApiLevel(ApiLevel.V2, MinVersion = "2.3.0")]
+        public Task DeleteTagsAsync(IEnumerable<string> tags, CancellationToken token = default)
+        {
+            int count = ValidateAndCountTags(ref tags);
+            if (count == 0)
+                return Task.CompletedTask;
+
+            return PostAsync(p => p.DeleteTags(tags), token, ApiLevel.V2, Version_2_3_0);
+        }
+
+        /// <summary>
+        /// Gets the list of the tags.
+        /// </summary>
+        /// <param name="token">The cancellation token.</param>
+        /// <returns></returns>
+        [ApiLevel(ApiLevel.V2, MinVersion = "2.3.0")]
+        public Task<IReadOnlyList<string>> GetTagsAsync(CancellationToken token = default)
+        {
+            return GetJsonAsync<IReadOnlyList<string>>(p => p.GetTags(), token, ApiLevel.V2, Version_2_3_0);
+        }
+
+        /// <summary>
+        /// Adds the tags to the torrents.
+        /// </summary>
+        /// <param name="hashes">The torrent hashes.</param>
+        /// <param name="tags">The tags.</param>
+        /// <param name="token">The cancellation token.</param>
+        /// <returns></returns>
+        [ApiLevel(ApiLevel.V2, MinVersion = "2.3.0")]
+        public Task AddTorrentTagsAsync(IEnumerable<string> hashes, IEnumerable<string> tags, CancellationToken token = default)
+        {
+            ValidateHashes(ref hashes);
+            int count = ValidateAndCountTags(ref tags);
+            if (count == 0)
+                return Task.CompletedTask;
+
+            return PostAsync(p => p.AddTorrentTags(hashes, tags), token, ApiLevel.V2, Version_2_3_0);
+        }
+
+        /// <summary>
+        /// Adds the tags to all torrents.
+        /// </summary>
+        /// <param name="tags">The tags.</param>
+        /// <param name="token">The cancellation token.</param>
+        /// <returns></returns>
+        [ApiLevel(ApiLevel.V2, MinVersion = "2.3.0")]
+        public Task AddTorrentTagsAsync(IEnumerable<string> tags, CancellationToken token = default)
+        {
+            int count = ValidateAndCountTags(ref tags);
+            if (count == 0)
+                return Task.CompletedTask;
+
+            return PostAsync(p => p.AddTorrentTags(All, tags), token, ApiLevel.V2, Version_2_3_0);
+        }
+
+        /// <summary>
+        /// Removes the specified tags from the torrents.
+        /// </summary>
+        /// <param name="hashes">The torrent hashes.</param>
+        /// <param name="tags">The tags.</param>
+        /// <param name="token">The cancellation token.</param>
+        /// <returns></returns>
+        /// <remarks>
+        /// If the list of tags is empty, this method is no op.
+        /// </remarks>
+        [ApiLevel(ApiLevel.V2, MinVersion = "2.3.0")]
+        public Task DeleteTorrentTagsAsync(IEnumerable<string> hashes, IEnumerable<string> tags, CancellationToken token = default)
+        {
+            ValidateHashes(ref hashes);
+            int count = ValidateAndCountTags(ref tags);
+            if (count == 0)
+                return Task.CompletedTask;
+
+            return PostAsync(p => p.DeleteTorrentTags(hashes, tags), token, ApiLevel.V2, Version_2_3_0);
+        }
+
+        /// <summary>
+        /// Removes the specified tags from all torrents.
+        /// </summary>
+        /// <param name="tags">The tags.</param>
+        /// <param name="token">The cancellation token.</param>
+        /// <returns></returns>
+        /// <remarks>
+        /// If the list of tags is empty, this method is no op.
+        /// </remarks>
+        [ApiLevel(ApiLevel.V2, MinVersion = "2.3.0")]
+        public Task DeleteTorrentTagsAsync(IEnumerable<string> tags, CancellationToken token = default)
+        {
+            int count = ValidateAndCountTags(ref tags);
+            if (count == 0)
+                return Task.CompletedTask;
+
+            return PostAsync(p => p.DeleteTorrentTags(All, tags), token, ApiLevel.V2, Version_2_3_0);
+        }
+
+        /// <summary>
+        /// Removes all tags from the torrents.
+        /// </summary>
+        /// <param name="hashes">The torrent hashes.</param>
+        /// <param name="token">The cancellation token.</param>
+        /// <returns></returns>
+        [ApiLevel(ApiLevel.V2, MinVersion = "2.3.0")]
+        public Task ClearTorrentTagsAsync(IEnumerable<string> hashes, CancellationToken token = default)
+        {
+            ValidateHashes(ref hashes);
+            return PostAsync(p => p.DeleteTorrentTags(hashes, Enumerable.Empty<string>()), token, ApiLevel.V2, Version_2_3_0);
+        }
+
+        /// <summary>
+        /// Removes all tags from all torrents.
+        /// </summary>
+        /// <param name="token">The cancellation token.</param>
+        /// <returns></returns>
+        [ApiLevel(ApiLevel.V2, MinVersion = "2.3.0")]
+        public Task ClearTorrentTagsAsync(CancellationToken token = default)
+        {
+            return PostAsync(p => p.DeleteTorrentTags(All, Enumerable.Empty<string>()), token, ApiLevel.V2, Version_2_3_0);
         }
 
         #region RSS

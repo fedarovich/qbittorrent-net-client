@@ -144,6 +144,16 @@ namespace QBittorrent.Client.Internal
 
         Uri AddTorrentPeers();
 
+        Uri CreateTags();
+
+        Uri DeleteTags();
+
+        Uri GetTags();
+
+        Uri AddTorrentTags();
+
+        Uri DeleteTorrentTags();
+
         // RSS
 
         Uri AddRssFolder();

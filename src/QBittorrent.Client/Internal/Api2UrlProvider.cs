@@ -168,6 +168,16 @@ namespace QBittorrent.Client.Internal
 
         public Uri AddTorrentPeers() => Create("/api/v2/torrents/addPeers");
 
+        public Uri CreateTags() => Create("/api/v2/torrents/createTags");
+
+        public Uri DeleteTags() => Create("/api/v2/torrents/deleteTags");
+
+        public Uri GetTags() => Create("/api/v2/torrents/tags");
+
+        public Uri AddTorrentTags() => Create("/api/v2/torrents/addTags");
+
+        public Uri DeleteTorrentTags() => Create("/api/v2/torrents/removeTags");
+
         public Uri AddRssFolder() => Create("/api/v2/rss/addFolder");
 
         public Uri AddRssFeed() => Create("/api/v2/rss/addFeed");

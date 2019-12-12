@@ -112,6 +112,32 @@ namespace QBittorrent.Client.Internal
                 ("peers", string.Join("|", peers)));
         }
 
+        public override (Uri url, HttpContent request) CreateTags(IEnumerable<string> tags)
+        {
+            return BuildForm(Url.CreateTags(),
+                ("tags", string.Join(",", tags)));
+        }
+
+        public override (Uri url, HttpContent request) DeleteTags(IEnumerable<string> tags)
+        {
+            return BuildForm(Url.DeleteTags(),
+                ("tags", string.Join(",", tags)));
+        }
+
+        public override (Uri url, HttpContent request) AddTorrentTags(IEnumerable<string> hashes, IEnumerable<string> tags)
+        {
+            return BuildForm(Url.AddTorrentTags(),
+                ("hashes", JoinHashes(hashes)),
+                ("tags", string.Join(",", tags)));
+        }
+
+        public override (Uri url, HttpContent request) DeleteTorrentTags(IEnumerable<string> hashes, IEnumerable<string> tags)
+        {
+            return BuildForm(Url.DeleteTorrentTags(),
+                ("hashes", JoinHashes(hashes)),
+                ("tags", string.Join(",", tags)));
+        }
+
         public override (Uri url, HttpContent request) AddTorrents(AddTorrentsRequest request)
         {
             var data = AddTorrentsCore(request);

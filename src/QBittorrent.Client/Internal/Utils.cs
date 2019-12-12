@@ -15,7 +15,8 @@ namespace QBittorrent.Client.Internal
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         internal static bool HashIsValid(string hash)
         {
-            return hash.Length == 40 && hash.All(c => (c >= '0' && c <= '9') || (c >= 'a' && c <= 'f') || (c >= 'A' && c <= 'F'));
+            return hash.Length == 40 &&
+                   hash.All(c => (c >= '0' && c <= '9') || (c >= 'a' && c <= 'f') || (c >= 'A' && c <= 'F'));
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -26,7 +27,8 @@ namespace QBittorrent.Client.Internal
                 throw new ArgumentNullException(nameof(hash));
 
             if (!HashIsValid(hash))
-                throw new ArgumentException("The parameter must be a hexadecimal representation of SHA-1 hash.", nameof(hash));
+                throw new ArgumentException("The parameter must be a hexadecimal representation of SHA-1 hash.",
+                    nameof(hash));
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -149,8 +151,40 @@ namespace QBittorrent.Client.Internal
                 return (parts[0], parts[1]);
             }
 
-            FormatException GetFormatException(Exception inner = null) => 
+            FormatException GetFormatException(Exception inner = null) =>
                 new FormatException($"'{ipEndpointString}' is not a valid IP endpoint.", inner);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        [ContractAnnotation("null => halt")]
+        internal static int ValidateAndCountTags(ref IEnumerable<string> tags)
+        {
+            if (tags == null)
+                throw new ArgumentNullException(nameof(tags));
+
+            var list = new List<string>();
+            foreach (var tag in tags)
+            {
+                ValidateTag(tag);
+                if (!string.IsNullOrWhiteSpace(tag))
+                {
+                    list.Add(tag);
+                }
+            }
+
+            tags = list;
+            return list.Count;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        [ContractAnnotation("null => halt")]
+        internal static void ValidateTag(string tag)
+        {
+            if (tag == null)
+                throw new ArgumentNullException(nameof(tag));
+
+            if (tag.Contains(","))
+                throw new ArgumentException("The tag cannot contain comma.", nameof(tag));
         }
     }
 }

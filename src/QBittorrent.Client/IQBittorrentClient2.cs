@@ -393,6 +393,111 @@ namespace QBittorrent.Client
             [NotNull, ItemNotNull] IEnumerable<IPEndPoint> peers,
             CancellationToken token = default);
 
+        /// <summary>
+        /// Creates the tags.
+        /// </summary>
+        /// <param name="tags">The list of the tags to create.</param>
+        /// <param name="token">The cancellation token.</param>
+        /// <returns></returns>
+        [ApiLevel(ApiLevel.V2, MinVersion = "2.3.0")]
+        Task CreateTagsAsync(
+            [NotNull, ItemNotNull] IEnumerable<string> tags,
+            CancellationToken token = default);
+
+        /// <summary>
+        /// Deletes the tags.
+        /// </summary>
+        /// <param name="tags">The list of the tags to delete.</param>
+        /// <param name="token">The cancellation token.</param>
+        /// <returns></returns>
+        [ApiLevel(ApiLevel.V2, MinVersion = "2.3.0")]
+        Task DeleteTagsAsync(
+            [NotNull, ItemNotNull] IEnumerable<string> tags,
+            CancellationToken token = default);
+
+        /// <summary>
+        /// Gets the list of the tags.
+        /// </summary>
+        /// <param name="token">The cancellation token.</param>
+        /// <returns></returns>
+        [ApiLevel(ApiLevel.V2, MinVersion = "2.3.0")]
+        Task<IReadOnlyList<string>> GetTagsAsync(
+            CancellationToken token = default);
+
+        /// <summary>
+        /// Adds the tags to the torrents.
+        /// </summary>
+        /// <param name="hashes">The torrent hashes.</param>
+        /// <param name="tags">The tags.</param>
+        /// <param name="token">The cancellation token.</param>
+        /// <returns></returns>
+        [ApiLevel(ApiLevel.V2, MinVersion = "2.3.0")]
+        Task AddTorrentTagsAsync(
+            [NotNull, ItemNotNull] IEnumerable<string> hashes,
+            [NotNull, ItemNotNull] IEnumerable<string> tags,
+            CancellationToken token = default);
+
+        /// <summary>
+        /// Adds the tags to all torrents.
+        /// </summary>
+        /// <param name="tags">The tags.</param>
+        /// <param name="token">The cancellation token.</param>
+        /// <returns></returns>
+        [ApiLevel(ApiLevel.V2, MinVersion = "2.3.0")]
+        Task AddTorrentTagsAsync(
+            [NotNull, ItemNotNull] IEnumerable<string> tags,
+            CancellationToken token = default);
+
+        /// <summary>
+        /// Removes the specified tags from the torrents.
+        /// </summary>
+        /// <param name="hashes">The torrent hashes.</param>
+        /// <param name="tags">The tags.</param>
+        /// <param name="token">The cancellation token.</param>
+        /// <returns></returns>
+        /// <remarks>
+        /// If the list of tags is empty, this method is no op.
+        /// </remarks>
+        [ApiLevel(ApiLevel.V2, MinVersion = "2.3.0")]
+        Task DeleteTorrentTagsAsync(
+            [NotNull, ItemNotNull] IEnumerable<string> hashes,
+            [NotNull, ItemNotNull] IEnumerable<string> tags,
+            CancellationToken token = default);
+
+        /// <summary>
+        /// Removes the specified tags from all torrents.
+        /// </summary>
+        /// <param name="tags">The tags.</param>
+        /// <param name="token">The cancellation token.</param>
+        /// <returns></returns>
+        /// <remarks>
+        /// If the list of tags is empty, this method is no op.
+        /// </remarks>
+        [ApiLevel(ApiLevel.V2, MinVersion = "2.3.0")]
+        Task DeleteTorrentTagsAsync(
+            [NotNull, ItemNotNull] IEnumerable<string> tags,
+            CancellationToken token = default);
+
+        /// <summary>
+        /// Removes all tags from the torrents.
+        /// </summary>
+        /// <param name="hashes">The torrent hashes.</param>
+        /// <param name="token">The cancellation token.</param>
+        /// <returns></returns>
+        [ApiLevel(ApiLevel.V2, MinVersion = "2.3.0")]
+        Task ClearTorrentTagsAsync(
+            [NotNull, ItemNotNull] IEnumerable<string> hashes,
+            CancellationToken token = default);
+
+        /// <summary>
+        /// Removes all tags from all torrents.
+        /// </summary>
+        /// <param name="token">The cancellation token.</param>
+        /// <returns></returns>
+        [ApiLevel(ApiLevel.V2, MinVersion = "2.3.0")]
+        Task ClearTorrentTagsAsync(
+            CancellationToken token = default);
+
         #region RSS
 
         /// <summary>

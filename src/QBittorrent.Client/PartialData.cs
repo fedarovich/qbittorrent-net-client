@@ -67,6 +67,18 @@ namespace QBittorrent.Client
         /// </summary>
         [JsonProperty("categories_removed")]
         public IReadOnlyList<string> CategoriesRemoved { get; set; }
+        
+        /// <summary>
+        /// Get or sets the list of added tags.
+        /// </summary>
+        [JsonProperty("tags")]
+        public IReadOnlyList<string> TagsAdded { get; set; }
+
+        /// <summary>
+        /// Get or sets the list of removed tags.
+        /// </summary>
+        [JsonProperty("tags_removed")]
+        public IReadOnlyList<string> TagsRemoved { get; set; }
 
         /// <summary>
         /// Priority system usage flag

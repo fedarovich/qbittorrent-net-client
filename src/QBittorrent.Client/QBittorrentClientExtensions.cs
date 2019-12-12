@@ -557,6 +557,207 @@ namespace QBittorrent.Client
         }
 
         /// <summary>
+        /// Creates the tag.
+        /// </summary>
+        /// <param name="client">An <see cref="IQBittorrentClient2"/> instance.</param>
+        /// <param name="tag">The list of the tags to create.</param>
+        /// <param name="token">The cancellation token.</param>
+        /// <returns></returns>
+        [ApiLevel(ApiLevel.V2, MinVersion = "2.3.0")]
+        public static Task CreateTagAsync(
+            [NotNull] this IQBittorrentClient2 client, 
+            [NotNull] string tag,
+            CancellationToken token = default)
+        {
+            ValidateTag(tag);
+            return client.CreateTagsAsync(new[] { tag }, token);
+        }
+
+        /// <summary>
+        /// Deletes the tag.
+        /// </summary>
+        /// <param name="client">An <see cref="IQBittorrentClient2"/> instance.</param>
+        /// <param name="tag">The list of the tags to delete.</param>
+        /// <param name="token">The cancellation token.</param>
+        /// <returns></returns>
+        [ApiLevel(ApiLevel.V2, MinVersion = "2.3.0")]
+        public static Task DeleteTagAsync(
+            [NotNull] this IQBittorrentClient2 client, 
+            [NotNull] string tag,
+            CancellationToken token = default)
+        {
+            ValidateTag(tag);
+            return client.DeleteTagsAsync(new[] { tag }, token);
+        }
+
+        /// <summary>
+        /// Adds the tags to the torrent.
+        /// </summary>
+        /// <param name="client">An <see cref="IQBittorrentClient2"/> instance.</param>
+        /// <param name="hash">The torrent hash.</param>
+        /// <param name="tags">The tags.</param>
+        /// <param name="token">The cancellation token.</param>
+        /// <returns></returns>
+        [ApiLevel(ApiLevel.V2, MinVersion = "2.3.0")]
+        public static Task AddTorrentTagsAsync(
+            [NotNull] this IQBittorrentClient2 client,
+            [NotNull] string hash,
+            [NotNull, ItemNotNull] IEnumerable<string> tags,
+            CancellationToken token = default)
+        {
+            ValidateHash(hash);
+            return client.AddTorrentTagsAsync(new[] { hash }, tags, token);
+        }
+
+        /// <summary>
+        /// Adds the tag to the torrents.
+        /// </summary>
+        /// <param name="client">An <see cref="IQBittorrentClient2"/> instance.</param>
+        /// <param name="hashes">The torrent hashes.</param>
+        /// <param name="tag">The tag.</param>
+        /// <param name="token">The cancellation token.</param>
+        /// <returns></returns>
+        [ApiLevel(ApiLevel.V2, MinVersion = "2.3.0")]
+        public static Task AddTorrentTagAsync(
+            [NotNull] this IQBittorrentClient2 client,
+            [NotNull, ItemNotNull] IEnumerable<string> hashes,
+            [NotNull] string tag,
+            CancellationToken token = default)
+        {
+            ValidateTag(tag);
+            return client.AddTorrentTagsAsync(hashes, new [] { tag }, token);
+        }
+
+        /// <summary>
+        /// Adds the tag to the torrent.
+        /// </summary>
+        /// <param name="client">An <see cref="IQBittorrentClient2"/> instance.</param>
+        /// <param name="hash">The torrent hash.</param>
+        /// <param name="tag">The tag.</param>
+        /// <param name="token">The cancellation token.</param>
+        /// <returns></returns>
+        [ApiLevel(ApiLevel.V2, MinVersion = "2.3.0")]
+        public static Task AddTorrentTagAsync(
+            [NotNull] this IQBittorrentClient2 client,
+            [NotNull] string hash,
+            [NotNull] string tag,
+            CancellationToken token = default)
+        {
+            ValidateHash(hash);
+            ValidateTag(tag);
+            return client.AddTorrentTagsAsync(new[] { hash }, new[] { tag }, token);
+        }
+
+        /// <summary>
+        /// Adds the tag to all torrents.
+        /// </summary>
+        /// <param name="client">An <see cref="IQBittorrentClient2"/> instance.</param>
+        /// <param name="tag">The tag.</param>
+        /// <param name="token">The cancellation token.</param>
+        /// <returns></returns>
+        [ApiLevel(ApiLevel.V2, MinVersion = "2.3.0")]
+        public static Task AddTorrentTagAsync(
+            [NotNull] this IQBittorrentClient2 client,
+            [NotNull] string tag,
+            CancellationToken token = default)
+        {
+            ValidateTag(tag);
+            return client.AddTorrentTagsAsync(new[] { tag }, token);
+        }
+
+        /// <summary>
+        /// Removes the specified tags from the torrent.
+        /// </summary>
+        /// <param name="client">An <see cref="IQBittorrentClient2"/> instance.</param>
+        /// <param name="hash">The torrent hash.</param>
+        /// <param name="tags">The tags.</param>
+        /// <param name="token">The cancellation token.</param>
+        /// <returns></returns>
+        [ApiLevel(ApiLevel.V2, MinVersion = "2.3.0")]
+        public static Task DeleteTorrentTagsAsync(
+            [NotNull] this IQBittorrentClient2 client,
+            [NotNull] string hash,
+            [NotNull, ItemNotNull] IEnumerable<string> tags,
+            CancellationToken token = default)
+        {
+            ValidateHash(hash);
+            return client.DeleteTorrentTagsAsync(new[] { hash }, tags, token);
+        }
+
+        /// <summary>
+        /// Removes the specified tag from the torrents.
+        /// </summary>
+        /// <param name="client">An <see cref="IQBittorrentClient2"/> instance.</param>
+        /// <param name="hashes">The torrent hashes.</param>
+        /// <param name="tag">The tag.</param>
+        /// <param name="token">The cancellation token.</param>
+        /// <returns></returns>
+        [ApiLevel(ApiLevel.V2, MinVersion = "2.3.0")]
+        public static Task DeleteTorrentTagAsync(
+            [NotNull] this IQBittorrentClient2 client,
+            [NotNull, ItemNotNull] IEnumerable<string> hashes,
+            [NotNull] string tag,
+            CancellationToken token = default)
+        {
+            ValidateTag(tag);
+            return client.DeleteTorrentTagsAsync(hashes, new[] { tag }, token);
+        }
+
+        /// <summary>
+        /// Removes the specified tag from the torrent.
+        /// </summary>
+        /// <param name="client">An <see cref="IQBittorrentClient2"/> instance.</param>
+        /// <param name="hash">The torrent hash.</param>
+        /// <param name="tag">The tag.</param>
+        /// <param name="token">The cancellation token.</param>
+        /// <returns></returns>
+        [ApiLevel(ApiLevel.V2, MinVersion = "2.3.0")]
+        public static Task DeleteTorrentTagAsync(
+            [NotNull] this IQBittorrentClient2 client,
+            [NotNull] string hash,
+            [NotNull] string tag,
+            CancellationToken token = default)
+        {
+            ValidateHash(hash);
+            ValidateTag(tag);
+            return client.DeleteTorrentTagsAsync(new[] { hash }, new[] { tag }, token);
+        }
+
+        /// <summary>
+        /// Removes the specified tag from all torrents.
+        /// </summary>
+        /// <param name="client">An <see cref="IQBittorrentClient2"/> instance.</param>
+        /// <param name="tag">The tag.</param>
+        /// <param name="token">The cancellation token.</param>
+        /// <returns></returns>
+        [ApiLevel(ApiLevel.V2, MinVersion = "2.3.0")]
+        public static Task DeleteTorrentTagAsync(
+            [NotNull] this IQBittorrentClient2 client,
+            [NotNull] string tag,
+            CancellationToken token = default)
+        {
+            ValidateTag(tag);
+            return client.DeleteTorrentTagsAsync(new[] { tag }, token);
+        }
+
+        /// <summary>
+        /// Removes all tags from the torrent.
+        /// </summary>
+        /// <param name="client">An <see cref="IQBittorrentClient2"/> instance.</param>
+        /// <param name="hash">The torrent hash.</param>
+        /// <param name="token">The cancellation token.</param>
+        /// <returns></returns>
+        [ApiLevel(ApiLevel.V2, MinVersion = "2.3.0")]
+        public static Task ClearTorrentTagsAsync(
+            [NotNull] this IQBittorrentClient2 client,
+            [NotNull] string hash,
+            CancellationToken token = default)
+        {
+            ValidateHash(hash);
+            return client.ClearTorrentTagsAsync(new[] { hash }, token);
+        }
+
+        /// <summary>
         /// Starts torrent search job.
         /// </summary>
         /// <param name="client">An <see cref="IQBittorrentClient2"/> instance.</param>

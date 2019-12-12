@@ -124,6 +124,7 @@ namespace QBittorrent.Client
         /// The torrent tags
         /// </summary>
         [JsonProperty("tags")]
+        [JsonConverter(typeof(StringToListConverter), ",", true)]
         public IReadOnlyCollection<string> Tags { get; set; }
 
         /// <summary>

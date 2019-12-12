@@ -306,6 +306,14 @@ namespace QBittorrent.Client.Internal
         public abstract (Uri url, HttpContent request) BanPeers(IEnumerable<string> peers);
         
         public abstract (Uri url, HttpContent request) AddTorrentPeers(IEnumerable<string> hashes, IEnumerable<string> peers);
+        
+        public abstract (Uri url, HttpContent request) CreateTags(IEnumerable<string> tags);
+        
+        public abstract (Uri url, HttpContent request) DeleteTags(IEnumerable<string> tags);
+        
+        public abstract (Uri url, HttpContent request) AddTorrentTags(IEnumerable<string> hashes, IEnumerable<string> tags);
+        
+        public abstract (Uri url, HttpContent request) DeleteTorrentTags(IEnumerable<string> hashes, IEnumerable<string> tags);
 
         public abstract (Uri url, HttpContent request) AddRssFolder(string path);
 

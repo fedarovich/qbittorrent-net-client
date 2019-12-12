@@ -163,6 +163,16 @@ namespace QBittorrent.Client.Internal
         public Uri BanPeers() => throw new ApiNotSupportedException(ApiLevel.V2, new Version(2, 3, 0));
 
         public Uri AddTorrentPeers() => throw new ApiNotSupportedException(ApiLevel.V2, new Version(2, 3, 0));
+        
+        public Uri CreateTags() => throw new ApiNotSupportedException(ApiLevel.V2, new Version(2, 3, 0));
+
+        public Uri DeleteTags() => throw new ApiNotSupportedException(ApiLevel.V2, new Version(2, 3, 0));
+
+        public Uri GetTags() => throw new ApiNotSupportedException(ApiLevel.V2, new Version(2, 3, 0));
+
+        public Uri AddTorrentTags() => throw new ApiNotSupportedException(ApiLevel.V2, new Version(2, 3, 0));
+
+        public Uri DeleteTorrentTags() => throw new ApiNotSupportedException(ApiLevel.V2, new Version(2, 3, 0));
 
         public Uri AddRssFolder() => throw new ApiNotSupportedException(ApiLevel.V2);
 

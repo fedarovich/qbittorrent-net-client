@@ -87,6 +87,14 @@ namespace QBittorrent.Client.Internal
         public override (Uri url, HttpContent request) BanPeers(IEnumerable<string> peers) => throw new ApiNotSupportedException(ApiLevel.V2, new ApiVersion(2, 3, 0));
 
         public override (Uri url, HttpContent request) AddTorrentPeers(IEnumerable<string> hashes, IEnumerable<string> peers) => throw new ApiNotSupportedException(ApiLevel.V2, new ApiVersion(2, 3, 0));
+        
+        public override (Uri url, HttpContent request) CreateTags(IEnumerable<string> tags) => throw new ApiNotSupportedException(ApiLevel.V2, new ApiVersion(2, 3, 0));
+
+        public override (Uri url, HttpContent request) DeleteTags(IEnumerable<string> tags) => throw new ApiNotSupportedException(ApiLevel.V2, new ApiVersion(2, 3, 0));
+
+        public override (Uri url, HttpContent request) AddTorrentTags(IEnumerable<string> hashes, IEnumerable<string> tags) => throw new ApiNotSupportedException(ApiLevel.V2, new ApiVersion(2, 3, 0));
+
+        public override (Uri url, HttpContent request) DeleteTorrentTags(IEnumerable<string> hashes, IEnumerable<string> tags) => throw new ApiNotSupportedException(ApiLevel.V2, new ApiVersion(2, 3, 0));
 
         public override (Uri url, HttpContent request) AddTorrents(AddTorrentsRequest request) => throw new ApiNotSupportedException(ApiLevel.V2);
 

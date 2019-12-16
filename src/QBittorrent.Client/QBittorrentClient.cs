@@ -5,9 +5,9 @@ using QBittorrent.Client.Extensions;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
-using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
@@ -208,10 +208,18 @@ namespace QBittorrent.Client
 
         private async Task<int> GetLegacyApiVersionPrivateAsync(CancellationToken token)
         {
-            var uri = BuildUri("/version/api");
-            var versionString = await _client.GetStringAsync(uri, true, token).ConfigureAwait(false);
-            var version = !string.IsNullOrEmpty(versionString) ? Convert.ToInt32(versionString) : NewApiLegacyFallbackVersion;
-            return version;
+            try
+            {
+                var uri = BuildUri("/version/api");
+                var versionString = await _client.GetStringAsync(uri, true, token).ConfigureAwait(false);
+                var version = !string.IsNullOrEmpty(versionString) ? Convert.ToInt32(versionString) : NewApiLegacyFallbackVersion;
+                return version;
+            }
+            catch (QBittorrentClientRequestException ex) when (ex.StatusCode == HttpStatusCode.InternalServerError)
+            {
+                // Fallback for qBittorrent 4.2+ on Linux/macOS
+                return NewApiLegacyFallbackVersion;
+            }
         }
 
         /// <summary>

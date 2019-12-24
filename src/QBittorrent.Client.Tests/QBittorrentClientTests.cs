@@ -116,7 +116,7 @@ namespace QBittorrent.Client.Tests
                 Console.WriteLine("\tEnsuring qBittorrent availability...");
                 using (var tempClient = new QBittorrentClient(new Uri("http://localhost:8080")))
                 {
-                    await Utils.Retry(() => tempClient.LoginAsync(UserName, Password), delayMs: 5000);
+                    await Utils.Retry(() => tempClient.LoginAsync(UserName, Password), delayMs: 500, attempts: 50);
                 }
 
                 Console.WriteLine("\tqBittorrent is available!");

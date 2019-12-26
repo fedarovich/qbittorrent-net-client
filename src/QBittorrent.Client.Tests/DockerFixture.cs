@@ -18,8 +18,8 @@ namespace QBittorrent.Client.Tests
 
         public async Task InitializeAsync()
         {
-            var version = Environment.GetEnvironmentVariable("QBT_VERSION")?.Replace(':', '-') ?? "4.2.0";
-            ImageName = "fedarovich-docker-qbittorrent-cli-docker.bintray.io/qbt-net-test:" + version;
+            var version = Environment.GetEnvironmentVariable("QBT_VERSION")?.Replace(':', '-') ?? "4.2.1";
+            ImageName = "docker.pkg.github.com/fedarovich/qbittorrent-net-client/qbt-net-test:" + version;
             var sourceDir = Path.Combine(Utils.StartupFolder, "docker", "qbt-" + version);
             var env = File.ReadAllText(Path.Combine(sourceDir, "env.json"));
             Console.WriteLine("Test Environment:");
@@ -34,7 +34,12 @@ namespace QBittorrent.Client.Tests
                 {
                     FromImage = ImageName
                 },
-                new AuthConfig(),
+                new AuthConfig
+                {
+                    // Workaround for issue with GitHub repository authorization
+                    Username = "fedarovich",
+                    Password = Environment.GetEnvironmentVariable("GITHUB_PACKAGES_TOKEN")
+                },
                 new Progress<JSONMessage>());
         }
 

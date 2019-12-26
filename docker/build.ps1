@@ -1,2 +1,2 @@
 param([String]$version)
-docker build -t fedarovich-docker-qbittorrent-cli-docker.bintray.io/qbt-net-test:$version -f $version/Dockerfile .
+docker build -t docker.pkg.github.com/fedarovich/qbittorrent-net-client/qbt-net-test:$version -f $version/Dockerfile .

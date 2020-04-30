@@ -50,7 +50,7 @@ dotnet add package QBittorrent.Client -v 0.9.0-*
 Create an instance of See documentation on [`QBittorrentClient`](xref:QBittorrent.Client.QBittorrentClient) for more information. class and pass the qBittorrent web interface URL to the constructor.
 
 ```cs
-var client = new QBittorrentClient(new Uri("http://127.0.0.1:8080/));
+var client = new QBittorrentClient(new Uri("http://127.0.0.1:8080/"));
 ```
 
 If your qBittorrent instance requires authentication call `LoginAsync` method:

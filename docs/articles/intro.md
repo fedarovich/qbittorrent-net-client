@@ -62,7 +62,7 @@ await client.LoginAsync("login", "password");
 Now you can use the `client` instance to query qBittorrent status, list/add/remove torrents, etc. See documentation on [`QBittorrentClient`](xref:QBittorrent.Client.QBittorrentClient) for more information.
 
 > [!IMPORTANT]
-> It is import to reuse the same `client` instance across the application, because it stores cookies required by qBittorrent web API.
+> It is important to reuse the same `client` instance across the application, because it stores cookies required by qBittorrent web API.
 
 Do not forget to dispose the `client` after you has finished your work with it:
 ```cs

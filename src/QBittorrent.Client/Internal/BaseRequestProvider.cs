@@ -314,6 +314,8 @@ namespace QBittorrent.Client.Internal
         public abstract (Uri url, HttpContent request) AddTorrentTags(IEnumerable<string> hashes, IEnumerable<string> tags);
         
         public abstract (Uri url, HttpContent request) DeleteTorrentTags(IEnumerable<string> hashes, IEnumerable<string> tags);
+       
+        public abstract (Uri url, HttpContent request) RenameFile(string hash, int fileId, string newName);
 
         public abstract (Uri url, HttpContent request) AddRssFolder(string path);
 

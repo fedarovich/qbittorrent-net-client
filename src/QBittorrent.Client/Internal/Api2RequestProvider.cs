@@ -138,6 +138,14 @@ namespace QBittorrent.Client.Internal
                 ("tags", string.Join(",", tags)));
         }
 
+        public override (Uri url, HttpContent request) RenameFile(string hash, int fileId, string newName)
+        {
+            return BuildForm(Url.RenameFile(),
+                ("hash", hash),
+                ("id", fileId.ToString()),
+                ("name", newName));
+        }
+
         public override (Uri url, HttpContent request) AddTorrents(AddTorrentsRequest request)
         {
             var data = AddTorrentsCore(request);

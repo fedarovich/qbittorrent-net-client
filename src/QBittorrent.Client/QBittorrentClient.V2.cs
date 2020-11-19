@@ -37,6 +37,9 @@ namespace QBittorrent.Client
         [SuppressMessage("ReSharper", "InconsistentNaming")]
         private static readonly ApiVersion Version_2_3_0 = new ApiVersion(2, 3, 0);
 
+        [SuppressMessage("ReSharper", "InconsistentNaming")]
+        private static readonly ApiVersion Version_2_4_0 = new ApiVersion(2, 4, 0);
+
         /// <summary>
         /// Gets the peer log.
         /// </summary>
@@ -703,6 +706,26 @@ namespace QBittorrent.Client
         public Task ClearTorrentTagsAsync(CancellationToken token = default)
         {
             return PostAsync(p => p.DeleteTorrentTags(All, Enumerable.Empty<string>()), token, ApiLevel.V2, Version_2_3_0);
+        }
+
+        /// <summary>
+        /// Renames the file in the torrent.
+        /// </summary>
+        /// <param name="hash">The hash of the torrent.</param>
+        /// <param name="fileId">The ID of the file to rename.</param>
+        /// <param name="newName">he new name to use for the file.</param>
+        /// <param name="token">The cancellation token.</param>
+        /// <returns></returns>
+        [ApiLevel(ApiLevel.V2, MinVersion = "2.4.0")]
+        public Task RenameFileAsync(string hash, int fileId, string newName, CancellationToken token = default)
+        {
+            ValidateHash(hash);
+            if (fileId < 0)
+                throw new ArgumentOutOfRangeException(nameof(fileId));
+            if (newName == null)
+                throw new ArgumentNullException(nameof(newName));
+
+            return PostAsync(p => p.RenameFile(hash, fileId, newName), token, ApiLevel.V2, Version_2_3_0);
         }
 
         #region RSS

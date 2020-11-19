@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Net.Http;
 using System.Text;
+using JetBrains.Annotations;
 
 namespace QBittorrent.Client.Internal
 {
@@ -112,6 +113,10 @@ namespace QBittorrent.Client.Internal
         (Uri url, HttpContent request) AddTorrentTags(IEnumerable<string> hashes, IEnumerable<string> tags);
         
         (Uri url, HttpContent request) DeleteTorrentTags(IEnumerable<string> hashes, IEnumerable<string> tags);
+
+        // API 2.4
+
+        (Uri url, HttpContent request) RenameFile(string hash, int fileId, string newName);
 
         // RSS
 

@@ -498,6 +498,21 @@ namespace QBittorrent.Client
         Task ClearTorrentTagsAsync(
             CancellationToken token = default);
 
+        /// <summary>
+        /// Renames the file in the torrent.
+        /// </summary>
+        /// <param name="hash">The hash of the torrent.</param>
+        /// <param name="fileId">The ID of the file to rename.</param>
+        /// <param name="newName">he new name to use for the file.</param>
+        /// <param name="token">The cancellation token.</param>
+        /// <returns></returns>
+        [ApiLevel(ApiLevel.V2, MinVersion = "2.4.0")]
+        Task RenameFileAsync(
+            [NotNull] string hash, 
+            int fileId, 
+            [NotNull] string newName, 
+            CancellationToken token = default);
+
         #region RSS
 
         /// <summary>

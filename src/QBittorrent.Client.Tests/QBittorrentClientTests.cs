@@ -3220,6 +3220,51 @@ namespace QBittorrent.Client.Tests
 
         #endregion
 
+        #region RenameFile
+
+        [SkippableFact]
+        [PrintTestName]
+        public async Task RenameFile()
+        {
+            Skip.If(ApiVersionLessThan(2, 4));
+
+            await Client.LoginAsync(UserName, Password);
+
+            var torrentPath = Path.Combine(Utils.TorrentsFolder, "ubuntu-16.04.4-desktop-amd64.iso.torrent");
+            var parser = new BencodeParser();
+            var torrent = parser.Parse<Torrent>(torrentPath);
+
+            var addRequest = new AddTorrentFilesRequest(torrentPath) { Paused = true };
+            await Client.AddTorrentsAsync(addRequest);
+
+            await Utils.Retry(async () =>
+            {
+                var contents = await Client.GetTorrentContentsAsync(torrent.OriginalInfoHash.ToLower());
+                contents.Should().NotBeNull();
+                contents.Should().HaveCount(1);
+
+                var content = contents.Single();
+                content.Name.Should().Be(torrent.File.FileName);
+                content.Size.Should().Be(torrent.File.FileSize);
+            });
+
+            var newName = Guid.NewGuid().ToString("N");
+            await Client.RenameFileAsync(torrent.OriginalInfoHash.ToLower(), 0, newName);
+
+            await Utils.Retry(async () =>
+            {
+                var contents = await Client.GetTorrentContentsAsync(torrent.OriginalInfoHash.ToLower());
+                contents.Should().NotBeNull();
+                contents.Should().HaveCount(1);
+
+                var content = contents.Single();
+                content.Name.Should().Be(newName);
+                content.Size.Should().Be(torrent.File.FileSize);
+            });
+        }
+
+        #endregion
+
         #region RSS
 
         [SkippableFact]

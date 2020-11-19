@@ -96,6 +96,8 @@ namespace QBittorrent.Client.Internal
 
         public override (Uri url, HttpContent request) DeleteTorrentTags(IEnumerable<string> hashes, IEnumerable<string> tags) => throw new ApiNotSupportedException(ApiLevel.V2, new ApiVersion(2, 3, 0));
 
+        public override (Uri url, HttpContent request) RenameFile(string hash, int fileId, string newName) => throw new ApiNotSupportedException(ApiLevel.V2, new ApiVersion(2, 4, 0));
+
         public override (Uri url, HttpContent request) AddTorrents(AddTorrentsRequest request) => throw new ApiNotSupportedException(ApiLevel.V2);
 
         public override (Uri url, HttpContent request) AddRssFolder(string path) => throw new ApiNotSupportedException(ApiLevel.V2);

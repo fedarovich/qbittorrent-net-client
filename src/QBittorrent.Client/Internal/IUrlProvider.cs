@@ -154,6 +154,10 @@ namespace QBittorrent.Client.Internal
 
         Uri DeleteTorrentTags();
 
+        // API 2.4
+
+        Uri RenameFile();
+
         // RSS
 
         Uri AddRssFolder();

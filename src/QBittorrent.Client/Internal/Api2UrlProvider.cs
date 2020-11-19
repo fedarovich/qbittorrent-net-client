@@ -178,6 +178,8 @@ namespace QBittorrent.Client.Internal
 
         public Uri DeleteTorrentTags() => Create("/api/v2/torrents/removeTags");
 
+        public Uri RenameFile() => Create("/api/v2/torrents/renameFile");
+
         public Uri AddRssFolder() => Create("/api/v2/rss/addFolder");
 
         public Uri AddRssFeed() => Create("/api/v2/rss/addFeed");

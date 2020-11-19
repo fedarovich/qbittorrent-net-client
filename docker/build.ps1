@@ -1,2 +1,2 @@
 param([String]$version)
-docker build -t docker.pkg.github.com/fedarovich/qbittorrent-net-client/qbt-net-test:$version -f $version/Dockerfile .
+docker build -t ghcr.io/fedarovich/qbt-net-test:$version -f $version/Dockerfile .

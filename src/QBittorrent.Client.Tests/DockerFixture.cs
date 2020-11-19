@@ -18,7 +18,7 @@ namespace QBittorrent.Client.Tests
 
         public async Task InitializeAsync()
         {
-            var version = Environment.GetEnvironmentVariable("QBT_VERSION")?.Replace(':', '-') ?? "4.2.1";
+            var version = Environment.GetEnvironmentVariable("QBT_VERSION")?.Replace(':', '-') ?? "4.3.0.1";
             ImageName = "ghcr.io/fedarovich/qbt-net-test:" + version;
             var sourceDir = Path.Combine(Utils.StartupFolder, "docker", "qbt-" + version);
             var env = File.ReadAllText(Path.Combine(sourceDir, "env.json"));

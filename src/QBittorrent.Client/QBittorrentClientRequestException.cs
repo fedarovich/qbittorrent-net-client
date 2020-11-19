@@ -15,14 +15,26 @@ namespace QBittorrent.Client
         /// </summary>
         /// <param name="message">The exception message.</param>
         /// <param name="statusCode">HTTPS status code.</param>
-        public QBittorrentClientRequestException(string message, HttpStatusCode statusCode) : base(message)
+        public QBittorrentClientRequestException(string message, HttpStatusCode statusCode)
+#if NET5_0
+            : base(message, null, statusCode)
+#else
+            : base(message)
+#endif
         {
             StatusCode = statusCode;
         }
 
+#if NET5_0
+        /// <summary>
+        /// Gets the HTTP status code.
+        /// </summary>
+        public new HttpStatusCode StatusCode { get; }
+#else
         /// <summary>
         /// Gets the HTTP status code.
         /// </summary>
         public HttpStatusCode StatusCode { get; }
+#endif
     }
 }

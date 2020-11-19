@@ -61,7 +61,7 @@ namespace QBittorrent.Client
         /// <returns></returns>
         [ApiLevel(ApiLevel.V2)]
         public Task AddTorrentsAsync(
-            [NotNull] AddTorrentsRequest request,
+            [JetBrains.Annotations.NotNull] AddTorrentsRequest request,
             CancellationToken token = default)
         {
             if (request == null)
@@ -102,7 +102,7 @@ namespace QBittorrent.Client
         /// <param name="token">The cancellation token.</param>
         /// <returns></returns>
         public Task RecheckAsync(
-            [NotNull, ItemNotNull] IEnumerable<string> hashes,
+            [JetBrains.Annotations.NotNull, ItemNotNull] IEnumerable<string> hashes,
             CancellationToken token = default)
         {
             ValidateHashes(ref hashes);
@@ -129,7 +129,7 @@ namespace QBittorrent.Client
         /// <returns></returns>
         [ApiLevel(ApiLevel.V2, MinVersion = "2.0.2")]
         public Task ReannounceAsync(
-            [NotNull, ItemNotNull] IEnumerable<string> hashes,
+            [JetBrains.Annotations.NotNull, ItemNotNull] IEnumerable<string> hashes,
             CancellationToken token = default)
         {
             ValidateHashes(ref hashes);
@@ -228,7 +228,7 @@ namespace QBittorrent.Client
         /// <returns></returns>
         [ApiLevel(ApiLevel.V2)]
         public Task SetLocationAsync(
-            [NotNull] string newLocation,
+            [JetBrains.Annotations.NotNull] string newLocation,
             CancellationToken token = default)
         {
             if (newLocation == null)
@@ -247,7 +247,7 @@ namespace QBittorrent.Client
         /// <returns></returns>
         [ApiLevel(ApiLevel.V2)]
         public Task SetTorrentCategoryAsync(
-            [NotNull] string category,
+            [JetBrains.Annotations.NotNull] string category,
             CancellationToken token = default)
         {
             if (category == null)

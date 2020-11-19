@@ -792,6 +792,7 @@ namespace QBittorrent.Client
         /// </summary>
         [JsonProperty("listen_on_ipv6_address")]
         [ApiLevel(ApiLevel.V2, MinVersion = "2.3")]
+        [Deprecated("2.4")]
         public bool? ListenOnIPv6Address { get; set; }
 
         /// <summary>
@@ -1080,6 +1081,7 @@ namespace QBittorrent.Client
         /// </remarks>
         [JsonProperty("enable_super_seeding")]
         [ApiLevel(ApiLevel.V2, MinVersion = "2.3")]
+        [Deprecated("2.5")]
         public bool? LibtorrentStrictSuperSeeding { get; set; }
 
         /// <summary>

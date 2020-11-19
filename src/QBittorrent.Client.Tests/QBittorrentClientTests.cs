@@ -2419,8 +2419,6 @@ namespace QBittorrent.Client.Tests
         [InlineData(nameof(Preferences.UploadLimit), 0, 40960)]
         [InlineData(nameof(Preferences.MaxConnections), 500, 600)]
         [InlineData(nameof(Preferences.MaxConnectionsPerTorrent), 100, 200)]
-        [InlineData(nameof(Preferences.MaxUploads), -1, 10)]
-        [InlineData(nameof(Preferences.MaxUploadsPerTorrent), -1, 5)]
         [InlineData(nameof(Preferences.LimitUTPRate), true, false)]
         [InlineData(nameof(Preferences.LimitTcpOverhead), false, true)]
         [InlineData(nameof(Preferences.AlternativeDownloadLimit), 10240, 20480)]
@@ -2468,7 +2466,6 @@ namespace QBittorrent.Client.Tests
         [InlineData(nameof(Preferences.AutoTMMRetainedWhenCategorySavePathChanges), false, true)]
         [InlineData(nameof(Preferences.AutoTMMRetainedWhenDefaultSavePathChanges), false, true)]
         [InlineData(nameof(Preferences.MailNotificationSender), "qBittorrent_notification@example.com", "test@example.com")]
-        [InlineData(nameof(Preferences.LimitLAN), false, true)]
         [InlineData(nameof(Preferences.SlowTorrentDownloadRateThreshold), 2, 50)]
         [InlineData(nameof(Preferences.SlowTorrentUploadRateThreshold), 2, 50)]
         [InlineData(nameof(Preferences.SlowTorrentInactiveTime), 60, 120)]
@@ -2480,10 +2477,7 @@ namespace QBittorrent.Client.Tests
         [InlineData(nameof(Preferences.SaveResumeDataInterval), 60, 30)]
         [InlineData(nameof(Preferences.RecheckCompletedTorrents), false, true)]
         [InlineData(nameof(Preferences.ResolvePeerCountries), true, false)]
-        [InlineData(nameof(Preferences.LibtorrentAsynchronousIOThreads), 4, 8)]
         [InlineData(nameof(Preferences.LibtorrentFilePoolSize), 40, 20)]
-        [InlineData(nameof(Preferences.LibtorrentOutstandingMemoryWhenCheckingTorrent), 16, 32)]
-        [InlineData(nameof(Preferences.LibtorrentDiskCache), 64, 32)]
         [InlineData(nameof(Preferences.LibtorrentDiskCacheExpiryInterval), 60, 30)]
         [InlineData(nameof(Preferences.LibtorrentUseOSCache), true, false)]
         [InlineData(nameof(Preferences.LibtorrentCoalesceReadsAndWrites), false, true)]
@@ -2509,7 +2503,7 @@ namespace QBittorrent.Client.Tests
             string[] ignoredProperties = null)
         {
             var prop = typeof(Preferences).GetProperty(name);
-            ignoredProperties = ignoredProperties ?? new string[0];
+            ignoredProperties ??= new string[0];
 
             var apiLevelAttr = prop.GetCustomAttribute<ApiLevelAttribute>();
             if (apiLevelAttr != null && apiLevelAttr.Level >= ApiLevel.V2)
@@ -2676,15 +2670,23 @@ namespace QBittorrent.Client.Tests
 
             var newClient = new QBittorrentClient(new Uri("http://localhost:8080/"));
 
-            var newPrefs = await newClient.GetPreferencesAsync();
-            newPrefs.BypassLocalAuthentication.Should().BeTrue();
-            newPrefs.BypassAuthenticationSubnetWhitelistEnabled.Should().BeTrue();
-            newPrefs.BypassAuthenticationSubnetWhitelist.Should()
-                .BeEquivalentTo(setPrefs.BypassAuthenticationSubnetWhitelist);
-            newPrefs.Should().BeEquivalentTo(newPrefs, options => options
-                .Excluding(p => p.BypassLocalAuthentication)
-                .Excluding(p => p.BypassAuthenticationSubnetWhitelist)
-                .Excluding(p => p.BypassAuthenticationSubnetWhitelistEnabled));
+            try
+            {
+                var newPrefs = await newClient.GetPreferencesAsync();
+                newPrefs.BypassLocalAuthentication.Should().BeTrue();
+                newPrefs.BypassAuthenticationSubnetWhitelistEnabled.Should().BeTrue();
+                newPrefs.BypassAuthenticationSubnetWhitelist.Should()
+                    .BeEquivalentTo(setPrefs.BypassAuthenticationSubnetWhitelist);
+                newPrefs.Should().BeEquivalentTo(newPrefs, options => options
+                    .Excluding(p => p.BypassLocalAuthentication)
+                    .Excluding(p => p.BypassAuthenticationSubnetWhitelist)
+                    .Excluding(p => p.BypassAuthenticationSubnetWhitelistEnabled));
+            }
+            catch (QBittorrentClientRequestException ex) when (ApiVersionMoreThan(2, 5))
+            {
+                ex.StatusCode.Should().Be(HttpStatusCode.Forbidden);
+            }
+            
 
             IEnumerable<string> GetNetworks()
             {
@@ -2958,7 +2960,7 @@ namespace QBittorrent.Client.Tests
 
         [SkippableFact]
         [PrintTestName]
-        public async Task SetCurrentNetworkInterfaceAndAddress()
+        public async Task SetPreferenceCurrentNetworkInterfaceAndAddress()
         {
             Skip.If(ApiVersionLessThan(2, 3));
 
@@ -2984,6 +2986,121 @@ namespace QBittorrent.Client.Tests
             newPrefs.Should().BeEquivalentTo(oldPrefs, options => options
                 .Excluding(p => p.CurrentNetworkInterface)
                 .Excluding(p => p.CurrentInterfaceAddress));
+        }
+
+        [SkippableFact]
+        [PrintTestName]
+        public async Task SetPreferenceLimitLAN()
+        {
+            Skip.If(ApiVersionLessThan(2, 2));
+            Skip.If(ApiVersionMoreThan(2, 3), "Impossible to test on API > 2.3.");
+
+            await Client.LoginAsync(UserName, Password);
+
+            var oldPrefs = await Client.GetPreferencesAsync();
+            oldPrefs.LimitLAN.Should().BeFalse();
+
+            var setPrefs = new Preferences { LimitLAN = true };
+            await Client.SetPreferencesAsync(setPrefs);
+
+            var newPrefs = await Client.GetPreferencesAsync();
+            newPrefs.LimitLAN.Should().Be(true);
+        }
+
+        [SkippableFact]
+        [PrintTestName]
+        public async Task SetPreferenceLibtorrentAsynchronousIOThreads()
+        {
+            Skip.If(ApiVersionLessThan(2, 3));
+
+            await Client.LoginAsync(UserName, Password);
+
+            var initial = ApiVersionLessThan(2, 6) ? 4 : 10;
+
+            var oldPrefs = await Client.GetPreferencesAsync();
+            oldPrefs.LibtorrentAsynchronousIOThreads.Should().Be(initial);
+
+            var setPrefs = new Preferences { LibtorrentAsynchronousIOThreads = 8 };
+            await Client.SetPreferencesAsync(setPrefs);
+
+            var newPrefs = await Client.GetPreferencesAsync();
+            newPrefs.LibtorrentAsynchronousIOThreads.Should().Be(8);
+        }
+
+        [SkippableFact]
+        [PrintTestName]
+        public async Task SetPreferenceLibtorrentDiskCache()
+        {
+            Skip.If(ApiVersionLessThan(2, 3));
+
+            await Client.LoginAsync(UserName, Password);
+
+            var initial = ApiVersionLessThan(2, 6) ? 64 : -1;
+
+            var oldPrefs = await Client.GetPreferencesAsync();
+            oldPrefs.LibtorrentDiskCache.Should().Be(initial);
+
+            var setPrefs = new Preferences { LibtorrentDiskCache = 32 };
+            await Client.SetPreferencesAsync(setPrefs);
+
+            var newPrefs = await Client.GetPreferencesAsync();
+            newPrefs.LibtorrentDiskCache.Should().Be(32);
+        }
+
+        [SkippableFact]
+        [PrintTestName]
+        public async Task SetPreferenceLibtorrentOutstandingMemoryWhenCheckingTorrent()
+        {
+            Skip.If(ApiVersionLessThan(2, 3));
+
+            await Client.LoginAsync(UserName, Password);
+
+            var initial = ApiVersionLessThan(2, 6) ? 16 : 32;
+
+            var oldPrefs = await Client.GetPreferencesAsync();
+            oldPrefs.LibtorrentOutstandingMemoryWhenCheckingTorrent.Should().Be(initial);
+
+            var setPrefs = new Preferences { LibtorrentOutstandingMemoryWhenCheckingTorrent = 64 };
+            await Client.SetPreferencesAsync(setPrefs);
+
+            var newPrefs = await Client.GetPreferencesAsync();
+            newPrefs.LibtorrentOutstandingMemoryWhenCheckingTorrent.Should().Be(64);
+        }
+
+        [SkippableFact]
+        [PrintTestName]
+        public async Task SetPreferenceMaxUploads()
+        {
+            await Client.LoginAsync(UserName, Password);
+
+            var initial = ApiVersionLessThan(2, 6) ? -1 : 20;
+
+            var oldPrefs = await Client.GetPreferencesAsync();
+            oldPrefs.MaxUploads.Should().Be(initial);
+
+            var setPrefs = new Preferences { MaxUploads = 10 };
+            await Client.SetPreferencesAsync(setPrefs);
+
+            var newPrefs = await Client.GetPreferencesAsync();
+            newPrefs.MaxUploads.Should().Be(10);
+        }
+
+        [SkippableFact]
+        [PrintTestName]
+        public async Task SetPreferenceMaxUploadsPerTorrent()
+        {
+            await Client.LoginAsync(UserName, Password);
+
+            var initial = ApiVersionLessThan(2, 6) ? -1 : 4;
+
+            var oldPrefs = await Client.GetPreferencesAsync();
+            oldPrefs.MaxUploadsPerTorrent.Should().Be(initial);
+
+            var setPrefs = new Preferences { MaxUploadsPerTorrent = 5 };
+            await Client.SetPreferencesAsync(setPrefs);
+
+            var newPrefs = await Client.GetPreferencesAsync();
+            newPrefs.MaxUploadsPerTorrent.Should().Be(5);
         }
 
         #endregion
@@ -3742,6 +3859,14 @@ namespace QBittorrent.Client.Tests
                 return plugins.Single();
             }, attempts: 10);
 
+            var categories = ApiVersionLessThan(2, 6)
+                ? new[] {new SearchPluginCategory("software")}
+                : new[]
+                {
+                    new SearchPluginCategory("all", "All categories"),
+                    new SearchPluginCategory("software", "Software"),
+                };
+
             plugin.Should().BeEquivalentTo(
                 new SearchPlugin
                 {
@@ -3750,8 +3875,12 @@ namespace QBittorrent.Client.Tests
                     IsEnabled = true,
                     Url = new Uri("http://linuxtracker.org/"),
                     Version = new System.Version(1, 1),
-                    SupportedCategories = new[] { "software" }
-                });
+                    Categories = categories,
+#pragma warning disable 618
+                    SupportedCategories = categories.Select(c => c.Id).ToArray()
+#pragma warning restore 618
+                }, 
+                cfg => cfg.Excluding(s => s.AdditionalData));
 
             await Client.DisableSearchPluginAsync(plugin.Name);
             await Utils.Retry(async () =>
@@ -3842,6 +3971,11 @@ namespace QBittorrent.Client.Tests
         private bool ApiVersionLessThan(byte major, byte minor = 0, byte build = 0)
         {
             return DockerFixture.Env.ApiVersion < new ApiVersion(major, minor, build);
+        }
+
+        private bool ApiVersionMoreThan(byte major, byte minor = 0, byte build = 0)
+        {
+            return DockerFixture.Env.ApiVersion > new ApiVersion(major, minor, build);
         }
     }
 }

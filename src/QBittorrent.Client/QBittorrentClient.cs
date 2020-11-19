@@ -188,7 +188,7 @@ namespace QBittorrent.Client
                 return new ApiVersion(1, checked((byte)legacyVersion));
 
             var uri = BuildUri("/api/v2/app/webapiVersion");
-            var version = await _client.GetStringAsync(uri, token).ConfigureAwait(false);
+            var version = await _client.GetStringWithCancellationAsync(uri, token).ConfigureAwait(false);
             return ApiVersion.Parse(version);
         }
 
@@ -211,7 +211,7 @@ namespace QBittorrent.Client
             try
             {
                 var uri = BuildUri("/version/api");
-                var versionString = await _client.GetStringAsync(uri, true, token).ConfigureAwait(false);
+                var versionString = await _client.GetStringWithCancellationAsync(uri, true, token).ConfigureAwait(false);
                 var version = !string.IsNullOrEmpty(versionString) ? Convert.ToInt32(versionString) : NewApiLegacyFallbackVersion;
                 return version;
             }
@@ -234,7 +234,7 @@ namespace QBittorrent.Client
         public async Task<int> GetLegacyMinApiVersionAsync(CancellationToken token = default)
         {
             var uri = BuildUri("/version/api_min");
-            var versionString = await _client.GetStringAsync(uri, true, token).ConfigureAwait(false);
+            var versionString = await _client.GetStringWithCancellationAsync(uri, true, token).ConfigureAwait(false);
             var version = !string.IsNullOrEmpty(versionString) ? Convert.ToInt32(versionString) : NewApiLegacyFallbackVersion;
             return version;
         }
@@ -247,7 +247,7 @@ namespace QBittorrent.Client
         public async Task<Version> GetQBittorrentVersionAsync(CancellationToken token = default)
         {
             var uri = await BuildUriAsync(p => p.QBittorrentVersion(), token).ConfigureAwait(false);
-            var version = await _client.GetStringAsync(uri, token).ConfigureAwait(false);
+            var version = await _client.GetStringWithCancellationAsync(uri, token).ConfigureAwait(false);
             var match = Regex.Match(version, @"\d+\.\d+(?:\.\d+(?:\.\d+)?)?");
             return match.Success ? new Version(match.Value) : null;
         }
@@ -283,7 +283,7 @@ namespace QBittorrent.Client
                         hashes), token)
                     .ConfigureAwait(false);
 
-                var json = await _client.GetStringAsync(uri, token).ConfigureAwait(false);
+                var json = await _client.GetStringWithCancellationAsync(uri, token).ConfigureAwait(false);
                 var result = JsonConvert.DeserializeObject<TorrentInfo[]>(json);
                 return result;
             }
@@ -305,7 +305,7 @@ namespace QBittorrent.Client
             async Task<TorrentProperties> ExecuteAsync()
             {
                 var uri = await BuildUriAsync(p => p.GetTorrentProperties(hash), token).ConfigureAwait(false);
-                var json = await _client.GetStringAsync(uri, true, token).ConfigureAwait(false);
+                var json = await _client.GetStringWithCancellationAsync(uri, true, token).ConfigureAwait(false);
                 var result = JsonConvert.DeserializeObject<TorrentProperties>(json);
                 return result;
             }
@@ -327,7 +327,7 @@ namespace QBittorrent.Client
             async Task<IReadOnlyList<TorrentContent>> ExecuteAsync()
             {
                 var uri = await BuildUriAsync(p => p.GetTorrentContents(hash), token).ConfigureAwait(false);
-                var json = await _client.GetStringAsync(uri, true, token).ConfigureAwait(false);
+                var json = await _client.GetStringWithCancellationAsync(uri, true, token).ConfigureAwait(false);
                 var result = JsonConvert.DeserializeObject<TorrentContent[]>(json);
                 return result;
             }
@@ -349,7 +349,7 @@ namespace QBittorrent.Client
             async Task<IReadOnlyList<TorrentTracker>> ExecuteAsync()
             {
                 var uri = await BuildUriAsync(p => p.GetTorrentTrackers(hash), token);
-                var json = await _client.GetStringAsync(uri, true, token).ConfigureAwait(false);
+                var json = await _client.GetStringWithCancellationAsync(uri, true, token).ConfigureAwait(false);
                 var result = JsonConvert.DeserializeObject<TorrentTracker[]>(json);
                 return result;
             }
@@ -371,7 +371,7 @@ namespace QBittorrent.Client
             async Task<IReadOnlyList<Uri>> ExecuteAsync()
             {
                 var uri = await BuildUriAsync(p => p.GetTorrentWebSeeds(hash), token).ConfigureAwait(false);
-                var json = await _client.GetStringAsync(uri, true, token).ConfigureAwait(false);
+                var json = await _client.GetStringWithCancellationAsync(uri, true, token).ConfigureAwait(false);
                 var result = JsonConvert.DeserializeObject<UrlItem[]>(json);
                 return result?.Select(x => x.Url).ToArray();
             }
@@ -393,7 +393,7 @@ namespace QBittorrent.Client
             async Task<IReadOnlyList<TorrentPieceState>> ExecuteAsync()
             {
                 var uri = await BuildUriAsync(p => p.GetTorrentPiecesStates(hash), token).ConfigureAwait(false);
-                var json = await _client.GetStringAsync(uri, true, token).ConfigureAwait(false);
+                var json = await _client.GetStringWithCancellationAsync(uri, true, token).ConfigureAwait(false);
                 var result = JsonConvert.DeserializeObject<TorrentPieceState[]>(json);
                 return result;
             }
@@ -415,7 +415,7 @@ namespace QBittorrent.Client
             async Task<IReadOnlyList<string>> ExecuteAsync()
             {
                 var uri = await BuildUriAsync(p => p.GetTorrentPiecesHashes(hash), token).ConfigureAwait(false);
-                var json = await _client.GetStringAsync(uri, true, token).ConfigureAwait(false);
+                var json = await _client.GetStringWithCancellationAsync(uri, true, token).ConfigureAwait(false);
                 var result = JsonConvert.DeserializeObject<string[]>(json);
                 return result;
             }
@@ -430,7 +430,7 @@ namespace QBittorrent.Client
             CancellationToken token = default)
         {
             var uri = await BuildUriAsync(p => p.GetGlobalTransferInfo(), token).ConfigureAwait(false);
-            var json = await _client.GetStringAsync(uri, token).ConfigureAwait(false);
+            var json = await _client.GetStringWithCancellationAsync(uri, token).ConfigureAwait(false);
             var result = JsonConvert.DeserializeObject<GlobalTransferInfo>(json);
             return result;
         }
@@ -446,7 +446,7 @@ namespace QBittorrent.Client
             CancellationToken token = default)
         {
             var uri = await BuildUriAsync(p => p.GetPartialData(responseId), token).ConfigureAwait(false);
-            var json = await _client.GetStringAsync(uri, token).ConfigureAwait(false);
+            var json = await _client.GetStringWithCancellationAsync(uri, token).ConfigureAwait(false);
             var result = JsonConvert.DeserializeObject<PartialData>(json);
             return result;
         }
@@ -469,7 +469,7 @@ namespace QBittorrent.Client
             async Task<PeerPartialData> ExecuteAsync()
             {
                 var uri = await BuildUriAsync(p => p.GetPeerPartialData(hash, responseId), token).ConfigureAwait(false);
-                var json = await _client.GetStringAsync(uri, true, token).ConfigureAwait(false);
+                var json = await _client.GetStringWithCancellationAsync(uri, true, token).ConfigureAwait(false);
                 var result = JsonConvert.DeserializeObject<PeerPartialData>(json);
                 return result;
             }
@@ -484,7 +484,7 @@ namespace QBittorrent.Client
             CancellationToken token = default)
         {
             var uri = await BuildUriAsync(p => p.GetDefaultSavePath(), token).ConfigureAwait(false);
-            return await _client.GetStringAsync(uri, token).ConfigureAwait(false);
+            return await _client.GetStringWithCancellationAsync(uri, token).ConfigureAwait(false);
         }
 
         #endregion
@@ -958,7 +958,7 @@ namespace QBittorrent.Client
             CancellationToken token = default)
         {
             var uri = await BuildUriAsync(p => p.GetLog(severity, afterId), token).ConfigureAwait(false);
-            var json = await _client.GetStringAsync(uri, token).ConfigureAwait(false);
+            var json = await _client.GetStringWithCancellationAsync(uri, token).ConfigureAwait(false);
             return JsonConvert.DeserializeObject<IEnumerable<TorrentLogEntry>>(json);
         }
 
@@ -971,7 +971,7 @@ namespace QBittorrent.Client
             CancellationToken token = default)
         {
             var uri = await BuildUriAsync(p => p.GetAlternativeSpeedLimitsEnabled(), token).ConfigureAwait(false);
-            var result = await _client.GetStringAsync(uri, token).ConfigureAwait(false);
+            var result = await _client.GetStringWithCancellationAsync(uri, token).ConfigureAwait(false);
             return result == "1";
         }
 
@@ -1072,7 +1072,7 @@ namespace QBittorrent.Client
             CancellationToken token = default)
         {
             var uri = await BuildUriAsync(p => p.GetPreferences(), token).ConfigureAwait(false);
-            var response = await _client.GetStringAsync(uri, token).ConfigureAwait(false);
+            var response = await _client.GetStringWithCancellationAsync(uri, token).ConfigureAwait(false);
             return JsonConvert.DeserializeObject<Preferences>(response);
         }
 
@@ -1180,7 +1180,7 @@ namespace QBittorrent.Client
             await EnsureApiVersionAsync(provider, token, minApiLevel, minApiVersion).ConfigureAwait(false);
 
             var uri = builder(provider.Url);
-            var json = await _client.GetStringAsync(uri, token).ConfigureAwait(false);
+            var json = await _client.GetStringWithCancellationAsync(uri, token).ConfigureAwait(false);
             var result = JsonConvert.DeserializeObject<T>(json);
             return result;
         }
@@ -1196,7 +1196,7 @@ namespace QBittorrent.Client
             await EnsureApiVersionAsync(provider, token, minApiLevel, minApiVersion).ConfigureAwait(false);
 
             var uri = builder(provider.Url);
-            var json = await _client.GetStringAsync(uri, token).ConfigureAwait(false);
+            var json = await _client.GetStringWithCancellationAsync(uri, token).ConfigureAwait(false);
             var result = JsonConvert.DeserializeObject<T>(json);
             return transform(result);
         }

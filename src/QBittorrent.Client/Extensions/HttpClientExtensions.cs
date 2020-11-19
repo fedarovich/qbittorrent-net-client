@@ -10,14 +10,14 @@ namespace QBittorrent.Client.Extensions
     internal static class HttpClientExtensions
     {
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static Task<string> GetStringAsync(this HttpClient client, 
+        public static Task<string> GetStringWithCancellationAsync(this HttpClient client, 
             Uri uri, 
             CancellationToken token)
         {
-            return client.GetStringAsync(uri, false, token);
+            return client.GetStringWithCancellationAsync(uri, false, token);
         }
         
-        public static async Task<string> GetStringAsync(this HttpClient client, 
+        public static async Task<string> GetStringWithCancellationAsync(this HttpClient client, 
             Uri uri, 
             bool returnEmptyIfNotFound, 
             CancellationToken token)

@@ -49,7 +49,7 @@ namespace QBittorrent.Client
             CancellationToken token = default)
         {
             var uri = await BuildUriAsync(p => p.GetPeerLog(afterId), token).ConfigureAwait(false);
-            var json = await _client.GetStringAsync(uri, token).ConfigureAwait(false);
+            var json = await _client.GetStringWithCancellationAsync(uri, token).ConfigureAwait(false);
             return JsonConvert.DeserializeObject<IEnumerable<PeerLogEntry>>(json);
         }
 
@@ -816,7 +816,7 @@ namespace QBittorrent.Client
             await EnsureApiVersionAsync(provider, token, ApiLevel.V2, Version_2_1_0).ConfigureAwait(false);
 
             var uri = provider.Url.GetRssItems(withData);
-            var json = await _client.GetStringAsync(uri, token).ConfigureAwait(false);
+            var json = await _client.GetStringWithCancellationAsync(uri, token).ConfigureAwait(false);
             var rootObject = JObject.Parse(json);
             return RssParser.Parse(rootObject);
         }
@@ -999,6 +999,7 @@ namespace QBittorrent.Client
         /// <param name="token">The cancellation token.</param>
         /// <returns>The list of the search categories.</returns>
         [ApiLevel(ApiLevel.V2, MinVersion = "2.1.1")]
+        [Deprecated("2.6")]
         public Task<IReadOnlyList<string>> GetSearchCategoriesAsync(string plugin, CancellationToken token = default)
         {
             if (plugin == null)

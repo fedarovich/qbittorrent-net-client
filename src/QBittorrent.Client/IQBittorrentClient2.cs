@@ -710,6 +710,7 @@ namespace QBittorrent.Client
         /// <param name="token">The cancellation token.</param>
         /// <returns>The list of the search categories.</returns>
         [ApiLevel(ApiLevel.V2, MinVersion = "2.1.1")]
+        [Deprecated("2.6")]
         Task<IReadOnlyList<string>> GetSearchCategoriesAsync(
             [NotNull] string plugin,
             CancellationToken token = default);

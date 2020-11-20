@@ -204,6 +204,10 @@ namespace QBittorrent.Client.Internal
         public Uri DeleteRssAutoDownloadingRule() => Create("/api/v2/rss/removeRule");
 
         public Uri GetRssAutoDownloadingRules() => Create("/api/v2/rss/rules");
+        
+        public Uri GetMatchingArticles(string ruleName) => Create("/api/v2/rss/matchingArticles", ("ruleName", ruleName));
+
+        public Uri MarkRssItemAsRead() => Create("/api/v2/rss/markAsRead");
 
         public Uri StartSearch() => Create("/api/v2/search/start");
 

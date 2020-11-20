@@ -620,6 +620,31 @@ namespace QBittorrent.Client
         Task<IReadOnlyDictionary<string, RssAutoDownloadingRule>> GetRssAutoDownloadingRulesAsync(
             CancellationToken token = default);
 
+        /// <summary>
+        /// Marks the RSS article as read, if <paramref name="articleId"/> is not <see langword="null" />.
+        /// Otherwise marks the whole RSS feed as read.
+        /// </summary>
+        /// <param name="itemPath">Full path of the item.</param>
+        /// <param name="articleId">ID of the article.</param>
+        /// <param name="token">The cancellation token.</param>
+        /// <returns></returns>
+        [ApiLevel(ApiLevel.V2, MinVersion = "2.5.1")]
+        Task MarkRssItemAsReadAsync(
+            [NotNull] string itemPath, 
+            string articleId = null,
+            CancellationToken token = default);
+
+        /// <summary>
+        /// Returns all articles that match a rule by feed name.
+        /// </summary>
+        /// <param name="ruleName">Rule name.</param>
+        /// <param name="token">The cancellation token.</param>
+        /// <returns></returns>
+        [ApiLevel(ApiLevel.V2, MinVersion = "2.5.1")]
+        Task<IReadOnlyDictionary<string, IReadOnlyList<string>>> GetMatchingRssArticlesAsync(
+            [NotNull] string ruleName,
+            CancellationToken token = default);
+
         #endregion RSS
 
         #region Search

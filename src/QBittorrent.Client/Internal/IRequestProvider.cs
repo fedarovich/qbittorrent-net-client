@@ -134,6 +134,9 @@ namespace QBittorrent.Client.Internal
 
         (Uri url, HttpContent request) DeleteRssAutoDownloadingRule(string name);
 
+        (Uri url, HttpContent request) MarkRssItemAsRead(string itemPath, string articleId);
+
+
         // Search
 
         (Uri url, HttpContent request) StartSearch(string pattern, IEnumerable<string> plugins, string category);

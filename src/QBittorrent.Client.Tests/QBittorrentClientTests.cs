@@ -3850,6 +3850,108 @@ namespace QBittorrent.Client.Tests
             rules.Should().BeEmpty();
         }
 
+        [SkippableFact]
+        [PrintTestName]
+        public async Task GetMatchingArticles()
+        {
+            Skip.If(true, "TODO: Find a way to test it.");
+            Skip.If(ApiVersionLessThan(2, 5, 1));
+
+            await Client.LoginAsync(UserName, Password);
+
+            await Client.SetPreferencesAsync(new Preferences { RssProcessingEnabled = true, RssAutoDownloadingEnabled = true });
+            await Task.Delay(1000);
+
+            await Client.AddRssFeedAsync(new Uri("file:///rss/ubuntu.rss"));
+            await Task.Delay(1000);
+
+            var rule = new RssAutoDownloadingRule()
+            {
+                MustContain = "Ubuntu"
+            };
+
+            var ruleName = "linux";
+            await Client.SetRssAutoDownloadingRuleAsync(ruleName, rule);
+
+            await Task.Delay(1000);
+
+            var rules = await Client.GetMatchingRssArticlesAsync(ruleName);
+            rules.Should().NotBeNullOrEmpty();
+        }
+
+        [SkippableFact]
+        [PrintTestName]
+        public async Task MarkArticleAsRead()
+        {
+            Skip.If(ApiVersionLessThan(2, 5, 1));
+
+            await Client.LoginAsync(UserName, Password);
+
+            await Client.SetPreferencesAsync(new Preferences { RssProcessingEnabled = true });
+            await Task.Delay(1000);
+
+            await Client.AddRssFeedAsync(new Uri("file:///rss/ubuntu.rss"));
+            await Client.AddRssFeedAsync(new Uri("file:///rss/rutracker.rss"));
+            await Task.Delay(1000);
+
+            var items = await Client.GetRssItemsAsync(true);
+            items.Feeds
+                .SelectMany(f => f.Articles, (_, a) => a.IsRead)
+                .Should()
+                .AllBeEquivalentTo(false);
+
+            var feedPath = "Ubuntu downloads";
+            var articleId = "http://releases.ubuntu.com/17.10/ubuntu-17.10.1-desktop-amd64.iso.torrent";
+
+            await Client.MarkRssItemAsReadAsync(feedPath, articleId);
+            items = await Client.GetRssItemsAsync(true);
+            items.Feeds
+                .SelectMany(f => f.Articles)
+                .Where(a => a.Id == articleId)
+                .Select(a => a.IsRead)
+                .Should().AllBeEquivalentTo(true);
+            items.Feeds
+                .SelectMany(f => f.Articles)
+                .Where(a => a.Id != articleId)
+                .Select(a => a.IsRead)
+                .Should().AllBeEquivalentTo(false);
+        }
+
+        [SkippableFact]
+        [PrintTestName]
+        public async Task MarkFeedAsRead()
+        {
+            Skip.If(ApiVersionLessThan(2, 5, 1));
+
+            await Client.LoginAsync(UserName, Password);
+
+            await Client.SetPreferencesAsync(new Preferences { RssProcessingEnabled = true });
+            await Task.Delay(1000);
+
+            await Client.AddRssFeedAsync(new Uri("file:///rss/ubuntu.rss"));
+            await Client.AddRssFeedAsync(new Uri("file:///rss/rutracker.rss"));
+            await Task.Delay(1000);
+
+            var items = await Client.GetRssItemsAsync(true);
+            items.Feeds
+                .SelectMany(f => f.Articles, (_, a) => a.IsRead)
+                .Should()
+                .AllBeEquivalentTo(false);
+
+            var feedPath = "Ubuntu downloads";
+
+            await Client.MarkRssItemAsReadAsync(feedPath);
+            items = await Client.GetRssItemsAsync(true);
+            items.Feeds
+                .Where(f => f.Title == feedPath)
+                .SelectMany(x => x.Articles, (_, a) => a.IsRead)
+                .Should().AllBeEquivalentTo(true);
+            items.Feeds
+                .Where(f => f.Title != feedPath)
+                .SelectMany(f => f.Articles, (_, a) => a.IsRead)
+                .Should().AllBeEquivalentTo(false);
+        }
+
         #endregion
 
         #region Search

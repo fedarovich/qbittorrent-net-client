@@ -178,6 +178,10 @@ namespace QBittorrent.Client.Internal
 
         Uri GetRssAutoDownloadingRules();
 
+        Uri GetMatchingArticles(string ruleName);
+
+        Uri MarkRssItemAsRead();
+
         // Search
 
         Uri StartSearch();

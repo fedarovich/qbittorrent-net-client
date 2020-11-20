@@ -194,6 +194,10 @@ namespace QBittorrent.Client.Internal
 
         public Uri GetRssAutoDownloadingRules() => throw new ApiNotSupportedException(ApiLevel.V2);
 
+        public Uri GetMatchingArticles(string ruleName) => throw new ApiNotSupportedException(ApiLevel.V2, new ApiVersion(2, 5, 1));
+
+        public Uri MarkRssItemAsRead() => throw new ApiNotSupportedException(ApiLevel.V2, new ApiVersion(2, 5, 1));
+
         public Uri StartSearch() => throw new ApiNotSupportedException(ApiLevel.V2, new ApiVersion(2, 1, 1));
 
         public Uri StopSearch() => throw new ApiNotSupportedException(ApiLevel.V2, new ApiVersion(2, 1, 1));

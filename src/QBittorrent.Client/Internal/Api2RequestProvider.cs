@@ -207,6 +207,13 @@ namespace QBittorrent.Client.Internal
                 ("ruleName", name));
         }
 
+        public override (Uri url, HttpContent request) MarkRssItemAsRead(string itemPath, string articleId)
+        {
+            return articleId == null
+                ? BuildForm(Url.MarkRssItemAsRead(), ("itemPath", itemPath))
+                : BuildForm(Url.MarkRssItemAsRead(), ("itemPath", itemPath), ("articleId", articleId));
+        }
+
         public override (Uri url, HttpContent request) StartSearch(string pattern, IEnumerable<string> plugins, string category)
         {
             return BuildForm(Url.StartSearch(),

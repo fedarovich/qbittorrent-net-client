@@ -40,6 +40,9 @@ namespace QBittorrent.Client
         [SuppressMessage("ReSharper", "InconsistentNaming")]
         private static readonly ApiVersion Version_2_4_0 = new ApiVersion(2, 4, 0);
 
+        [SuppressMessage("ReSharper", "InconsistentNaming")]
+        private static readonly ApiVersion Version_2_5_1 = new ApiVersion(2, 5, 1);
+
         /// <summary>
         /// Gets the peer log.
         /// </summary>
@@ -884,6 +887,39 @@ namespace QBittorrent.Client
             return GetJsonAsync<IReadOnlyDictionary<string, RssAutoDownloadingRule>>(
                 p => p.GetRssAutoDownloadingRules(), token,
                 ApiLevel.V2, Version_2_1_0);
+        }
+
+        /// <summary>
+        /// Marks the RSS article as read, if <paramref name="articleId"/> is not <see langword="null" />.
+        /// Otherwise marks the whole RSS feed as read.
+        /// </summary>
+        /// <param name="itemPath">Full path of the item.</param>
+        /// <param name="articleId">ID of the article.</param>
+        /// <param name="token">The cancellation token.</param>
+        /// <returns></returns>
+        [ApiLevel(ApiLevel.V2, MinVersion = "2.5.1")]
+        public Task MarkRssItemAsReadAsync(string itemPath, string articleId = null, CancellationToken token = default)
+        {
+            if (itemPath == null)
+                throw new ArgumentNullException(nameof(itemPath));
+
+            return PostAsync(p => p.MarkRssItemAsRead(itemPath, articleId), token, ApiLevel.V2, Version_2_5_1);
+        }
+
+        /// <summary>
+        /// Returns all articles that match a rule by feed name.
+        /// </summary>
+        /// <param name="ruleName">Rule name.</param>
+        /// <param name="token">The cancellation token.</param>
+        /// <returns></returns>
+        [ApiLevel(ApiLevel.V2, MinVersion = "2.5.1")]
+        public Task<IReadOnlyDictionary<string, IReadOnlyList<string>>> GetMatchingRssArticlesAsync(string ruleName, CancellationToken token = default)
+        {
+            if (ruleName == null)
+                throw new ArgumentNullException(nameof(ruleName));
+
+            return GetJsonAsync<IReadOnlyDictionary<string, IReadOnlyList<string>>>(p => p.GetMatchingArticles(ruleName), token,
+                ApiLevel.V2, Version_2_5_1);
         }
 
         #endregion

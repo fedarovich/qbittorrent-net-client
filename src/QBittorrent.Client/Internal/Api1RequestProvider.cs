@@ -113,6 +113,8 @@ namespace QBittorrent.Client.Internal
         public override (Uri url, HttpContent request) RenameRssAutoDownloadingRule(string name, string newName) => throw new ApiNotSupportedException(ApiLevel.V2);
 
         public override (Uri url, HttpContent request) DeleteRssAutoDownloadingRule(string name) => throw new ApiNotSupportedException(ApiLevel.V2);
+        
+        public override (Uri url, HttpContent request) MarkRssItemAsRead(string itemPath, string articleId) => throw new ApiNotSupportedException(ApiLevel.V2, new ApiVersion(2, 5, 1));
 
         public override (Uri url, HttpContent request) StartSearch(string pattern, IEnumerable<string> plugins, string category) => throw new ApiNotSupportedException(ApiLevel.V2, new ApiVersion(2, 1, 1));
 

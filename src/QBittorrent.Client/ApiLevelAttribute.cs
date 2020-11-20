@@ -6,7 +6,7 @@ namespace QBittorrent.Client
     /// Annotates the minimal API Level that supports the annotated method.
     /// </summary>
     /// <seealso cref="System.Attribute" />
-    [AttributeUsage(AttributeTargets.Method | AttributeTargets.Property | AttributeTargets.Class, Inherited = true, AllowMultiple = false)]
+    [AttributeUsage(AttributeTargets.Method | AttributeTargets.Property | AttributeTargets.Field | AttributeTargets.Class, Inherited = true, AllowMultiple = false)]
     public sealed class ApiLevelAttribute : Attribute
     {
         /// <summary>

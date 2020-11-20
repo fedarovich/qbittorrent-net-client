@@ -28,13 +28,20 @@ namespace QBittorrent.Client.Internal
         {
             var hashesString = hashes != null ? string.Join("|", hashes) : null;
             return Create("/api/v2/torrents/info",
-                ("filter", filter.ToString().ToLowerInvariant()),
+                ("filter", GetFilterString()),
                 ("category", category),
                 ("sort", sort),
                 ("reverse", reverse.ToLowerString()),
                 ("limit", limit?.ToString()),
                 ("offset", offset?.ToString()),
                 ("hashes", hashesString));
+
+            string GetFilterString() => filter switch
+            {
+                TorrentListFilter.StalledDownloading => "stalled_downloading",
+                TorrentListFilter.StalledUploading => "stalled_uploading",
+                _ => filter.ToString().ToLowerInvariant()
+            };
         }
 
         public Uri GetTorrentProperties(string hash) => Create("/api/v2/torrents/properties", ("hash", hash));

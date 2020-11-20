@@ -527,6 +527,51 @@ namespace QBittorrent.Client
         public bool? WebUICsrfProtection { get; set; }
 
         /// <summary>
+        /// True if Secure attribute is set on cookie when using HTTPS
+        /// </summary>
+        [JsonProperty("web_ui_secure_cookie_enabled")]
+        [SuppressMessage("ReSharper", "InconsistentNaming")]
+        [ApiLevel(ApiLevel.V2, MinVersion = "2.4.1")]
+        public bool? WebUISecureCookie { get; set; }
+        
+        /// <summary>
+        /// The number of the failed authentication attempt after which the client will be banned.
+        /// </summary>
+        /// <seealso cref="WebUIBanDuration"/>
+        [JsonProperty("web_ui_max_auth_fail_count")]
+        [SuppressMessage("ReSharper", "InconsistentNaming")]
+        [ApiLevel(ApiLevel.V2, MinVersion = "2.4.1")]
+        public int? WebUIMaxAuthenticationFailures { get; set; }
+
+        /// <summary>
+        /// The duration (in seconds) the client will be banned for after <see cref="WebUIMaxAuthenticationFailures"/> failed authentication attempts.
+        /// </summary>
+        [JsonProperty("web_ui_ban_duration")]
+        [SuppressMessage("ReSharper", "InconsistentNaming")]
+        [ApiLevel(ApiLevel.V2, MinVersion = "2.4.1")]
+        public int? WebUIBanDuration { get; set; }
+
+        /// <summary>
+        /// True if custom HTTP headers are enabled for Web UI.
+        /// </summary>
+        [JsonProperty("web_ui_use_custom_http_headers_enabled")]
+        [SuppressMessage("ReSharper", "InconsistentNaming")]
+        [ApiLevel(ApiLevel.V2, MinVersion = "2.5.1")]
+        public bool? WebUICustomHttpHeadersEnabled { get; set; }
+
+        /// <summary>
+        /// Custom HTTP headers to be used for Web UI.
+        /// </summary>
+        /// <remarks>
+        /// Each header must be specified as a key-value pair separated by a colon, i.e.<c>HEADER:VALUE</c>. The headers must be separated by a new-line character (<c>\n</c>).
+        /// </remarks>
+        [JsonProperty("web_ui_custom_http_headers")]
+        [JsonConverter(typeof(SeparatedStringToListConverter), "\n")]
+        [SuppressMessage("ReSharper", "InconsistentNaming")]
+        [ApiLevel(ApiLevel.V2, MinVersion = "2.5.1")]
+        public IList<string> WebUICustomHttpHeaders { get; set; }
+
+        /// <summary>
         /// True if authentication challenge for loopback address (127.0.0.1) should be disabled.
         /// </summary>
         [JsonProperty("bypass_local_auth")]
@@ -602,6 +647,21 @@ namespace QBittorrent.Client
         /// </summary>
         [JsonProperty("rss_auto_downloading_enabled")]
         public bool? RssAutoDownloadingEnabled { get; set; }
+
+        /// <summary>
+        /// Enables downloading REPACK/PROPER episodes.
+        /// </summary>
+        [JsonProperty("rss_download_repack_proper_episodes")]
+        [ApiLevel(ApiLevel.V2, MinVersion = "2.5.1")]
+        public bool? RssDownloadRepackProperEpisodes { get; set; }
+
+        /// <summary>
+        /// Smart episode filters.
+        /// </summary>
+        [JsonProperty("rss_smart_episode_filters")]
+        [ApiLevel(ApiLevel.V2, MinVersion = "2.5.1")]
+        [JsonConverter(typeof(SeparatedStringToListConverter), "\n")]
+        public IList<string> RssSmartEpisodeFilters { get; set; }
 
         /// <summary>
         /// True if additional trackers are enabled.
@@ -893,6 +953,16 @@ namespace QBittorrent.Client
         public bool? LibtorrentCoalesceReadsAndWrites { get; set; }
 
         /// <summary>
+        /// When this is <see langword="true" />, create an affinity for downloading 4 MiB extents of adjacent pieces.
+        /// </summary>
+        /// <remarks>
+        /// This is an attempt to achieve better disk I/O throughput by downloading larger extents of bytes, for torrents with small piece sizes.
+        /// </remarks>
+        [JsonProperty("enable_piece_extent_affinity")]
+        [ApiLevel(ApiLevel.V2, MinVersion = "2.4.1")]
+        public bool? LibtorrentPieceExtentAffinity { get; set; }
+
+        /// <summary>
         /// Controls whether or not libtorrent will send out suggest messages to create a bias of its peers to request certain pieces.
         /// If enabled, libtorrent will send out suggest messages for the most recent pieces that are in the read cache.
         /// </summary>
@@ -1115,6 +1185,24 @@ namespace QBittorrent.Client
         [JsonProperty("announce_ip")]
         [ApiLevel(ApiLevel.V2, MinVersion = "2.3")]
         public string LibtorrentAnnounceIp { get; set; }
+
+        /// <summary>
+        /// The number of seconds to wait when sending a stopped message before considering a tracker to have timed out.
+        /// </summary>
+        /// <remarks>
+        /// This is usually shorter, to make the client quit faster. If the value is set to 0, the connections to trackers with the stopped event are suppressed.
+        /// </remarks>
+        [JsonProperty("stop_tracker_timeout")]
+        [ApiLevel(ApiLevel.V2, MinVersion = "2.4.1")]
+        public int? LibtorrentStopTrackerTimeout { get; set; }
+
+        /// <summary>
+        /// Limits the number of concurrent HTTP tracker announces. Once the limit is hit, tracker requests are queued and issued when an outstanding announce completes.
+        /// </summary>
+        [JsonProperty("max_concurrent_http_announces")]
+        [ApiLevel(ApiLevel.V2, MinVersion = "2.6")]
+        public int? LibtorrentMaxConcurrentHttpAnnounces { get; set; }
+
 
         /* Other */
 

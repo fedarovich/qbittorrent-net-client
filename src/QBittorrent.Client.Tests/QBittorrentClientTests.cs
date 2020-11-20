@@ -2498,6 +2498,23 @@ namespace QBittorrent.Client.Tests
         [InlineData(nameof(Preferences.LibtorrentAnnounceToAllTrackers), false, true)]
         [InlineData(nameof(Preferences.LibtorrentAnnounceToAllTiers), true, false)]
         [InlineData(nameof(Preferences.LibtorrentAnnounceIp), "", "127.0.0.1")]
+        // API 2.4.1
+        [InlineData(nameof(Preferences.LibtorrentPieceExtentAffinity), false, true)]
+        [InlineData(nameof(Preferences.WebUISecureCookie), true, false)]
+        [InlineData(nameof(Preferences.WebUIMaxAuthenticationFailures), 5, 3)]
+        [InlineData(nameof(Preferences.WebUIBanDuration), 3600, 1800)]
+        [InlineData(nameof(Preferences.LibtorrentStopTrackerTimeout), 5, 10)]
+        // API 2.5.1
+        [InlineData(nameof(Preferences.WebUICustomHttpHeadersEnabled), false, true)]
+        [InlineData(nameof(Preferences.WebUICustomHttpHeaders), 
+            new string[] {},
+            new [] { "X-FORWARDED-HOST:localhost", "X-FORWARDED-PROTO:HTTP" })]
+        [InlineData(nameof(Preferences.RssDownloadRepackProperEpisodes), true, false)]
+        [InlineData(nameof(Preferences.RssSmartEpisodeFilters), 
+            new[] { @"s(\d+)e(\d+)", @"(\d+)x(\d+)", @"(\d{4}[.\-]\d{1,2}[.\-]\d{1,2})", @"(\d{1,2}[.\-]\d{1,2}[.\-]\d{4})" }, 
+            new[] { @"s(\d+)e(\d+)", @"(\d{4}[.\-]\d{1,3}[.\-]\d{1,3})" })]
+        // API 2.6.0
+        [InlineData(nameof(Preferences.LibtorrentMaxConcurrentHttpAnnounces), 50, 30)]
         [PrintTestName]
         public async Task SetPreference(string name, object oldValue, object newValue,
             string[] ignoredProperties = null)

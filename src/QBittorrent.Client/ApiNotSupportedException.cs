@@ -32,6 +32,18 @@ namespace QBittorrent.Client
         /// <summary>
         /// Initializes a new instance of <see cref="ApiNotSupportedException"/>.
         /// </summary>
+        /// <param name="requiredApiLevel">The minimal required API level.</param>
+        /// <param name="requiredApiVersion">The minimal required API version.</param>
+        /// <param name="maxApiVersion">The maximal supported API version.</param>
+        public ApiNotSupportedException(ApiLevel requiredApiLevel, Version requiredApiVersion, Version maxApiVersion)
+            : this(requiredApiLevel, requiredApiVersion)
+        {
+            MaxApiVersion = maxApiVersion;
+        }
+
+        /// <summary>
+        /// Initializes a new instance of <see cref="ApiNotSupportedException"/>.
+        /// </summary>
         /// <param name="message">The exception message.</param>
         /// <param name="requiredApiLevel">The minimal required API level.</param>
         public ApiNotSupportedException(string message, ApiLevel requiredApiLevel)
@@ -53,6 +65,19 @@ namespace QBittorrent.Client
         }
 
         /// <summary>
+        /// Initializes a new instance of <see cref="ApiNotSupportedException"/>.
+        /// </summary>
+        /// <param name="message">The exception message.</param>
+        /// <param name="requiredApiLevel">The minimal required API level.</param>
+        /// <param name="requiredApiVersion">The minimal required API version.</param>
+        /// <param name="maxApiVersion">The maximum required API version.</param>
+        public ApiNotSupportedException(string message, ApiLevel requiredApiLevel, Version requiredApiVersion, Version maxApiVersion)
+            : this(message, requiredApiLevel, requiredApiVersion)
+        {
+            MaxApiVersion = maxApiVersion;
+        }
+
+        /// <summary>
         /// The minimal required API level.
         /// </summary>
         public ApiLevel RequiredApiLevel { get; }
@@ -61,5 +86,10 @@ namespace QBittorrent.Client
         /// The minimal required API version.
         /// </summary>
         public Version RequiredApiVersion { get; }
+
+        /// <summary>
+        /// The maximal supported API version.
+        /// </summary>
+        public Version MaxApiVersion { get; }
     }
 }

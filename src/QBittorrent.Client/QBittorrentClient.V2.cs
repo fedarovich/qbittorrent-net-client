@@ -43,6 +43,9 @@ namespace QBittorrent.Client
         [SuppressMessage("ReSharper", "InconsistentNaming")]
         private static readonly ApiVersion Version_2_5_1 = new ApiVersion(2, 5, 1);
 
+        [SuppressMessage("ReSharper", "InconsistentNaming")]
+        private static readonly ApiVersion Version_2_8_0 = new ApiVersion(2, 8, 0);
+
         /// <summary>
         /// Gets the peer log.
         /// </summary>
@@ -729,6 +732,46 @@ namespace QBittorrent.Client
                 throw new ArgumentNullException(nameof(newName));
 
             return PostAsync(p => p.RenameFile(hash, fileId, newName), token, ApiLevel.V2, Version_2_3_0);
+        }
+
+        /// <summary>
+        /// Renames the folder of the torrent.
+        /// </summary>
+        /// <param name="hash">The hash of the torrent.</param>
+        /// <param name="oldPath">The old path of the torrent.</param>
+        /// <param name="newPath">The new path to use for the file.</param>
+        /// <param name="token">The cancellation token.</param>
+        /// <returns></returns>
+        [ApiLevel(ApiLevel.V2, MinVersion = "2.8.0")]
+        public Task RenameFileAsync(string hash, string oldPath, string newPath, CancellationToken token = default)
+        {
+            ValidateHash(hash);
+            if (oldPath == null)
+                throw new ArgumentNullException(nameof(oldPath));
+            if (newPath == null)
+                throw new ArgumentNullException(nameof(newPath));
+
+            return PostAsync(p => p.RenameFile(hash, oldPath, newPath), token, ApiLevel.V2, Version_2_8_0);
+        }
+
+        /// <summary>
+        /// Renames the folder of the torrent.
+        /// </summary>
+        /// <param name="hash">The hash of the torrent.</param>
+        /// <param name="oldPath">The old path of the torrent.</param>
+        /// <param name="newPath">The new path to use for the file.</param>
+        /// <param name="token">The cancellation token.</param>
+        /// <returns></returns>
+        [ApiLevel(ApiLevel.V2, MinVersion = "2.8.0")]
+        public Task RenameFolderAsync(string hash, string oldPath, string newPath, CancellationToken token = default)
+        {
+            ValidateHash(hash);
+            if (oldPath == null)
+                throw new ArgumentNullException(nameof(oldPath));
+            if (newPath == null)
+                throw new ArgumentNullException(nameof(newPath));
+
+            return PostAsync(p => p.RenameFolder(hash, oldPath, newPath), token, ApiLevel.V2, Version_2_8_0);
         }
 
         #region RSS

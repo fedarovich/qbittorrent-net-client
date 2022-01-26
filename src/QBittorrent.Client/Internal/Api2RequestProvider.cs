@@ -146,6 +146,22 @@ namespace QBittorrent.Client.Internal
                 ("name", newName));
         }
 
+        public override (Uri url, HttpContent request) RenameFile(string hash, string oldPath, string newPath)
+        {
+            return BuildForm(Url.RenameFile(),
+                ("hash", hash),
+                ("oldPath", oldPath),
+                ("newPath", newPath));
+        }
+
+        public override (Uri url, HttpContent request) RenameFolder(string hash, string oldPath, string newPath)
+        {
+            return BuildForm(Url.RenameFolder(),
+                ("hash", hash),
+                ("oldPath", oldPath),
+                ("newPath", newPath));
+        }
+
         public override (Uri url, HttpContent request) AddTorrents(AddTorrentsRequest request)
         {
             var data = AddTorrentsCore(request);

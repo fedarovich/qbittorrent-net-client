@@ -66,5 +66,19 @@
         /// <remarks>This value is ignored until API v2.2.0</remarks>
         [ApiLevel(ApiLevel.V2, MinVersion = "2.2.0")]
         public bool? AutomaticTorrentManagement { get; set; }
+
+        /// <summary>
+        /// Set torrent share ratio limit
+        /// </summary>
+        /// <remarks>This value is ignored until API v2.8.1</remarks>
+        [ApiLevel(ApiLevel.V2, MinVersion = "2.8.1")]
+        public double? RatioLimit { get; set; }
+
+        /// <summary>
+        /// Set torrent seeding time limit. Unit in seconds
+        /// </summary>
+        /// <remarks>This value is ignored until API v2.8.1</remarks>
+        [ApiLevel(ApiLevel.V2, MinVersion = "2.8.1")]
+        public int? SeedingTimeLimit { get; set; }
     }
 }

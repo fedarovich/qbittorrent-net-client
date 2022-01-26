@@ -266,6 +266,13 @@ namespace QBittorrent.Client
         public long? TotalSize { get; set; }
 
         /// <summary>
+        /// Torrent elapsed time while complete (seconds)
+        /// </summary>
+        [JsonProperty("seeding_time")]
+        [JsonConverter(typeof(SecondsToTimeSpanConverter))]
+        public TimeSpan? SeedingTime { get; set; }
+
+        /// <summary>
         /// Additional properties not handled by this library.
         /// </summary>
         [JsonExtensionData]

@@ -58,5 +58,11 @@ namespace QBittorrent.Client
         /// </summary>
         [JsonExtensionData]
         public IDictionary<string, JToken> AdditionalData { get; set; }
+
+        /// <summary>
+        /// File index
+        /// </summary>
+        [JsonProperty("index")]
+        public int? Index { get; set; }
     }
 }

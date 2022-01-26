@@ -23,7 +23,8 @@ namespace QBittorrent.Client.Internal
             bool reverse,
             int? limit,
             int? offset, 
-            IEnumerable<string> hashes)
+            IEnumerable<string> hashes,
+            string tag)
         {
             return Create("/query/torrents",
                 ("filter", filter.ToString().ToLowerInvariant()),
@@ -36,7 +37,7 @@ namespace QBittorrent.Client.Internal
 
         public Uri GetTorrentProperties(string hash) => Create($"/query/propertiesGeneral/{hash}");
 
-        public Uri GetTorrentContents(string hash) => Create($"/query/propertiesFiles/{hash}");
+        public Uri GetTorrentContents(string hash, IEnumerable<string> indexes) => Create($"/query/propertiesFiles/{hash}");
 
         public Uri GetTorrentTrackers(string hash) => Create($"/query/propertiesTrackers/{hash}");
 
@@ -175,6 +176,8 @@ namespace QBittorrent.Client.Internal
         public Uri DeleteTorrentTags() => throw new ApiNotSupportedException(ApiLevel.V2, new Version(2, 3, 0));
         
         public Uri RenameFile() => throw new ApiNotSupportedException(ApiLevel.V2, new Version(2, 4, 0));
+
+        public Uri RenameFolder() => throw new ApiNotSupportedException(ApiLevel.V2, new Version(2, 8, 0));
 
         public Uri AddRssFolder() => throw new ApiNotSupportedException(ApiLevel.V2);
 

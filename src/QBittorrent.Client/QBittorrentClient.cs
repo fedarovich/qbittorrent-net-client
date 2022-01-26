@@ -280,7 +280,8 @@ namespace QBittorrent.Client
                         query.ReverseSort,
                         query.Limit,
                         query.Offset,
-                        hashes), token)
+                        hashes,
+                        query.Tag), token)
                     .ConfigureAwait(false);
 
                 var json = await _client.GetStringWithCancellationAsync(uri, token).ConfigureAwait(false);
@@ -317,16 +318,26 @@ namespace QBittorrent.Client
         /// <param name="hash">The torrent hash.</param>
         /// <param name="token">The cancellation token.</param>
         /// <returns></returns>
+        public Task<IReadOnlyList<TorrentContent>> GetTorrentContentsAsync(string hash, CancellationToken token = default) => GetTorrentContentsAsync(hash, null, token);
+
+        /// <summary>
+        /// Gets the torrent contents.
+        /// </summary>
+        /// <param name="hash">The torrent hash.</param>
+        /// <param name="indexes">The indexes of the files you want to retrieve.</param>
+        /// <param name="token">The cancellation token.</param>
+        /// <returns></returns>
         public Task<IReadOnlyList<TorrentContent>> GetTorrentContentsAsync(
-            string hash,
-            CancellationToken token = default)
+        string hash,
+        IEnumerable<string> indexes,
+        CancellationToken token = default)
         {
             ValidateHash(hash);
             return ExecuteAsync();
 
             async Task<IReadOnlyList<TorrentContent>> ExecuteAsync()
             {
-                var uri = await BuildUriAsync(p => p.GetTorrentContents(hash), token).ConfigureAwait(false);
+                var uri = await BuildUriAsync(p => p.GetTorrentContents(hash, indexes), token).ConfigureAwait(false);
                 var json = await _client.GetStringWithCancellationAsync(uri, true, token).ConfigureAwait(false);
                 var result = JsonConvert.DeserializeObject<TorrentContent[]>(json);
                 return result;
@@ -459,13 +470,13 @@ namespace QBittorrent.Client
         /// <param name="token">The cancellation token.</param>
         /// <returns></returns>
         public Task<PeerPartialData> GetPeerPartialDataAsync(
-            string hash, 
+            string hash,
             int responseId = 0,
             CancellationToken token = default )
         {
             ValidateHash(hash);
             return ExecuteAsync();
-            
+
             async Task<PeerPartialData> ExecuteAsync()
             {
                 var uri = await BuildUriAsync(p => p.GetPeerPartialData(hash, responseId), token).ConfigureAwait(false);
@@ -1138,8 +1149,8 @@ namespace QBittorrent.Client
             return builder(provider.Url);
         }
 
-        private async Task PostAsync(Func<IRequestProvider, (Uri, HttpContent)> builder, 
-            CancellationToken token, 
+        private async Task PostAsync(Func<IRequestProvider, (Uri, HttpContent)> builder,
+            CancellationToken token,
             ApiLevel minApiLevel = ApiLevel.V1,
             ApiVersion minApiVersion = default)
         {
@@ -1155,7 +1166,7 @@ namespace QBittorrent.Client
 
         private async Task<T> PostAsync<T>(Func<IRequestProvider, (Uri, HttpContent)> builder,
             CancellationToken token,
-            Func<HttpResponseMessage, Task<T>> transform, 
+            Func<HttpResponseMessage, Task<T>> transform,
             ApiLevel minApiLevel = ApiLevel.V1,
             ApiVersion minApiVersion = default)
         {
@@ -1201,8 +1212,8 @@ namespace QBittorrent.Client
             return transform(result);
         }
 
-        private async Task EnsureApiVersionAsync(IRequestProvider provider, 
-            CancellationToken token, 
+        private async Task EnsureApiVersionAsync(IRequestProvider provider,
+            CancellationToken token,
             ApiLevel minApiLevel = ApiLevel.V1,
             ApiVersion minApiVersion = default)
         {

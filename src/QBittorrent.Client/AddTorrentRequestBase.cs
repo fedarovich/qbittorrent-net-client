@@ -1,4 +1,6 @@
-﻿namespace QBittorrent.Client
+﻿using System.Collections.Generic;
+
+namespace QBittorrent.Client
 {
     /// <summary>
     /// The base class for add torrent requests.
@@ -66,6 +68,13 @@
         /// <remarks>This value is ignored until API v2.2.0</remarks>
         [ApiLevel(ApiLevel.V2, MinVersion = "2.2.0")]
         public bool? AutomaticTorrentManagement { get; set; }
+
+        /// <summary>
+        /// Tags for the torrent
+        /// </summary>
+        /// <remarks>This value is ignored until API v2.6.2</remarks>
+        [ApiLevel(ApiLevel.V2, MinVersion = "2.6.2")]
+        public IEnumerable<string> Tags { get; set; }
 
         /// <summary>
         /// Set torrent share ratio limit

@@ -47,6 +47,7 @@ namespace QBittorrent.Client.Internal
 
         protected virtual MultipartFormDataContent AddTorrentsCore(AddTorrentRequestBase request)
         {
+            var tags = request.Tags != null ? string.Join(",", request.Tags) : null;
             return new MultipartFormDataContent()
                 .AddNonEmptyString("savepath", request.DownloadFolder)
                 .AddNonEmptyString("cookie", request.Cookie)
@@ -61,7 +62,8 @@ namespace QBittorrent.Client.Internal
                 .AddValue("firstLastPiecePrio", request.FirstLastPiecePrioritized)
                 .AddValue("autoTMM", request.AutomaticTorrentManagement)
                 .AddNotNullValue("ratioLimit", request.RatioLimit)
-                .AddNotNullValue("seedingTimeLimit", request.SeedingTimeLimit);
+                .AddNotNullValue("seedingTimeLimit", request.SeedingTimeLimit)
+                .AddNotNullValue("tags", tags);
         }
 
         public abstract (Uri url, HttpContent request) Pause(IEnumerable<string> hashes);

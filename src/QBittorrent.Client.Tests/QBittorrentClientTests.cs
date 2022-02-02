@@ -1671,7 +1671,7 @@ namespace QBittorrent.Client.Tests
             await Utils.Retry(async () =>
             {
                 var props = await Client.GetTorrentPropertiesAsync(torrent.Hash);
-                props.SavePath.Should().Be("/tmp/");
+                Path.TrimEndingDirectorySeparator(props.SavePath).Should().Be("/tmp");
             });
         }
 
@@ -1679,8 +1679,8 @@ namespace QBittorrent.Client.Tests
         [PrintTestName]
         public async Task SetLocationForAll()
         {
-            Skip.If(Environment.OSVersion.Platform != PlatformID.Unix,
-                "This test is supported only on linux at the moment.");
+            //Skip.If(Environment.OSVersion.Platform != PlatformID.Unix,
+            //    "This test is supported only on linux at the moment.");
             Skip.If(ApiVersionLessThan(2), "API version 2+ is required.");
 
             await Client.LoginAsync(UserName, Password);
@@ -1706,8 +1706,8 @@ namespace QBittorrent.Client.Tests
             {
                 var list = await Client.GetTorrentListAsync();
                 list.Should().HaveCount(files.Length);
-                list.Select(t => t.SavePath)
-                    .Should().BeEquivalentTo(Enumerable.Repeat("/tmp/", files.Length));
+                list.Select(t => Path.TrimEndingDirectorySeparator(t.SavePath))
+                    .Should().BeEquivalentTo(Enumerable.Repeat("/tmp", files.Length));
             });
         }
 
@@ -4159,5 +4159,7 @@ namespace QBittorrent.Client.Tests
         {
             return DockerFixture.Env.ApiVersion > new ApiVersion(major, minor, build);
         }
+
+
     }
 }

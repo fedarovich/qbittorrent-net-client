@@ -40,16 +40,16 @@ namespace QBittorrent.Client.Tests
 
         public async Task DisposeAsync()
         {
-            Console.WriteLine($"\t Deleting image {ImageName}...");
-            await Client.Images.DeleteImageAsync(ImageName,
-                new ImageDeleteParameters()
-                {
-                    PruneChildren = true,
-                    Force = true
-                });
+            //Console.WriteLine($"\t Deleting image {ImageName}...");
+            //await Client.Images.DeleteImageAsync(ImageName,
+            //    new ImageDeleteParameters()
+            //    {
+            //        PruneChildren = true,
+            //        Force = true
+            //    });
 
-            Console.WriteLine("\t Clearing dangling volumes...");
-            await Client.Volumes.PruneAsync(new VolumesPruneParameters());
+            //Console.WriteLine("\t Clearing dangling volumes...");
+            //await Client.Volumes.PruneAsync(new VolumesPruneParameters());
         }
     }
 }

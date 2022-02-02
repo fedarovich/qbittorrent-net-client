@@ -252,6 +252,8 @@ namespace QBittorrent.Client.Tests
         [PrintTestName]
         public async Task AddTorrentsFromFiles()
         {
+            string[] tags = { "Tag1", "Tag2" };
+
             await Client.LoginAsync(UserName, Password);
             var list = await Client.GetTorrentListAsync();
             list.Should().BeEmpty();
@@ -264,6 +266,17 @@ namespace QBittorrent.Client.Tests
             var hashes = torrents.Select(t => t.OriginalInfoHash.ToLower());
 
             var addRequest = new AddTorrentFilesRequest(filesToAdd) {Paused = true};
+            if (ApiVersionMoreThan(2, 6, 1))
+            {
+                addRequest.Tags = tags;
+            }
+
+            if (ApiVersionMoreThan(2, 8))
+            {
+                addRequest.RatioLimit = 4;
+                addRequest.SeedingTimeLimit = 3600;
+            }
+
             await Client.AddTorrentsAsync(addRequest);
 
             await Utils.Retry(async () =>
@@ -271,6 +284,14 @@ namespace QBittorrent.Client.Tests
                 list = await Client.GetTorrentListAsync();
                 list.Should().HaveCount(filesToAdd.Length);
                 list.Select(t => t.Hash).Should().BeEquivalentTo(hashes);
+                if (ApiVersionMoreThan(2, 6, 1))
+                {
+                    list.Select(t => t.Tags).Should().AllBeEquivalentTo(tags);
+                }
+                if (ApiVersionMoreThan(2, 8))
+                {
+                    list.Select(t => t.RatioLimit).Should().AllBeEquivalentTo(4);
+                }
             });
         }
 
@@ -3358,9 +3379,10 @@ namespace QBittorrent.Client.Tests
 
         [SkippableFact]
         [PrintTestName]
-        public async Task RenameFile()
+        public async Task RenameFileByIndex()
         {
             Skip.If(ApiVersionLessThan(2, 4));
+            Skip.If(ApiVersionMoreThan(2, 6, 2), "Impossible to test on API > 2.6.2");
 
             await Client.LoginAsync(UserName, Password);
 
@@ -3384,6 +3406,47 @@ namespace QBittorrent.Client.Tests
 
             var newName = Guid.NewGuid().ToString("N");
             await Client.RenameFileAsync(torrent.OriginalInfoHash.ToLower(), 0, newName);
+
+            await Utils.Retry(async () =>
+            {
+                var contents = await Client.GetTorrentContentsAsync(torrent.OriginalInfoHash.ToLower());
+                contents.Should().NotBeNull();
+                contents.Should().HaveCount(1);
+
+                var content = contents.Single();
+                content.Name.Should().Be(newName);
+                content.Size.Should().Be(torrent.File.FileSize);
+            });
+        }
+
+        [SkippableFact]
+        [PrintTestName]
+        public async Task RenameFileByName()
+        {
+            Skip.If(ApiVersionLessThan(2, 8));
+
+            await Client.LoginAsync(UserName, Password);
+
+            var torrentPath = Path.Combine(Utils.TorrentsFolder, "ubuntu-16.04.4-desktop-amd64.iso.torrent");
+            var parser = new BencodeParser();
+            var torrent = parser.Parse<Torrent>(torrentPath);
+
+            var addRequest = new AddTorrentFilesRequest(torrentPath) { Paused = true };
+            await Client.AddTorrentsAsync(addRequest);
+
+            await Utils.Retry(async () =>
+            {
+                var contents = await Client.GetTorrentContentsAsync(torrent.OriginalInfoHash.ToLower());
+                contents.Should().NotBeNull();
+                contents.Should().HaveCount(1);
+
+                var content = contents.Single();
+                content.Name.Should().Be(torrent.File.FileName);
+                content.Size.Should().Be(torrent.File.FileSize);
+            });
+
+            var newName = Guid.NewGuid().ToString("N");
+            await Client.RenameFileAsync(torrent.OriginalInfoHash.ToLower(), torrent.File.FileName, newName);
 
             await Utils.Retry(async () =>
             {

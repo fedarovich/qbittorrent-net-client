@@ -27,5 +27,10 @@ namespace QBittorrent.Client
         /// The minimal API version that supports the annotated method.
         /// </summary>
         public string MinVersion { get; set; }
+
+        /// <summary>
+        /// The maximal API version that supports the annotated method.
+        /// </summary>
+        public string MaxVersion { get; set; }
     }
 }

@@ -47,6 +47,7 @@ namespace QBittorrent.Client.Internal
 
         protected virtual MultipartFormDataContent AddTorrentsCore(AddTorrentRequestBase request)
         {
+            var tags = request.Tags != null ? string.Join(",", request.Tags) : null;
             return new MultipartFormDataContent()
                 .AddNonEmptyString("savepath", request.DownloadFolder)
                 .AddNonEmptyString("cookie", request.Cookie)
@@ -59,7 +60,10 @@ namespace QBittorrent.Client.Internal
                 .AddNotNullValue("dlLimit", request.DownloadLimit)
                 .AddValue("sequentialDownload", request.SequentialDownload)
                 .AddValue("firstLastPiecePrio", request.FirstLastPiecePrioritized)
-                .AddValue("autoTMM", request.AutomaticTorrentManagement);
+                .AddValue("autoTMM", request.AutomaticTorrentManagement)
+                .AddNotNullValue("ratioLimit", request.RatioLimit)
+                .AddNotNullValue("seedingTimeLimit", request.SeedingTimeLimit)
+                .AddNotNullValue("tags", tags);
         }
 
         public abstract (Uri url, HttpContent request) Pause(IEnumerable<string> hashes);
@@ -316,6 +320,10 @@ namespace QBittorrent.Client.Internal
         public abstract (Uri url, HttpContent request) DeleteTorrentTags(IEnumerable<string> hashes, IEnumerable<string> tags);
        
         public abstract (Uri url, HttpContent request) RenameFile(string hash, int fileId, string newName);
+
+        public abstract (Uri url, HttpContent request) RenameFile(string hash, string oldPath, string newPath);
+
+        public abstract (Uri url, HttpContent request) RenameFolder(string hash, string oldPath, string newPath);
 
         public abstract (Uri url, HttpContent request) AddRssFolder(string path);
 

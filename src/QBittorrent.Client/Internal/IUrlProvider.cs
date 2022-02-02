@@ -18,11 +18,12 @@ namespace QBittorrent.Client.Internal
             bool reverse,
             int? limit,
             int? offset, 
-            IEnumerable<string> hashes);
+            IEnumerable<string> hashes,
+            string tag);
 
         Uri GetTorrentProperties(string hash);
 
-        Uri GetTorrentContents(string hash);
+        Uri GetTorrentContents(string hash, IEnumerable<string> indexes);
 
         Uri GetTorrentTrackers(string hash);
 
@@ -157,6 +158,10 @@ namespace QBittorrent.Client.Internal
         // API 2.4
 
         Uri RenameFile();
+
+        // API 2.8
+
+        Uri RenameFolder();
 
         // RSS
 

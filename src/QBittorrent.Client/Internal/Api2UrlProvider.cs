@@ -24,7 +24,8 @@ namespace QBittorrent.Client.Internal
             bool reverse, 
             int? limit,
             int? offset, 
-            IEnumerable<string> hashes)
+            IEnumerable<string> hashes,
+            string tag)
         {
             var hashesString = hashes != null ? string.Join("|", hashes) : null;
             return Create("/api/v2/torrents/info",
@@ -34,7 +35,8 @@ namespace QBittorrent.Client.Internal
                 ("reverse", reverse.ToLowerString()),
                 ("limit", limit?.ToString()),
                 ("offset", offset?.ToString()),
-                ("hashes", hashesString));
+                ("hashes", hashesString),
+                ("tag", tag));
 
             string GetFilterString() => filter switch
             {
@@ -46,7 +48,13 @@ namespace QBittorrent.Client.Internal
 
         public Uri GetTorrentProperties(string hash) => Create("/api/v2/torrents/properties", ("hash", hash));
 
-        public Uri GetTorrentContents(string hash) => Create("/api/v2/torrents/files", ("hash", hash));
+        public Uri GetTorrentContents(string hash, IEnumerable<string> indexes)
+        {
+            var indexesString = indexes != null ? string.Join("|", indexes) : null;
+            return Create("/api/v2/torrents/files",
+                ("hash", hash),
+                ("indexes", indexesString));
+        }
 
         public Uri GetTorrentTrackers(string hash) => Create("/api/v2/torrents/trackers", ("hash", hash));
 
@@ -186,6 +194,8 @@ namespace QBittorrent.Client.Internal
         public Uri DeleteTorrentTags() => Create("/api/v2/torrents/removeTags");
 
         public Uri RenameFile() => Create("/api/v2/torrents/renameFile");
+
+        public Uri RenameFolder() => Create("/api/v2/torrents/renameFolder");
 
         public Uri AddRssFolder() => Create("/api/v2/rss/addFolder");
 

@@ -425,6 +425,18 @@ namespace QBittorrent.Client
             CancellationToken token = default);
 
         /// <summary>
+        /// Gets the torrent contents.
+        /// </summary>
+        /// <param name="hash">The torrent hash.</param>
+        /// <param name="indexes">The indexes of the files you want to retrieve.</param>
+        /// <param name="token">The cancellation token.</param>
+        /// <returns></returns>
+        Task<IReadOnlyList<TorrentContent>> GetTorrentContentsAsync(
+            [NotNull] string hash,
+            IEnumerable<string> indexes,
+            CancellationToken token = default);
+
+        /// <summary>
         /// Adds the tags to the torrents.
         /// </summary>
         /// <param name="hashes">The torrent hashes.</param>
@@ -503,7 +515,7 @@ namespace QBittorrent.Client
         /// </summary>
         /// <param name="hash">The hash of the torrent.</param>
         /// <param name="fileId">The ID of the file to rename.</param>
-        /// <param name="newName">he new name to use for the file.</param>
+        /// <param name="newName">The new name to use for the file.</param>
         /// <param name="token">The cancellation token.</param>
         /// <returns></returns>
         [ApiLevel(ApiLevel.V2, MinVersion = "2.4.0")]
@@ -511,6 +523,36 @@ namespace QBittorrent.Client
             [NotNull] string hash, 
             int fileId, 
             [NotNull] string newName, 
+            CancellationToken token = default);
+
+        /// <summary>
+        /// Renames the folder of the torrent.
+        /// </summary>
+        /// <param name="hash">The hash of the torrent.</param>
+        /// <param name="oldPath">The old path of the torrent.</param>
+        /// <param name="newPath">The new path to use for the file.</param>
+        /// <param name="token">The cancellation token.</param>
+        /// <returns></returns>
+        [ApiLevel(ApiLevel.V2, MinVersion = "2.8.0")]
+        Task RenameFileAsync(
+            [NotNull] string hash,
+            [NotNull] string oldPath,
+            [NotNull] string newPath,
+            CancellationToken token = default);
+
+        /// <summary>
+        /// Renames the folder of the torrent.
+        /// </summary>
+        /// <param name="hash">The hash of the torrent.</param>
+        /// <param name="oldPath">The old path of the torrent.</param>
+        /// <param name="newPath">The new path to use for the file.</param>
+        /// <param name="token">The cancellation token.</param>
+        /// <returns></returns>
+        [ApiLevel(ApiLevel.V2, MinVersion = "2.8.0")]
+        Task RenameFolderAsync(
+            [NotNull] string hash,
+            [NotNull] string oldPath,
+            [NotNull] string newPath,
             CancellationToken token = default);
 
         #region RSS

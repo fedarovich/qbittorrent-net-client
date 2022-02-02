@@ -1,5 +1,6 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
+using JetBrains.Annotations;
 
 namespace QBittorrent.Client
 {
@@ -45,5 +46,13 @@ namespace QBittorrent.Client
         /// </summary>
         [ApiLevel(ApiLevel.V2, MinVersion = "2.0.1")]
         public IEnumerable<string> Hashes { get; set; }
+
+        /// <summary>
+        /// Get torrents with the given tag (empty string means "without tag"; no "tag" parameter means "any tag".
+        /// Remember to URL-encode the category name. For example, <c>My tag</c> becomes <c>My%20tag</c>.
+        /// </summary>
+        [ApiLevel(ApiLevel.V2, MinVersion = "2.8.3")]
+        [CanBeNull]
+        public string Tag { get; set; }
     }
 }

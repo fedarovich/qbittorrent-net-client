@@ -2415,9 +2415,7 @@ namespace QBittorrent.Client.Tests
 
         [SkippableTheory]
         [InlineData(nameof(Preferences.Locale), "C", "de")]
-        [InlineData(nameof(Preferences.SavePath), "/downloads/", "/tmp/")]
         [InlineData(nameof(Preferences.TempPathEnabled), false, true)]
-        [InlineData(nameof(Preferences.TempPath), "/downloads/temp/", "/tmp/")]
         [InlineData(nameof(Preferences.ExportDirectory), "", "/tmp/")]
         [InlineData(nameof(Preferences.ExportDirectoryForFinished), "", "/tmp/")]
         [InlineData(nameof(Preferences.MailNotificationEnabled), false, true)]
@@ -2502,7 +2500,6 @@ namespace QBittorrent.Client.Tests
         [InlineData(nameof(Preferences.SaveResumeDataInterval), 60, 30)]
         [InlineData(nameof(Preferences.RecheckCompletedTorrents), false, true)]
         [InlineData(nameof(Preferences.ResolvePeerCountries), true, false)]
-        [InlineData(nameof(Preferences.LibtorrentFilePoolSize), 40, 20)]
         [InlineData(nameof(Preferences.LibtorrentDiskCacheExpiryInterval), 60, 30)]
         [InlineData(nameof(Preferences.LibtorrentUseOSCache), true, false)]
         [InlineData(nameof(Preferences.LibtorrentCoalesceReadsAndWrites), false, true)]
@@ -2540,12 +2537,14 @@ namespace QBittorrent.Client.Tests
             new[] { @"s(\d+)e(\d+)", @"(\d{4}[.\-]\d{1,3}[.\-]\d{1,3})" })]
         // API 2.6.0
         [InlineData(nameof(Preferences.LibtorrentMaxConcurrentHttpAnnounces), 50, 30)]
+        // API 2.7.0
+        [InlineData(nameof(Preferences.TorrentContentLayout), TorrentContentLayout.Original, TorrentContentLayout.Subfolder)]
         [PrintTestName]
         public async Task SetPreference(string name, object oldValue, object newValue,
             string[] ignoredProperties = null)
         {
             var prop = typeof(Preferences).GetProperty(name);
-            ignoredProperties ??= new string[0];
+            ignoredProperties ??= Array.Empty<string>();
 
             var apiLevelAttr = prop.GetCustomAttribute<ApiLevelAttribute>();
             if (apiLevelAttr != null && apiLevelAttr.Level >= ApiLevel.V2)
@@ -3071,6 +3070,26 @@ namespace QBittorrent.Client.Tests
 
         [SkippableFact]
         [PrintTestName]
+        public async Task SetPreferenceLibtorrentFilePoolSize()
+        {
+            Skip.If(ApiVersionLessThan(2, 3));
+
+            await Client.LoginAsync(UserName, Password);
+
+            var initial = ApiVersionLessThan(2, 8) ? 40 : 5000;
+
+            var oldPrefs = await Client.GetPreferencesAsync();
+            oldPrefs.LibtorrentFilePoolSize.Should().Be(initial);
+
+            var setPrefs = new Preferences { LibtorrentFilePoolSize = 8 };
+            await Client.SetPreferencesAsync(setPrefs);
+
+            var newPrefs = await Client.GetPreferencesAsync();
+            newPrefs.LibtorrentFilePoolSize.Should().Be(8);
+        }
+
+        [SkippableFact]
+        [PrintTestName]
         public async Task SetPreferenceLibtorrentDiskCache()
         {
             Skip.If(ApiVersionLessThan(2, 3));
@@ -3143,6 +3162,42 @@ namespace QBittorrent.Client.Tests
 
             var newPrefs = await Client.GetPreferencesAsync();
             newPrefs.MaxUploadsPerTorrent.Should().Be(5);
+        }
+
+        [SkippableFact]
+        [PrintTestName]
+        public async Task SetPreferenceSavePath()
+        {
+            await Client.LoginAsync(UserName, Password);
+
+            var oldPrefs = await Client.GetPreferencesAsync();
+            Path.TrimEndingDirectorySeparator(oldPrefs.SavePath).Should().Be("/downloads");
+
+            var setPrefs = new Preferences { SavePath = "/tmp" };
+            await Client.SetPreferencesAsync(setPrefs);
+
+            var newPrefs = await Client.GetPreferencesAsync();
+            Path.TrimEndingDirectorySeparator(newPrefs.SavePath).Should().Be("/tmp");
+        }
+
+        [SkippableFact]
+        [PrintTestName]
+        public async Task SetPreferenceTempPath()
+        {
+            await Client.LoginAsync(UserName, Password);
+
+            var initial = ApiVersionLessThan(2, 8) 
+                ? "/downloads/temp"
+                : "/home/qbittorrent/Downloads/temp";
+
+            var oldPrefs = await Client.GetPreferencesAsync();
+            Path.TrimEndingDirectorySeparator(oldPrefs.TempPath).Should().Be(initial);
+
+            var setPrefs = new Preferences { TempPath = "/tmp" };
+            await Client.SetPreferencesAsync(setPrefs);
+
+            var newPrefs = await Client.GetPreferencesAsync();
+            Path.TrimEndingDirectorySeparator(newPrefs.TempPath).Should().Be("/tmp");
         }
 
         #endregion

@@ -5,6 +5,7 @@ using System.Diagnostics.CodeAnalysis;
 using System.Runtime.Serialization;
 using System.Text;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Converters;
 using Newtonsoft.Json.Linq;
 using QBittorrent.Client.Converters;
 
@@ -696,6 +697,7 @@ namespace QBittorrent.Client
         /// </summary>
         [JsonProperty("create_subfolder_enabled")]
         [ApiLevel(ApiLevel.V2, MinVersion = "2.2.0")]
+        [Deprecated("2.7.0")]
         public bool? CreateTorrentSubfolder { get; set; }
 
         /// <summary>
@@ -1203,6 +1205,13 @@ namespace QBittorrent.Client
         [ApiLevel(ApiLevel.V2, MinVersion = "2.6")]
         public int? LibtorrentMaxConcurrentHttpAnnounces { get; set; }
 
+        /// <summary>
+        /// The default torrent content layout.
+        /// </summary>
+        [JsonProperty("torrent_content_layout")]
+        [JsonConverter(typeof(StringEnumConverter))]
+        [ApiLevel(ApiLevel.V2, MinVersion = "2.7")]
+        public TorrentContentLayout? TorrentContentLayout { get; set; }
 
         /* Other */
 

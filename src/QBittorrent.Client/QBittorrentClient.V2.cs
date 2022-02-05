@@ -53,6 +53,9 @@ namespace QBittorrent.Client
         private static readonly ApiVersion Version_2_6_2 = new ApiVersion(2, 6, 2);
 
         [SuppressMessage("ReSharper", "InconsistentNaming")]
+        private static readonly ApiVersion Version_2_7_0 = new ApiVersion(2, 7, 0);
+
+        [SuppressMessage("ReSharper", "InconsistentNaming")]
         private static readonly ApiVersion Version_2_8_0 = new ApiVersion(2, 8, 0);
 
         /// <summary>
@@ -731,7 +734,8 @@ namespace QBittorrent.Client
         /// <param name="newName">he new name to use for the file.</param>
         /// <param name="token">The cancellation token.</param>
         /// <returns></returns>
-        [ApiLevel(ApiLevel.V2, MinVersion = "2.4.0", MaxVersion = "2.6.2")]
+        [ApiLevel(ApiLevel.V2, MinVersion = "2.4.0")]
+        [Deprecated("2.7.0")]
         public Task RenameFileAsync(string hash, int fileId, string newName, CancellationToken token = default)
         {
             ValidateHash(hash);

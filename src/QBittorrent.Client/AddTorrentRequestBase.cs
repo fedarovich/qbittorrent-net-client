@@ -35,7 +35,8 @@ namespace QBittorrent.Client
         /// <summary>
         /// Create the root folder.
         /// </summary>
-        [ApiLevel(ApiLevel.V1, MaxVersion = "2.6.2")]
+        [ApiLevel(ApiLevel.V1)]
+        [Deprecated("2.7.0")]
         public bool? CreateRootFolder { get; set; }
 
         /// <summary>

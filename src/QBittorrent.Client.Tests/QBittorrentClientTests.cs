@@ -475,7 +475,7 @@ namespace QBittorrent.Client.Tests
             var parser = new BencodeParser();
             var torrent = parser.Parse<Torrent>(torrentPath);
 
-            var addRequest = new AddTorrentFilesRequest(torrentPath) {CreateRootFolder = false, Paused = true};
+            var addRequest = new AddTorrentFilesRequest(torrentPath) {CreateRootFolder = false, Paused = true, ContentLayout = TorrentContentLayout.NoSubfolder};
             await Client.AddTorrentsAsync(addRequest);
 
             await Utils.Retry(async () =>
@@ -1042,11 +1042,13 @@ namespace QBittorrent.Client.Tests
             {
                 categories = await Client.GetCategoriesAsync();
                 categories.Should().NotBeEmpty();
-                categories.Should().BeEquivalentTo(new Dictionary<string, Category>()
-                {
-                    ["Default"] = new Category { Name = "Default", SavePath = "" },
-                    ["Test"] = new Category { Name = "Test", SavePath = "/downloads/test1" },
-                });
+                categories.Should().BeEquivalentTo(
+                    new Dictionary<string, Category>()
+                    {
+                        ["Default"] = new Category { Name = "Default", SavePath = "" },
+                        ["Test"] = new Category { Name = "Test", SavePath = "/downloads/test1" },
+                    }, 
+                    config => config.Excluding(x => x.Value.AdditionalData));
             });
 
             await Client.EditCategoryAsync("Test", "/downloads/test2");
@@ -1055,11 +1057,13 @@ namespace QBittorrent.Client.Tests
             {
                 categories = await Client.GetCategoriesAsync();
                 categories.Should().NotBeEmpty();
-                categories.Should().BeEquivalentTo(new Dictionary<string, Category>()
-                {
-                    ["Default"] = new Category { Name = "Default", SavePath = "" },
-                    ["Test"] = new Category { Name = "Test", SavePath = "/downloads/test2" },
-                });
+                categories.Should().BeEquivalentTo(
+                    new Dictionary<string, Category>()
+                    {
+                        ["Default"] = new Category { Name = "Default", SavePath = "" },
+                        ["Test"] = new Category { Name = "Test", SavePath = "/downloads/test2" },
+                    },
+                    config => config.Excluding(x => x.Value.AdditionalData));
             });
         }
 
@@ -3457,6 +3461,45 @@ namespace QBittorrent.Client.Tests
                 var content = contents.Single();
                 content.Name.Should().Be(newName);
                 content.Size.Should().Be(torrent.File.FileSize);
+            });
+        }
+
+        [SkippableFact]
+        [PrintTestName]
+        public async Task RenameFolderByName()
+        {
+            Skip.If(ApiVersionLessThan(2, 8));
+
+            await Client.LoginAsync(UserName, Password);
+
+            var torrentPath = Path.Combine(Utils.TorrentsFolder, "ubuntu-14.04-pack.torrent");
+            var parser = new BencodeParser();
+            var torrent = parser.Parse<Torrent>(torrentPath);
+
+            var addRequest = new AddTorrentFilesRequest(torrentPath) { Paused = true };
+            await Client.AddTorrentsAsync(addRequest);
+
+            await Utils.Retry(async () =>
+            {
+                var contents = await Client.GetTorrentContentsAsync(torrent.OriginalInfoHash.ToLower());
+                contents.Should().NotBeNull();
+                contents.Should().HaveCount(2);
+
+                contents.Select(x => x.Name).Should().BeEquivalentTo(
+                    torrent.Files.Select(x => $"{torrent.Files.DirectoryName}/{x.FileName}"));
+            });
+
+            var newName = Guid.NewGuid().ToString("N");
+            await Client.RenameFolderAsync(torrent.OriginalInfoHash.ToLower(), torrent.Files.DirectoryName, newName);
+
+            await Utils.Retry(async () =>
+            {
+                var contents = await Client.GetTorrentContentsAsync(torrent.OriginalInfoHash.ToLower());
+                contents.Should().NotBeNull();
+                contents.Should().HaveCount(2);
+
+                contents.Select(x => x.Name).Should().BeEquivalentTo(
+                    torrent.Files.Select(x => $"{newName}/{x.FileName}"));
             });
         }
 

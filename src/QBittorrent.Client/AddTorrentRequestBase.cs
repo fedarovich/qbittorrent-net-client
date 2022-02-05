@@ -35,6 +35,7 @@ namespace QBittorrent.Client
         /// <summary>
         /// Create the root folder.
         /// </summary>
+        [ApiLevel(ApiLevel.V1, MaxVersion = "2.6.2")]
         public bool? CreateRootFolder { get; set; }
 
         /// <summary>
@@ -89,5 +90,11 @@ namespace QBittorrent.Client
         /// <remarks>This value is ignored until API v2.8.1</remarks>
         [ApiLevel(ApiLevel.V2, MinVersion = "2.8.1")]
         public int? SeedingTimeLimit { get; set; }
+
+        /// <summary>
+        /// Torrent content layout.
+        /// </summary>
+        [ApiLevel(ApiLevel.V2, MinVersion = "2.7.0")]
+        public TorrentContentLayout? ContentLayout { get; set; }
     }
 }

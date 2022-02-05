@@ -1,4 +1,8 @@
-﻿using Newtonsoft.Json;
+﻿using System.Collections.Generic;
+using System.Runtime.Serialization;
+using JetBrains.Annotations;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 
 namespace QBittorrent.Client
 {
@@ -18,5 +22,22 @@ namespace QBittorrent.Client
         /// </summary>
         [JsonProperty("savePath")]
         public string SavePath { get; set; }
+
+        /// <summary>
+        /// Additional properties not handled by this library.
+        /// </summary>
+        [JsonExtensionData]
+        public IDictionary<string, JToken> AdditionalData { get; set; }
+
+        [OnDeserialized]
+        [UsedImplicitly]
+        private void OnDeserialized(StreamingContext context)
+        {
+            if (AdditionalData.TryGetValue("save_path", out JToken savePath) && savePath.Type == JTokenType.String)
+            {
+                SavePath = savePath.ToObject<string>();
+                AdditionalData = null;
+            }
+        }
     }
 }

@@ -63,7 +63,8 @@ namespace QBittorrent.Client.Internal
                 .AddValue("autoTMM", request.AutomaticTorrentManagement)
                 .AddNotNullValue("ratioLimit", request.RatioLimit)
                 .AddNotNullValue("seedingTimeLimit", request.SeedingTimeLimit)
-                .AddNotNullValue("tags", tags);
+                .AddNotNullValue("tags", tags)
+                .AddNotNullValue("contentLayout", request.ContentLayout);
         }
 
         public abstract (Uri url, HttpContent request) Pause(IEnumerable<string> hashes);

@@ -33,7 +33,7 @@ namespace QBittorrent.Client
         [UsedImplicitly]
         private void OnDeserialized(StreamingContext context)
         {
-            if (AdditionalData.TryGetValue("save_path", out JToken savePath) && savePath.Type == JTokenType.String)
+            if (AdditionalData != null && AdditionalData.TryGetValue("save_path", out JToken savePath) && savePath.Type == JTokenType.String)
             {
                 SavePath = savePath.ToObject<string>();
                 AdditionalData = null;

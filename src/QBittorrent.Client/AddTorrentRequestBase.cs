@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 
 namespace QBittorrent.Client
 {
@@ -35,6 +36,8 @@ namespace QBittorrent.Client
         /// <summary>
         /// Create the root folder.
         /// </summary>
+        /// <remarks>This value is ignored starting from API v2.7.0. Use <see cref="ContentLayout"/> for the API v2.7.0 and newer.</remarks>
+        /// <seealso cref="ContentLayout"/>
         [ApiLevel(ApiLevel.V1)]
         [Deprecated("2.7.0")]
         public bool? CreateRootFolder { get; set; }
@@ -79,6 +82,14 @@ namespace QBittorrent.Client
         public IEnumerable<string> Tags { get; set; }
 
         /// <summary>
+        /// Torrent content layout.
+        /// </summary>
+        /// <remarks>This value is ignored until API v2.7.0. Use <see cref="CreateRootFolder"/> for the previous versions.</remarks>
+        /// <seealso cref="CreateRootFolder"/>
+        [ApiLevel(ApiLevel.V2, MinVersion = "2.7.0")]
+        public TorrentContentLayout? ContentLayout { get; set; }
+
+        /// <summary>
         /// Set torrent share ratio limit
         /// </summary>
         /// <remarks>This value is ignored until API v2.8.1</remarks>
@@ -86,16 +97,10 @@ namespace QBittorrent.Client
         public double? RatioLimit { get; set; }
 
         /// <summary>
-        /// Set torrent seeding time limit. Unit in seconds
+        /// Set torrent seeding time limit.
         /// </summary>
         /// <remarks>This value is ignored until API v2.8.1</remarks>
         [ApiLevel(ApiLevel.V2, MinVersion = "2.8.1")]
-        public int? SeedingTimeLimit { get; set; }
-
-        /// <summary>
-        /// Torrent content layout.
-        /// </summary>
-        [ApiLevel(ApiLevel.V2, MinVersion = "2.7.0")]
-        public TorrentContentLayout? ContentLayout { get; set; }
+        public TimeSpan? SeedingTimeLimit { get; set; }
     }
 }

@@ -518,7 +518,9 @@ namespace QBittorrent.Client
         /// <param name="newName">The new name to use for the file.</param>
         /// <param name="token">The cancellation token.</param>
         /// <returns></returns>
+        /// <remarks>This overload is not supported starting from API v2.8.0. Use <see cref="RenameFileAsync(string,string,string,CancellationToken)"/> instead.</remarks>
         [ApiLevel(ApiLevel.V2, MinVersion = "2.4.0")]
+        [Deprecated("2.8.0")]
         Task RenameFileAsync(
             [NotNull] string hash, 
             int fileId, 
@@ -529,10 +531,11 @@ namespace QBittorrent.Client
         /// Renames the folder of the torrent.
         /// </summary>
         /// <param name="hash">The hash of the torrent.</param>
-        /// <param name="oldPath">The old path of the torrent.</param>
+        /// <param name="oldPath">The old path of the file.</param>
         /// <param name="newPath">The new path to use for the file.</param>
         /// <param name="token">The cancellation token.</param>
         /// <returns></returns>
+        /// <remarks>This overload is not supported starting until API v2.8.0. Use <see cref="RenameFileAsync(string,int,string,CancellationToken)"/> for earlier API versions instead.</remarks>
         [ApiLevel(ApiLevel.V2, MinVersion = "2.8.0")]
         Task RenameFileAsync(
             [NotNull] string hash,
@@ -544,8 +547,8 @@ namespace QBittorrent.Client
         /// Renames the folder of the torrent.
         /// </summary>
         /// <param name="hash">The hash of the torrent.</param>
-        /// <param name="oldPath">The old path of the torrent.</param>
-        /// <param name="newPath">The new path to use for the file.</param>
+        /// <param name="oldPath">The old path of the folder.</param>
+        /// <param name="newPath">The new path to use for the folder.</param>
         /// <param name="token">The cancellation token.</param>
         /// <returns></returns>
         [ApiLevel(ApiLevel.V2, MinVersion = "2.8.0")]

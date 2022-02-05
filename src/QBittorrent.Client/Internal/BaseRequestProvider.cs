@@ -62,7 +62,7 @@ namespace QBittorrent.Client.Internal
                 .AddValue("firstLastPiecePrio", request.FirstLastPiecePrioritized)
                 .AddValue("autoTMM", request.AutomaticTorrentManagement)
                 .AddNotNullValue("ratioLimit", request.RatioLimit)
-                .AddNotNullValue("seedingTimeLimit", request.SeedingTimeLimit)
+                .AddNotNullValue("seedingTimeLimit", checked ((int?) request.SeedingTimeLimit?.TotalSeconds))
                 .AddNotNullValue("tags", tags)
                 .AddNotNullValue("contentLayout", request.ContentLayout);
         }

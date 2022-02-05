@@ -253,6 +253,8 @@ namespace QBittorrent.Client.Tests
         public async Task AddTorrentsFromFiles()
         {
             string[] tags = { "Tag1", "Tag2" };
+            const double ratioLimit = 4;
+            var seedingTimeLimit = TimeSpan.FromMinutes(48);
 
             await Client.LoginAsync(UserName, Password);
             var list = await Client.GetTorrentListAsync();
@@ -273,8 +275,8 @@ namespace QBittorrent.Client.Tests
 
             if (ApiVersionMoreThan(2, 8))
             {
-                addRequest.RatioLimit = 4;
-                addRequest.SeedingTimeLimit = 3600;
+                addRequest.RatioLimit = ratioLimit;
+                addRequest.SeedingTimeLimit = seedingTimeLimit;
             }
 
             await Client.AddTorrentsAsync(addRequest);
@@ -293,6 +295,16 @@ namespace QBittorrent.Client.Tests
                     list.Select(t => t.RatioLimit).Should().AllBeEquivalentTo(4);
                 }
             });
+
+            if (ApiVersionMoreThan(2, 8))
+            {
+                await Utils.Retry(async () =>
+                {
+                    var partialData = await Client.GetPartialDataAsync();
+                    partialData.TorrentsChanged.Values.Select(x => (x.SeedingTimeLimit, x.RatioLimit))
+                        .Should().AllBeEquivalentTo((seedingTimeLimit, ratioLimit));
+                });
+            }
         }
 
         [Fact]

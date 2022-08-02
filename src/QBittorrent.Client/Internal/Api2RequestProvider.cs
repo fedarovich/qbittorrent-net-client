@@ -96,7 +96,7 @@ namespace QBittorrent.Client.Internal
             return BuildForm(Url.SetShareLimits(),
                 ("hashes", JoinHashes(hashes)),
                 ("ratioLimit", ratio.ToString("R", CultureInfo.InvariantCulture)),
-                ("seedingTimeLimit", seedingTime.TotalSeconds.ToString("F0")));
+                ("seedingTimeLimit", seedingTime.TotalMinutes.ToString("F0")));
         }
 
         public override (Uri url, HttpContent request) BanPeers(IEnumerable<string> peers)

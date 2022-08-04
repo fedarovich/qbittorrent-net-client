@@ -33,12 +33,12 @@ namespace QBittorrent.Client
             /// <summary>
             /// Set global limit.
             /// </summary>
-            public static readonly TimeSpan Global = TimeSpan.FromSeconds(-2);
+            public static readonly TimeSpan Global = TimeSpan.FromMinutes(-2);
 
             /// <summary>
             /// Set no limit.
             /// </summary>
-            public static readonly TimeSpan Unlimited = TimeSpan.FromSeconds(-1);
+            public static readonly TimeSpan Unlimited = TimeSpan.FromMinutes(-1);
         }
     }
 }

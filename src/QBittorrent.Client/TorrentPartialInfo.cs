@@ -231,7 +231,7 @@ namespace QBittorrent.Client
         /// Upload seeding time limit 
         /// </summary>
         [JsonProperty("seeding_time_limit")]
-        [JsonConverter(typeof(SecondsToTimeSpanConverter))]
+        [JsonConverter(typeof(MinutesToTimeSpanConverter))]
         public TimeSpan? SeedingTimeLimit { get; set; }
 
         /// <summary>

@@ -1135,7 +1135,7 @@ namespace QBittorrent.Client
         {
             var builder = new UriBuilder(_uri)
             {
-                Path = path,
+                Path = _uri.AbsolutePath.TrimEnd('/') + path,
                 Query = string.Join("&", parameters
                     .Where(t => t.value != null)
                     .Select(t => $"{Uri.EscapeDataString(t.key)}={Uri.EscapeDataString(t.value)}"))

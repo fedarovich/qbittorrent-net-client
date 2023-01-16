@@ -1152,9 +1152,12 @@ namespace QBittorrent.Client
             await EnsureApiVersionAsync(provider, token, minApiLevel, minApiVersion, maxApiVersion);
 
             var (uri, content) = builder(provider);
-            using (var response = await _client.PostAsync(uri, content, token).ConfigureAwait(false))
+            using (content)
             {
-                response.EnsureSuccessStatusCodeEx();
+                using (var response = await _client.PostAsync(uri, content, token).ConfigureAwait(false))
+                {
+                    response.EnsureSuccessStatusCodeEx();
+                }
             }
         }
 
@@ -1168,10 +1171,13 @@ namespace QBittorrent.Client
             await EnsureApiVersionAsync(provider, token, minApiLevel, minApiVersion);
 
             var (uri, content) = builder(provider);
-            using (var response = await _client.PostAsync(uri, content, token).ConfigureAwait(false))
+            using (content)
             {
-                response.EnsureSuccessStatusCodeEx();
-                return await transform(response).ConfigureAwait(false);
+                using (var response = await _client.PostAsync(uri, content, token).ConfigureAwait(false))
+                {
+                    response.EnsureSuccessStatusCodeEx();
+                    return await transform(response).ConfigureAwait(false);
+                }
             }
         }
 

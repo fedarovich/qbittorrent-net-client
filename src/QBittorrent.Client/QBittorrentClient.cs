@@ -90,7 +90,7 @@ namespace QBittorrent.Client
         /// </exception>
         private QBittorrentClient([NotNull] Uri uri, ApiLevel apiLevel, [NotNull] HttpClient client)
         {
-            _uri = uri ?? throw new ArgumentNullException(nameof(uri));
+            _uri = (uri ?? throw new ArgumentNullException(nameof(uri))).EnsureTrailingSlash();
             _client = client ?? throw new ArgumentNullException(nameof(client));
             _client.DefaultRequestHeaders.ExpectContinue = true;
 
@@ -187,7 +187,7 @@ namespace QBittorrent.Client
             if (legacyVersion < NewApiLegacyVersion)
                 return new ApiVersion(1, checked((byte)legacyVersion));
 
-            var uri = BuildUri("/api/v2/app/webapiVersion");
+            var uri = BuildUri("api/v2/app/webapiVersion");
             var version = await _client.GetStringWithCancellationAsync(uri, token).ConfigureAwait(false);
             return ApiVersion.Parse(version);
         }
@@ -210,7 +210,7 @@ namespace QBittorrent.Client
         {
             try
             {
-                var uri = BuildUri("/version/api");
+                var uri = BuildUri("version/api");
                 var versionString = await _client.GetStringWithCancellationAsync(uri, true, token).ConfigureAwait(false);
                 var version = !string.IsNullOrEmpty(versionString) ? Convert.ToInt32(versionString) : NewApiLegacyFallbackVersion;
                 return version;
@@ -233,7 +233,7 @@ namespace QBittorrent.Client
         /// <returns></returns>
         public async Task<int> GetLegacyMinApiVersionAsync(CancellationToken token = default)
         {
-            var uri = BuildUri("/version/api_min");
+            var uri = BuildUri("version/api_min");
             var versionString = await _client.GetStringWithCancellationAsync(uri, true, token).ConfigureAwait(false);
             var version = !string.IsNullOrEmpty(versionString) ? Convert.ToInt32(versionString) : NewApiLegacyFallbackVersion;
             return version;
@@ -1133,14 +1133,7 @@ namespace QBittorrent.Client
 
         private Uri BuildUri(string path, params (string key, string value)[] parameters)
         {
-            var builder = new UriBuilder(_uri)
-            {
-                Path = path,
-                Query = string.Join("&", parameters
-                    .Where(t => t.value != null)
-                    .Select(t => $"{Uri.EscapeDataString(t.key)}={Uri.EscapeDataString(t.value)}"))
-            };
-            return builder.Uri;
+            return new Uri(_uri, path).WithQueryParameters(parameters);
         }
 
         private async Task<Uri> BuildUriAsync(Func<IUrlProvider, Uri> builder, CancellationToken token = default)

@@ -1,5 +1,5 @@
 ﻿using System;
-using System.Linq;
+using QBittorrent.Client.Extensions;
 
 namespace QBittorrent.Client.Internal
 {
@@ -9,22 +9,14 @@ namespace QBittorrent.Client.Internal
 
         private protected BaseUrlProvider(Uri baseUri)
         {
-            _baseUri = baseUri;
+            _baseUri = baseUri.EnsureTrailingSlash();
         }
 
         private protected Uri Create(string relativeUri) => new Uri(_baseUri, relativeUri);
 
-        private protected Uri Create(string relativeUri, 
-            params (string key, string value)[] parameters)
+        private protected Uri Create(string relativeUri, params (string key, string value)[] parameters)
         {
-            var builder = new UriBuilder(_baseUri)
-            {
-                Path = relativeUri,
-                Query = string.Join("&", parameters
-                    .Where(t => t.value != null)
-                    .Select(t => $"{Uri.EscapeDataString(t.key)}={Uri.EscapeDataString(t.value)}"))
-            };
-            return builder.Uri;
+            return Create(relativeUri).WithQueryParameters(parameters);
         }
     }
 }

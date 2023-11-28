@@ -18,7 +18,7 @@ namespace QBittorrent.Client.Tests
 
         public async Task InitializeAsync()
         {
-            var version = Environment.GetEnvironmentVariable("QBT_VERSION")?.Replace(':', '-') ?? "4.4.0";
+            var version = Environment.GetEnvironmentVariable("QBT_VERSION")?.Replace(':', '-') ?? "4.6.0";
             ImageName = "ghcr.io/fedarovich/qbt-net-test:" + version;
             var sourceDir = Path.Combine(Utils.StartupFolder, "docker", "qbt-" + version);
             var env = File.ReadAllText(Path.Combine(sourceDir, "env.json"));
@@ -44,7 +44,7 @@ namespace QBittorrent.Client.Tests
             await Client.Images.DeleteImageAsync(ImageName,
                 new ImageDeleteParameters()
                 {
-                    PruneChildren = true,
+                    NoPrune = false,
                     Force = true
                 });
 

@@ -13,7 +13,7 @@
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="BencodeNET" Version="2.2.24" />
-    <PackageReference Include="Docker.DotNet" Version="3.125.2" />
+    <PackageReference Include="Docker.DotNet" Version="3.125.15" />
     <PackageReference Include="FluentAssertions" Version="5.10.3" />
     <PackageReference Include="IPNetwork2" Version="2.1.2" />
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="16.8.0" />

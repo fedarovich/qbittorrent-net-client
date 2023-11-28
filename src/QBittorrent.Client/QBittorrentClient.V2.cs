@@ -58,6 +58,12 @@ namespace QBittorrent.Client
         [SuppressMessage("ReSharper", "InconsistentNaming")]
         private static readonly ApiVersion Version_2_8_0 = new ApiVersion(2, 8, 0);
 
+        [SuppressMessage("ReSharper", "InconsistentNaming")]
+        private static readonly ApiVersion Version_2_9_1 = new ApiVersion(2, 9, 1);
+
+        [SuppressMessage("ReSharper", "InconsistentNaming")]
+        private static readonly ApiVersion Version_2_9_2 = new ApiVersion(2, 9, 2);
+
         /// <summary>
         /// Gets the peer log.
         /// </summary>
@@ -472,7 +478,38 @@ namespace QBittorrent.Client
         {
             ValidateHashes(ref hashes);
 
-            return PostAsync(p => p.SetShareLimits(hashes, ratio, seedingTime), token, ApiLevel.V2, Version_2_0_1);
+            return PostAsync(p => p.SetShareLimits(hashes, ratio, seedingTime), token, ApiLevel.V2, Version_2_0_1, Version_2_9_1);
+        }
+
+        /// <summary>
+        /// Sets the torrent share limits.
+        /// </summary>
+        /// <param name="hashes">The torrent hashes.</param>
+        /// <param name="ratio">
+        /// The ratio limit.
+        /// Use <see cref="ShareLimits.Ratio.Global"/> in order to use global limit.
+        /// Use <see cref="ShareLimits.Ratio.Unlimited"/> in order to set no limit.
+        /// </param>
+        /// <param name="seedingTime">
+        /// The seeding time limit.
+        /// Use <see cref="ShareLimits.SeedingTime.Global"/> in order to use global limit.
+        /// Use <see cref="ShareLimits.SeedingTime.Unlimited"/> in order to set no limit.
+        /// </param>
+        /// <param name="inactiveSeedingTime">
+        /// The inactive seeding time limit.
+        /// Use <see cref="ShareLimits.SeedingTime.Global"/> in order to use global limit.
+        /// Use <see cref="ShareLimits.SeedingTime.Unlimited"/> in order to set no limit.
+        /// </param>
+        /// <param name="token">The cancellation token.</param>
+        /// <returns></returns>
+        /// <seealso cref="ShareLimits.Ratio" />
+        /// <seealso cref="ShareLimits.SeedingTime" />
+        [ApiLevel(ApiLevel.V2, MinVersion = "2.9.2")]
+        public Task SetShareLimitsAsync(IEnumerable<string> hashes, double ratio, TimeSpan seedingTime, TimeSpan inactiveSeedingTime, CancellationToken token = default)
+        {
+            ValidateHashes(ref hashes);
+
+            return PostAsync(p => p.SetShareLimits(hashes, ratio, seedingTime, inactiveSeedingTime), token, ApiLevel.V2, Version_2_9_2);
         }
 
         /// <summary>

@@ -2353,7 +2353,7 @@ namespace QBittorrent.Client.Tests
         [PrintTestName]
         public async Task SetShareLimit()
         {
-            Skip.If(ApiVersionLessThan(2, 0, 1));
+            Skip.If(ApiVersionLessThan(2, 0, 1) || ApiVersionMoreThan(2, 9, 1));
 
             await Client.LoginAsync(UserName, Password);
             var list = await Client.GetTorrentListAsync();
@@ -2411,6 +2411,75 @@ namespace QBittorrent.Client.Tests
             info = partialData.TorrentsChanged[torrent.Hash];
             info.RatioLimit.Should().Be(ShareLimits.Ratio.Global);
             info.SeedingTimeLimit.Should().Be(TimeSpan.Zero);
+        }
+
+        [SkippableFact]
+        [PrintTestName]
+        public async Task SetShareLimitWithInactiveSeedingTimeLimit()
+        {
+            Skip.If(ApiVersionLessThan(2, 9, 2));
+
+            await Client.LoginAsync(UserName, Password);
+            var list = await Client.GetTorrentListAsync();
+            list.Should().BeEmpty();
+
+            var fileToAdd = Path.Combine(Utils.TorrentsFolder, "ubuntu-16.04.4-desktop-amd64.iso.torrent");
+            await Utils.Retry(() => Client.AddTorrentsAsync(new AddTorrentFilesRequest(fileToAdd)));
+
+            var torrent = await Utils.Retry(async () =>
+            {
+                list = await Client.GetTorrentListAsync();
+                return list.Single();
+            });
+
+            int responseId = 0;
+            var partialData = await Client.GetPartialDataAsync(responseId);
+            partialData.TorrentsChanged.Should().HaveCount(1);
+
+            var info = partialData.TorrentsChanged[torrent.Hash];
+            info.RatioLimit.Should().Be(ShareLimits.Ratio.Global);
+            info.SeedingTimeLimit.Should().Be(ShareLimits.SeedingTime.Global);
+            info.InactiveSeedingTimeLimit.Should().Be(ShareLimits.SeedingTime.Global);
+
+            await Client.SetShareLimitsAsync(torrent.Hash, ShareLimits.Ratio.Unlimited, TimeSpan.FromHours(1), TimeSpan.FromHours(0.5));
+            await Task.Delay(1000);
+            partialData = await Client.GetPartialDataAsync(responseId);
+            partialData.TorrentsChanged.Should().HaveCount(1);
+
+            info = partialData.TorrentsChanged[torrent.Hash];
+            info.RatioLimit.Should().Be(ShareLimits.Ratio.Unlimited);
+            info.SeedingTimeLimit.Should().Be(TimeSpan.FromHours(1));
+            info.InactiveSeedingTimeLimit.Should().Be(TimeSpan.FromHours(0.5));
+
+            await Client.SetShareLimitsAsync(torrent.Hash, 10, ShareLimits.SeedingTime.Unlimited, ShareLimits.SeedingTime.Global);
+            await Task.Delay(1000);
+            partialData = await Client.GetPartialDataAsync(responseId);
+            partialData.TorrentsChanged.Should().HaveCount(1);
+
+            info = partialData.TorrentsChanged[torrent.Hash];
+            info.RatioLimit.Should().Be(10.0);
+            info.SeedingTimeLimit.Should().Be(ShareLimits.SeedingTime.Unlimited);
+            info.InactiveSeedingTimeLimit.Should().Be(ShareLimits.SeedingTime.Global);
+
+            await Client.SetShareLimitsAsync(torrent.Hash, 0, ShareLimits.SeedingTime.Global, ShareLimits.SeedingTime.Unlimited);
+            await Task.Delay(1000);
+            partialData = await Client.GetPartialDataAsync(responseId);
+            partialData.TorrentsChanged.Should().HaveCount(1);
+
+            info = partialData.TorrentsChanged[torrent.Hash];
+            info.RatioLimit.Should().Be(0);
+            info.SeedingTimeLimit.Should().Be(ShareLimits.SeedingTime.Global);
+            info.InactiveSeedingTimeLimit.Should().Be(ShareLimits.SeedingTime.Unlimited);
+
+            await Client.SetShareLimitsAsync(torrent.Hash, ShareLimits.Ratio.Global, TimeSpan.Zero, TimeSpan.Zero);
+            await Task.Delay(1000);
+            partialData = await Client.GetPartialDataAsync(responseId);
+            partialData.TorrentsChanged.Should().HaveCount(1);
+
+            info = partialData.TorrentsChanged[torrent.Hash];
+            info.RatioLimit.Should().Be(ShareLimits.Ratio.Global);
+            info.SeedingTimeLimit.Should().Be(TimeSpan.Zero);
+            info.InactiveSeedingTimeLimit.Should().Be(TimeSpan.Zero);
         }
 
         #endregion

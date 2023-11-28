@@ -235,6 +235,13 @@ namespace QBittorrent.Client
         public TimeSpan? SeedingTimeLimit { get; set; }
 
         /// <summary>
+        /// Upload inactive seeding time limit 
+        /// </summary>
+        [JsonProperty("inactive_seeding_time_limit")]
+        [JsonConverter(typeof(MinutesToTimeSpanConverter))]
+        public TimeSpan? InactiveSeedingTimeLimit { get; set; }
+
+        /// <summary>
         /// The date and time when this torrent was seen complete for the last time
         /// </summary>
         [JsonProperty("seen_complete")]

@@ -42,6 +42,8 @@ namespace QBittorrent.Client.Tests
 
         private QBittorrentClient Client { get; }
 
+        private long? DefaultTorrentRateLimit => ApiVersionLessThan(2, 9) ? default(long?) : default(long);
+
         #region Lifetime
 
         public QBittorrentClientTests(DockerFixture dockerFixture)
@@ -127,7 +129,7 @@ namespace QBittorrent.Client.Tests
                 Console.WriteLine($"\t{ex}");
                 Console.WriteLine($"\tStopping container {ContainerId}...");
                 await DockerFixture.Client.Containers.StopContainerAsync(ContainerId,
-                    new ContainerStopParameters {WaitBeforeKillSeconds = 10u});
+                    new ContainerStopParameters { WaitBeforeKillSeconds = 10u });
                 throw;
             }
         }
@@ -136,10 +138,10 @@ namespace QBittorrent.Client.Tests
         {
             Console.WriteLine($"\tStopping container {ContainerId}...");
             await DockerFixture.Client.Containers.StopContainerAsync(ContainerId,
-                new ContainerStopParameters {WaitBeforeKillSeconds = 10u});
+                new ContainerStopParameters { WaitBeforeKillSeconds = 10u });
             await DockerFixture.Client.Containers.WaitContainerAsync(ContainerId);
             await DockerFixture.Client.Containers.RemoveContainerAsync(ContainerId,
-                new ContainerRemoveParameters {Force = true});
+                new ContainerRemoveParameters { Force = true });
         }
 
         #endregion
@@ -267,7 +269,7 @@ namespace QBittorrent.Client.Tests
                 .ToList();
             var hashes = torrents.Select(t => t.OriginalInfoHash.ToLower());
 
-            var addRequest = new AddTorrentFilesRequest(filesToAdd) {Paused = true};
+            var addRequest = new AddTorrentFilesRequest(filesToAdd) { Paused = true };
             if (ApiVersionMoreThan(2, 6, 1))
             {
                 addRequest.Tags = tags;
@@ -322,7 +324,7 @@ namespace QBittorrent.Client.Tests
                 .ToList();
             var magnets = torrents.Select(t => new Uri(t.GetMagnetLink()));
 
-            var addRequest = new AddTorrentUrlsRequest(magnets) {Paused = true};
+            var addRequest = new AddTorrentUrlsRequest(magnets) { Paused = true };
             await Client.AddTorrentsAsync(addRequest);
 
             await Utils.Retry(async () =>
@@ -347,7 +349,7 @@ namespace QBittorrent.Client.Tests
                 new Uri(
                     "https://fedarovich.blob.core.windows.net/qbittorrent-test/torrents/ubuntu-16.04.4-desktop-amd64.iso.torrent"),
             };
-            var addRequest = new AddTorrentUrlsRequest(links) {Paused = true};
+            var addRequest = new AddTorrentUrlsRequest(links) { Paused = true };
             await Client.AddTorrentsAsync(addRequest);
 
             await Task.Delay(1000);
@@ -381,7 +383,7 @@ namespace QBittorrent.Client.Tests
             var parser = new BencodeParser();
             var hash = parser.Parse<Torrent>(torrentFile).OriginalInfoHash.ToLower();
 
-            var addRequest = new AddTorrentsRequest(new[] {torrentFile}, links) {Paused = true};
+            var addRequest = new AddTorrentsRequest(new[] { torrentFile }, links) { Paused = true };
 
             if (ApiVersionLessThan(2))
             {
@@ -420,7 +422,7 @@ namespace QBittorrent.Client.Tests
             var parser = new BencodeParser();
             var torrent = parser.Parse<Torrent>(torrentPath);
 
-            var addRequest = new AddTorrentFilesRequest(torrentPath) {Paused = true};
+            var addRequest = new AddTorrentFilesRequest(torrentPath) { Paused = true };
             await Client.AddTorrentsAsync(addRequest);
 
             await Utils.Retry(async () =>
@@ -462,7 +464,7 @@ namespace QBittorrent.Client.Tests
             var parser = new BencodeParser();
             var torrent = parser.Parse<Torrent>(torrentPath);
 
-            var addRequest = new AddTorrentFilesRequest(torrentPath) {Paused = true};
+            var addRequest = new AddTorrentFilesRequest(torrentPath) { Paused = true };
             await Client.AddTorrentsAsync(addRequest);
 
             await Utils.Retry(async () =>
@@ -487,7 +489,7 @@ namespace QBittorrent.Client.Tests
             var parser = new BencodeParser();
             var torrent = parser.Parse<Torrent>(torrentPath);
 
-            var addRequest = new AddTorrentFilesRequest(torrentPath) {CreateRootFolder = false, Paused = true, ContentLayout = TorrentContentLayout.NoSubfolder};
+            var addRequest = new AddTorrentFilesRequest(torrentPath) { CreateRootFolder = false, Paused = true, ContentLayout = TorrentContentLayout.NoSubfolder };
             await Client.AddTorrentsAsync(addRequest);
 
             await Utils.Retry(async () =>
@@ -498,8 +500,8 @@ namespace QBittorrent.Client.Tests
 
                 var pairs =
                     (from content in contents
-                        join file in torrent.Files on content.Name equals file.FullPath
-                        select (content, file))
+                     join file in torrent.Files on content.Name equals file.FullPath
+                     select (content, file))
                     .ToList();
 
                 pairs.Should().HaveCount(torrent.Files.Count);
@@ -536,7 +538,7 @@ namespace QBittorrent.Client.Tests
             var parser = new BencodeParser();
             var torrent = parser.Parse<Torrent>(torrentPath);
 
-            var addRequest = new AddTorrentFilesRequest(torrentPath) {Paused = true};
+            var addRequest = new AddTorrentFilesRequest(torrentPath) { Paused = true };
             await Client.AddTorrentsAsync(addRequest);
 
             await Utils.Retry(async () =>
@@ -578,7 +580,7 @@ namespace QBittorrent.Client.Tests
             var parser = new BencodeParser();
             var torrent = parser.Parse<Torrent>(torrentPath);
 
-            var addRequest = new AddTorrentFilesRequest(torrentPath) {Paused = true};
+            var addRequest = new AddTorrentFilesRequest(torrentPath) { Paused = true };
             await Client.AddTorrentsAsync(addRequest);
 
             await Utils.Retry(async () =>
@@ -614,7 +616,7 @@ namespace QBittorrent.Client.Tests
             var parser = new BencodeParser();
             var torrent = parser.Parse<Torrent>(torrentPath);
 
-            var addRequest = new AddTorrentFilesRequest(torrentPath) {Paused = true};
+            var addRequest = new AddTorrentFilesRequest(torrentPath) { Paused = true };
             await Client.AddTorrentsAsync(addRequest);
 
             var torrentHash = torrent.OriginalInfoHash.ToLower();
@@ -709,7 +711,7 @@ namespace QBittorrent.Client.Tests
                 .ToList();
             var hashes = torrents.Select(t => t.OriginalInfoHash.ToLower()).ToList();
 
-            await Client.AddTorrentsAsync(new AddTorrentFilesRequest(filesToAdd[0]) {Paused = true});
+            await Client.AddTorrentsAsync(new AddTorrentFilesRequest(filesToAdd[0]) { Paused = true });
 
             await Task.Delay(1000);
 
@@ -738,7 +740,7 @@ namespace QBittorrent.Client.Tests
             partialData.CategoriesRemoved.Should().BeNull();
             responseId = partialData.ResponseId;
 
-            await Client.AddTorrentsAsync(new AddTorrentFilesRequest(filesToAdd.Skip(1)) {Paused = true});
+            await Client.AddTorrentsAsync(new AddTorrentFilesRequest(filesToAdd.Skip(1)) { Paused = true });
             await Task.Delay(refreshInterval);
 
             partialData = await Client.GetPartialDataAsync(responseId);
@@ -765,8 +767,8 @@ namespace QBittorrent.Client.Tests
             partialData.CategoriesChanged.Should().BeEquivalentTo(
                 new Dictionary<string, Category>
                 {
-                    ["a"] = new Category {Name = "a", SavePath = ""},
-                    ["b"] = new Category {Name = "b", SavePath = ""}
+                    ["a"] = new Category { Name = "a", SavePath = "" },
+                    ["b"] = new Category { Name = "b", SavePath = "" }
                 });
             partialData.CategoriesRemoved.Should().BeNull();
             responseId = partialData.ResponseId;
@@ -804,7 +806,7 @@ namespace QBittorrent.Client.Tests
                 .ToList();
             var hashes = torrents.Select(t => t.OriginalInfoHash.ToLower()).ToList();
 
-            await Client.AddTorrentsAsync(new AddTorrentFilesRequest(filesToAdd[0]) {Paused = true});
+            await Client.AddTorrentsAsync(new AddTorrentFilesRequest(filesToAdd[0]) { Paused = true });
 
             await Task.Delay(1000);
 
@@ -815,13 +817,23 @@ namespace QBittorrent.Client.Tests
             partialData.TorrentsChanged.Should().HaveCount(1);
             partialData.TorrentsChanged.Should().Contain(p => p.Key.ToLower() == hashes[0]);
             partialData.TorrentsRemoved.Should().BeNull();
-            partialData.CategoriesAdded.Should().BeEmpty();
-            partialData.CategoriesChanged.Should().BeEmpty();
+            if (ApiVersionLessThan(2, 9))
+            {
+                partialData.CategoriesAdded.Should().BeEmpty();
+                partialData.CategoriesChanged.Should().BeEmpty();
+            }
+            else
+            {
+                partialData.CategoriesAdded.Should().BeNull();
+                partialData.CategoriesChanged.Should().BeNull();
+            }
             partialData.CategoriesRemoved.Should().BeNull();
-            if (!ApiVersionLessThan(2, 1, 1))
+
+            if (!ApiVersionLessThan(2, 1, 1) && !ApiVersionIs(2, 9, 2))
             {
                 partialData.ServerState.FreeSpaceOnDisk.Should().BeGreaterThan(0);
             }
+
             responseId = partialData.ResponseId;
             var refreshInterval = partialData.ServerState.RefreshInterval ?? 1000;
 
@@ -837,7 +849,7 @@ namespace QBittorrent.Client.Tests
             partialData.CategoriesRemoved.Should().BeNull();
             responseId = partialData.ResponseId;
 
-            await Client.AddTorrentsAsync(new AddTorrentFilesRequest(filesToAdd.Skip(1)) {Paused = true});
+            await Client.AddTorrentsAsync(new AddTorrentFilesRequest(filesToAdd.Skip(1)) { Paused = true });
             await Task.Delay(refreshInterval);
 
             partialData = await Client.GetPartialDataAsync(responseId);
@@ -865,8 +877,8 @@ namespace QBittorrent.Client.Tests
             partialData.CategoriesChanged.Should().BeEquivalentTo(
                 new Dictionary<string, Category>
                 {
-                    ["a"] = new Category {Name = "a", SavePath = ""},
-                    ["b"] = new Category {Name = "b", SavePath = "/tmp"}
+                    ["a"] = new Category { Name = "a", SavePath = "" },
+                    ["b"] = new Category { Name = "b", SavePath = "/tmp" }
                 });
             partialData.CategoriesRemoved.Should().BeNull();
             responseId = partialData.ResponseId;
@@ -924,7 +936,7 @@ namespace QBittorrent.Client.Tests
 
             var filesToAdd = Directory.GetFiles(Utils.TorrentsFolder, "*.torrent");
 
-            await Client.AddTorrentsAsync(new AddTorrentFilesRequest(filesToAdd) {Paused = true});
+            await Client.AddTorrentsAsync(new AddTorrentFilesRequest(filesToAdd) { Paused = true });
             await Task.Delay(1000);
 
             var list = await Client.GetTorrentListAsync();
@@ -971,7 +983,7 @@ namespace QBittorrent.Client.Tests
 
             var filesToAdd = Directory.GetFiles(Utils.TorrentsFolder, "*.torrent");
 
-            await Client.AddTorrentsAsync(new AddTorrentFilesRequest(filesToAdd) {Paused = true});
+            await Client.AddTorrentsAsync(new AddTorrentFilesRequest(filesToAdd) { Paused = true });
             await Task.Delay(1000);
 
             var list = await Client.GetTorrentListAsync();
@@ -1017,7 +1029,7 @@ namespace QBittorrent.Client.Tests
 
             var filesToAdd = Directory.GetFiles(Utils.TorrentsFolder, "*.torrent");
 
-            await Client.AddTorrentsAsync(new AddTorrentFilesRequest(filesToAdd) {Paused = true});
+            await Client.AddTorrentsAsync(new AddTorrentFilesRequest(filesToAdd) { Paused = true });
             await Task.Delay(1000);
 
             var list = await Client.GetTorrentListAsync();
@@ -1059,7 +1071,7 @@ namespace QBittorrent.Client.Tests
                     {
                         ["Default"] = new Category { Name = "Default", SavePath = "" },
                         ["Test"] = new Category { Name = "Test", SavePath = "/downloads/test1" },
-                    }, 
+                    },
                     config => config.Excluding(x => x.Value.AdditionalData));
             });
 
@@ -1098,7 +1110,7 @@ namespace QBittorrent.Client.Tests
 
             var file = Path.Combine(Utils.TorrentsFolder, "ubuntu-16.04.4-desktop-amd64.iso.torrent");
 
-            await Client.AddTorrentsAsync(new AddTorrentFilesRequest(file) {Paused = true});
+            await Client.AddTorrentsAsync(new AddTorrentFilesRequest(file) { Paused = true });
             await Task.Delay(1000);
             var list = await Client.GetTorrentListAsync();
             list.Should().ContainSingle().Which.Category.Should().BeEmpty();
@@ -1135,7 +1147,7 @@ namespace QBittorrent.Client.Tests
 
             var file = Path.Combine(Utils.TorrentsFolder, "ubuntu-16.04.4-desktop-amd64.iso.torrent");
 
-            await Client.AddTorrentsAsync(new AddTorrentFilesRequest(file) {Paused = true, Category = "xyz"});
+            await Client.AddTorrentsAsync(new AddTorrentFilesRequest(file) { Paused = true, Category = "xyz" });
             await Task.Delay(1000);
             var list = await Client.GetTorrentListAsync();
             list.Should().ContainSingle().Which.Category.Should().Be("xyz");
@@ -1235,7 +1247,7 @@ namespace QBittorrent.Client.Tests
 
             var file = Path.Combine(Utils.TorrentsFolder, "ubuntu-16.04.4-desktop-amd64.iso.torrent");
 
-            await Client.AddTorrentsAsync(new AddTorrentFilesRequest(file) {Paused = true});
+            await Client.AddTorrentsAsync(new AddTorrentFilesRequest(file) { Paused = true });
             await Task.Delay(1000);
             var list = await Client.GetTorrentListAsync();
             list.Should().ContainSingle();
@@ -1246,8 +1258,8 @@ namespace QBittorrent.Client.Tests
                 Client.GetTorrentDownloadLimitAsync(hash),
                 Client.GetTorrentUploadLimitAsync(hash),
                 Client.GetTorrentPropertiesAsync(hash));
-            down.Should().Be(null);
-            up.Should().Be(null);
+            down.Should().Be(DefaultTorrentRateLimit);
+            up.Should().Be(DefaultTorrentRateLimit);
             props.DownloadLimit.Should().Be(null);
             props.UploadLimit.Should().Be(null);
 
@@ -1406,7 +1418,7 @@ namespace QBittorrent.Client.Tests
             var parser = new BencodeParser();
             var hashes = files.Select(f => parser.Parse<Torrent>(f).OriginalInfoHash.ToLower()).ToArray();
 
-            await Client.AddTorrentsAsync(new AddTorrentFilesRequest(files) {Paused = true});
+            await Client.AddTorrentsAsync(new AddTorrentFilesRequest(files) { Paused = true });
             await Task.Delay(1000);
             var list = await Client.GetTorrentListAsync();
             list.Should().HaveCount(files.Length);
@@ -1415,9 +1427,9 @@ namespace QBittorrent.Client.Tests
                 Client.GetTorrentDownloadLimitAsync(hashes),
                 Client.GetTorrentUploadLimitAsync(hashes));
             down.Should().HaveCount(files.Length);
-            down.Values.Should().AllBeEquivalentTo(default(long?));
+            down.Values.Should().AllBeEquivalentTo(DefaultTorrentRateLimit);
             up.Should().HaveCount(files.Length);
-            up.Values.Should().AllBeEquivalentTo(default(long?));
+            up.Values.Should().AllBeEquivalentTo(DefaultTorrentRateLimit);
 
             await Client.SetTorrentDownloadLimitAsync(downLimit);
             await Utils.Retry(async () =>
@@ -1480,12 +1492,12 @@ namespace QBittorrent.Client.Tests
 
             var filesToAdd = Directory.GetFiles(Utils.TorrentsFolder, "*.torrent");
 
-            var addRequest = new AddTorrentFilesRequest(filesToAdd) {Paused = true};
+            var addRequest = new AddTorrentFilesRequest(filesToAdd) { Paused = true };
             await Client.AddTorrentsAsync(addRequest);
 
             var torrents = await Utils.Retry(async () =>
             {
-                var list = await Client.GetTorrentListAsync(new TorrentListQuery {SortBy = "priority"});
+                var list = await Client.GetTorrentListAsync(new TorrentListQuery { SortBy = "priority" });
                 list.Should().HaveCount(filesToAdd.Length);
                 list.Select(t => t.Priority).Should().Equal(1, 2, 3);
                 return list;
@@ -1495,7 +1507,7 @@ namespace QBittorrent.Client.Tests
 
             await Utils.Retry(async () =>
             {
-                var list = await Client.GetTorrentListAsync(new TorrentListQuery {SortBy = "priority"});
+                var list = await Client.GetTorrentListAsync(new TorrentListQuery { SortBy = "priority" });
                 list.Should().HaveCount(filesToAdd.Length);
                 list.Select(t => t.Priority).Should().Equal(1, 2, 3);
                 list.Select(t => t.Hash).Should().Equal(torrents[0].Hash, torrents[2].Hash, torrents[1].Hash);
@@ -1511,12 +1523,12 @@ namespace QBittorrent.Client.Tests
 
             var filesToAdd = Directory.GetFiles(Utils.TorrentsFolder, "*.torrent");
 
-            var addRequest = new AddTorrentFilesRequest(filesToAdd) {Paused = true};
+            var addRequest = new AddTorrentFilesRequest(filesToAdd) { Paused = true };
             await Client.AddTorrentsAsync(addRequest);
 
             var torrents = await Utils.Retry(async () =>
             {
-                var list = await Client.GetTorrentListAsync(new TorrentListQuery {SortBy = "priority"});
+                var list = await Client.GetTorrentListAsync(new TorrentListQuery { SortBy = "priority" });
                 list.Should().HaveCount(filesToAdd.Length);
                 list.Select(t => t.Priority).Should().Equal(1, 2, 3);
                 return list;
@@ -1526,7 +1538,7 @@ namespace QBittorrent.Client.Tests
 
             await Utils.Retry(async () =>
             {
-                var list = await Client.GetTorrentListAsync(new TorrentListQuery {SortBy = "priority"});
+                var list = await Client.GetTorrentListAsync(new TorrentListQuery { SortBy = "priority" });
                 list.Should().HaveCount(filesToAdd.Length);
                 list.Select(t => t.Priority).Should().Equal(1, 2, 3);
                 list.Select(t => t.Hash).Should().Equal(torrents[1].Hash, torrents[0].Hash, torrents[2].Hash);
@@ -1542,12 +1554,12 @@ namespace QBittorrent.Client.Tests
 
             var filesToAdd = Directory.GetFiles(Utils.TorrentsFolder, "*.torrent");
 
-            var addRequest = new AddTorrentFilesRequest(filesToAdd) {Paused = true};
+            var addRequest = new AddTorrentFilesRequest(filesToAdd) { Paused = true };
             await Client.AddTorrentsAsync(addRequest);
 
             var torrents = await Utils.Retry(async () =>
             {
-                var list = await Client.GetTorrentListAsync(new TorrentListQuery {SortBy = "priority"});
+                var list = await Client.GetTorrentListAsync(new TorrentListQuery { SortBy = "priority" });
                 list.Should().HaveCount(filesToAdd.Length);
                 list.Select(t => t.Priority).Should().Equal(1, 2, 3);
                 return list;
@@ -1557,7 +1569,7 @@ namespace QBittorrent.Client.Tests
 
             await Utils.Retry(async () =>
             {
-                var list = await Client.GetTorrentListAsync(new TorrentListQuery {SortBy = "priority"});
+                var list = await Client.GetTorrentListAsync(new TorrentListQuery { SortBy = "priority" });
                 list.Should().HaveCount(filesToAdd.Length);
                 list.Select(t => t.Priority).Should().Equal(1, 2, 3);
                 list.Select(t => t.Hash).Should().Equal(torrents[2].Hash, torrents[0].Hash, torrents[1].Hash);
@@ -1573,12 +1585,12 @@ namespace QBittorrent.Client.Tests
 
             var filesToAdd = Directory.GetFiles(Utils.TorrentsFolder, "*.torrent");
 
-            var addRequest = new AddTorrentFilesRequest(filesToAdd) {Paused = true};
+            var addRequest = new AddTorrentFilesRequest(filesToAdd) { Paused = true };
             await Client.AddTorrentsAsync(addRequest);
 
             var torrents = await Utils.Retry(async () =>
             {
-                var list = await Client.GetTorrentListAsync(new TorrentListQuery {SortBy = "priority"});
+                var list = await Client.GetTorrentListAsync(new TorrentListQuery { SortBy = "priority" });
                 list.Should().HaveCount(filesToAdd.Length);
                 list.Select(t => t.Priority).Should().Equal(1, 2, 3);
                 return list;
@@ -1588,7 +1600,7 @@ namespace QBittorrent.Client.Tests
 
             await Utils.Retry(async () =>
             {
-                var list = await Client.GetTorrentListAsync(new TorrentListQuery {SortBy = "priority"});
+                var list = await Client.GetTorrentListAsync(new TorrentListQuery { SortBy = "priority" });
                 list.Should().HaveCount(filesToAdd.Length);
                 list.Select(t => t.Priority).Should().Equal(1, 2, 3);
                 list.Select(t => t.Hash).Should().Equal(torrents[1].Hash, torrents[2].Hash, torrents[0].Hash);
@@ -1829,7 +1841,7 @@ namespace QBittorrent.Client.Tests
                     .Should().BeEquivalentTo(tracker1, tracker2, newTracker);
             });
 
-            await Client.DeleteTrackersAsync(torrent.Hash, new[] {tracker1, newTracker});
+            await Client.DeleteTrackersAsync(torrent.Hash, new[] { tracker1, newTracker });
 
             await Utils.Retry(async () =>
             {
@@ -2203,7 +2215,7 @@ namespace QBittorrent.Client.Tests
 
             var fileToAdd = Path.Combine(Utils.TorrentsFolder, "ubuntu-16.04.4-desktop-amd64.iso.torrent");
             await Utils.Retry(() => Client.AddTorrentsAsync(new AddTorrentFilesRequest(fileToAdd)
-                {FirstLastPiecePrioritized = initial}));
+            { FirstLastPiecePrioritized = initial }));
 
             var torrent = await Utils.Retry(async () =>
             {
@@ -2240,7 +2252,7 @@ namespace QBittorrent.Client.Tests
 
             var files = Directory.GetFiles(Utils.TorrentsFolder, "*.torrent");
             await Utils.Retry(() =>
-                Client.AddTorrentsAsync(new AddTorrentFilesRequest(files) {FirstLastPiecePrioritized = initial}));
+                Client.AddTorrentsAsync(new AddTorrentFilesRequest(files) { FirstLastPiecePrioritized = initial }));
 
             var torrents = await Utils.Retry(async () =>
             {
@@ -2279,7 +2291,7 @@ namespace QBittorrent.Client.Tests
 
             var fileToAdd = Path.Combine(Utils.TorrentsFolder, "ubuntu-16.04.4-desktop-amd64.iso.torrent");
             await Utils.Retry(() =>
-                Client.AddTorrentsAsync(new AddTorrentFilesRequest(fileToAdd) {SequentialDownload = initial}));
+                Client.AddTorrentsAsync(new AddTorrentFilesRequest(fileToAdd) { SequentialDownload = initial }));
 
             var torrent = await Utils.Retry(async () =>
             {
@@ -2316,7 +2328,7 @@ namespace QBittorrent.Client.Tests
 
             var files = Directory.GetFiles(Utils.TorrentsFolder, "*.torrent");
             await Utils.Retry(() =>
-                Client.AddTorrentsAsync(new AddTorrentFilesRequest(files) {SequentialDownload = initial}));
+                Client.AddTorrentsAsync(new AddTorrentFilesRequest(files) { SequentialDownload = initial }));
 
             var torrents = await Utils.Retry(async () =>
             {
@@ -2415,7 +2427,7 @@ namespace QBittorrent.Client.Tests
 
         [SkippableFact]
         [PrintTestName]
-        public async Task SetShareLimitWithInactiveSeedingTimeLimit()
+        public async Task SetShareLimit_API_2_9_2()
         {
             Skip.If(ApiVersionLessThan(2, 9, 2));
 
@@ -2497,8 +2509,8 @@ namespace QBittorrent.Client.Tests
         [SkippableTheory]
         [InlineData(nameof(Preferences.Locale), "C", "de")]
         [InlineData(nameof(Preferences.TempPathEnabled), false, true)]
-        [InlineData(nameof(Preferences.ExportDirectory), "", "/tmp/")]
-        [InlineData(nameof(Preferences.ExportDirectoryForFinished), "", "/tmp/")]
+        [InlineData(nameof(Preferences.ExportDirectory), "", "/tmp")]
+        [InlineData(nameof(Preferences.ExportDirectoryForFinished), "", "/tmp")]
         [InlineData(nameof(Preferences.MailNotificationEnabled), false, true)]
         [InlineData(nameof(Preferences.MailNotificationEmailAddress), "", "test@example.com")]
         [InlineData(nameof(Preferences.MailNotificationSmtpServer), "smtp.changeme.com", "smtp.example.com")]
@@ -2518,7 +2530,7 @@ namespace QBittorrent.Client.Tests
         [InlineData(nameof(Preferences.AppendExtensionToIncompleteFiles), false, true)]
         [InlineData(nameof(Preferences.ListenPort), 6881, 8888)]
         [InlineData(nameof(Preferences.UpnpEnabled), true, false)]
-        [InlineData(nameof(Preferences.RandomPort), false, true, new[] {nameof(Preferences.ListenPort)})]
+        [InlineData(nameof(Preferences.RandomPort), false, true, new[] { nameof(Preferences.ListenPort) })]
         [InlineData(nameof(Preferences.DownloadLimit), 0, 40960)]
         [InlineData(nameof(Preferences.UploadLimit), 0, 40960)]
         [InlineData(nameof(Preferences.MaxConnections), 500, 600)]
@@ -2536,8 +2548,8 @@ namespace QBittorrent.Client.Tests
         [InlineData(nameof(Preferences.LocalPeerDiscovery), true, false)]
         [InlineData(nameof(Preferences.Encryption), Encryption.Prefer, Encryption.ForceOn)]
         [InlineData(nameof(Preferences.AnonymousMode), false, true)]
-        [InlineData(nameof(Preferences.ProxyType), default(ProxyType), ProxyType.Http)]
-        [InlineData(nameof(Preferences.ProxyAddress), "0.0.0.0", "192.168.254.200")]
+        [InlineData(nameof(Preferences.ProxyType), nameof(GetPreferenceDefault), ProxyType.Http)]
+        [InlineData(nameof(Preferences.ProxyAddress), nameof(GetPreferenceDefault), "192.168.254.200")]
         [InlineData(nameof(Preferences.ProxyPort), 8080, 8888)]
         [InlineData(nameof(Preferences.ProxyPeerConnections), false, true)]
         [InlineData(nameof(Preferences.ForceProxy), true, false)]
@@ -2547,7 +2559,7 @@ namespace QBittorrent.Client.Tests
         [InlineData(nameof(Preferences.IpFilterEnabled), false, true)]
         [InlineData(nameof(Preferences.IpFilterPath), "", "/tmp/ipfilter.dat")]
         [InlineData(nameof(Preferences.IpFilterTrackers), false, true)]
-        [InlineData(nameof(Preferences.WebUIUpnp), true, false)]
+        [InlineData(nameof(Preferences.WebUIUpnp), nameof(GetPreferenceDefault), false)]
         [InlineData(nameof(Preferences.WebUIClickjackingProtection), true, false)]
         [InlineData(nameof(Preferences.WebUICsrfProtection), true, false)]
         [InlineData(nameof(Preferences.WebUIHostHeaderValidation), true, false)]
@@ -2557,9 +2569,9 @@ namespace QBittorrent.Client.Tests
         [InlineData(nameof(Preferences.DynamicDnsUsername), "", "testuser")]
         [InlineData(nameof(Preferences.DynamicDnsPassword), "", "testpassword")]
         [InlineData(nameof(Preferences.BannedIpAddresses), new string[0],
-            new[] {"192.168.254.201", "2001:db8::ff00:42:8329"})]
+            new[] { "192.168.254.201", "2001:db8::ff00:42:8329" })]
         [InlineData(nameof(Preferences.AdditinalTrackers), new string[0],
-            new[] {"http://test1.example.com", "http://test2.example.com"})]
+            new[] { "http://test1.example.com", "http://test2.example.com" })]
         // API 2.2
         [InlineData(nameof(Preferences.CreateTorrentSubfolder), true, false)]
         [InlineData(nameof(Preferences.AddTorrentPaused), false, true)]
@@ -2606,15 +2618,15 @@ namespace QBittorrent.Client.Tests
         [InlineData(nameof(Preferences.WebUISecureCookie), true, false)]
         [InlineData(nameof(Preferences.WebUIMaxAuthenticationFailures), 5, 3)]
         [InlineData(nameof(Preferences.WebUIBanDuration), 3600, 1800)]
-        [InlineData(nameof(Preferences.LibtorrentStopTrackerTimeout), 5, 10)]
+        [InlineData(nameof(Preferences.LibtorrentStopTrackerTimeout), nameof(GetPreferenceDefault), 10)]
         // API 2.5.1
         [InlineData(nameof(Preferences.WebUICustomHttpHeadersEnabled), false, true)]
-        [InlineData(nameof(Preferences.WebUICustomHttpHeaders), 
-            new string[] {},
-            new [] { "X-FORWARDED-HOST:localhost", "X-FORWARDED-PROTO:HTTP" })]
+        [InlineData(nameof(Preferences.WebUICustomHttpHeaders),
+            new string[] { },
+            new[] { "X-FORWARDED-HOST:localhost", "X-FORWARDED-PROTO:HTTP" })]
         [InlineData(nameof(Preferences.RssDownloadRepackProperEpisodes), true, false)]
-        [InlineData(nameof(Preferences.RssSmartEpisodeFilters), 
-            new[] { @"s(\d+)e(\d+)", @"(\d+)x(\d+)", @"(\d{4}[.\-]\d{1,2}[.\-]\d{1,2})", @"(\d{1,2}[.\-]\d{1,2}[.\-]\d{4})" }, 
+        [InlineData(nameof(Preferences.RssSmartEpisodeFilters),
+            new[] { @"s(\d+)e(\d+)", @"(\d+)x(\d+)", @"(\d{4}[.\-]\d{1,2}[.\-]\d{1,2})", @"(\d{1,2}[.\-]\d{1,2}[.\-]\d{4})" },
             new[] { @"s(\d+)e(\d+)", @"(\d{4}[.\-]\d{1,3}[.\-]\d{1,3})" })]
         // API 2.6.0
         [InlineData(nameof(Preferences.LibtorrentMaxConcurrentHttpAnnounces), 50, 30)]
@@ -2634,6 +2646,12 @@ namespace QBittorrent.Client.Tests
                     ? new ApiVersion(2)
                     : ApiVersion.Parse(apiLevelAttr.MinVersion);
                 Skip.If(DockerFixture.Env.ApiVersion < minVersion, $"API version is less than {minVersion}.");
+
+                if (!string.IsNullOrEmpty(apiLevelAttr.MaxVersion))
+                {
+                    var maxVersion = ApiVersion.Parse(apiLevelAttr.MaxVersion);
+                    Skip.If(DockerFixture.Env.ApiVersion > maxVersion, $"API version is greater than {maxVersion}.");
+                }
             }
 
             var deprecatedAttr = prop.GetCustomAttribute<DeprecatedAttribute>();
@@ -2646,7 +2664,7 @@ namespace QBittorrent.Client.Tests
             await Client.LoginAsync(UserName, Password);
 
             var oldPrefs = await Client.GetPreferencesAsync();
-            prop.GetValue(oldPrefs).Should().BeEquivalentTo(oldValue);
+            prop.GetValue(oldPrefs).Should().BeEquivalentTo(oldValue.Equals(nameof(GetPreferenceDefault)) ? GetPreferenceDefault(name) : oldValue);
 
             var setPrefs = new Preferences();
             prop.SetValue(setPrefs, newValue);
@@ -2661,6 +2679,15 @@ namespace QBittorrent.Client.Tests
                     .Excluding(ctx => ignoredProperties.Contains(ctx.SelectedMemberPath)));
             });
         }
+
+        private object GetPreferenceDefault(string name) => name switch 
+        {
+            nameof(Preferences.LibtorrentStopTrackerTimeout) => ApiVersionLessThan(2, 9) ? 5 : 2,
+            nameof(Preferences.ProxyAddress) => ApiVersionLessThan(2, 9) ? "0.0.0.0" : "",
+            nameof(Preferences.ProxyType) => ApiVersionLessThan(2, 9) ? 0 : ProxyType.None,
+            nameof(Preferences.WebUIUpnp) => ApiVersionLessThan(2, 9) ? true : false,
+            _ => throw new NotImplementedException(name)
+        };
 
         [SkippableFact]
         [PrintTestName]
@@ -3157,7 +3184,7 @@ namespace QBittorrent.Client.Tests
 
             await Client.LoginAsync(UserName, Password);
 
-            var initial = ApiVersionLessThan(2, 8) ? 40 : 5000;
+            var initial = ApiVersionLessThan(2, 8) ? 40 : ApiVersionLessThan(2, 9) ? 5000 : 100;
 
             var oldPrefs = await Client.GetPreferencesAsync();
             oldPrefs.LibtorrentFilePoolSize.Should().Be(initial);
@@ -3267,7 +3294,7 @@ namespace QBittorrent.Client.Tests
         {
             await Client.LoginAsync(UserName, Password);
 
-            var initial = ApiVersionLessThan(2, 8) 
+            var initial = ApiVersionLessThan(2, 8) || ApiVersionMoreThan(2, 9)
                 ? "/downloads/temp"
                 : "/home/qbittorrent/Downloads/temp";
 
@@ -4339,6 +4366,9 @@ namespace QBittorrent.Client.Tests
             return DockerFixture.Env.ApiVersion > new ApiVersion(major, minor, build);
         }
 
-
+        private bool ApiVersionIs(byte major, byte minor = 0, byte build = 0)
+        {
+            return DockerFixture.Env.ApiVersion == new ApiVersion(major, minor, build);
+        }
     }
 }

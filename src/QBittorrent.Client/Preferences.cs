@@ -391,7 +391,7 @@ namespace QBittorrent.Client
         /// True if proxy should be used only for torrents.
         /// </summary>
         [JsonProperty("proxy_torrents_only")]
-        [ApiLevel(ApiLevel.V2)]
+        [ApiLevel(ApiLevel.V2, MaxVersion = "2.8.19")]
         public bool? ProxyTorrentsOnly { get; set; }
 
         /// <summary>
@@ -941,7 +941,7 @@ namespace QBittorrent.Client
         /// </remarks>
         [JsonProperty("enable_os_cache")]
         [SuppressMessage("ReSharper", "InconsistentNaming")]
-        [ApiLevel(ApiLevel.V2, MinVersion = "2.3")]
+        [ApiLevel(ApiLevel.V2, MinVersion = "2.3", MaxVersion = "2.8.19")]
         public bool? LibtorrentUseOSCache { get; set; }
 
         /// <summary>
@@ -1241,6 +1241,54 @@ namespace QBittorrent.Client
                 WebUIPasswordHash = hashToken.Value<string>();
                 AdditionalData.Remove(WebUiPasswordPropertyName);
             }
+        }
+    }
+
+    /// <summary>
+    /// JSON converter for the <see cref="ProxyType"/> preference.
+    /// </summary>
+    public class ProxyTypeConverter : JsonConverter
+    {
+        private readonly ApiVersion _apiVersion;
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="ProxyTypeConverter"/> class.
+        /// </summary>
+        /// <param name="apiVersion">qBittorrent API version.</param>
+        public ProxyTypeConverter(ApiVersion apiVersion)
+        {
+            _apiVersion = apiVersion;
+        }
+
+        /// <summary>
+        /// Indicates whether this converter can write a type to JSON.
+        /// </summary>
+        /// <param name="type">The type.</param>
+        /// <returns>True if <paramref name="type"/> is nullable <see cref="ProxyType"/>.</returns>
+        public override bool CanConvert(Type type) => type == typeof(ProxyType?);
+
+        /// <summary>
+        /// Indicates whether this converter can read JSON.
+        /// </summary>
+        /// <returns>Always false.</returns>
+        public override bool CanRead => false;
+
+        /// <summary>
+        /// Reads a value from JSON.
+        /// </summary>
+        /// <exception cref="NotImplementedException">This converter is not capable of reading JSON.</exception>
+        public override object ReadJson(JsonReader reader, Type objectType, object existingValue, JsonSerializer serializer)
+        {
+            throw new NotImplementedException();
+        }
+
+        /// <summary>
+        /// Writes a value to JSON.
+        /// </summary>
+        public override void WriteJson(JsonWriter writer, object value, JsonSerializer serializer)
+        {
+            var proxyType = (ProxyType?)value;
+            writer.WriteValue(_apiVersion < new ApiVersion(2, 9) ? (int?)proxyType : proxyType?.ToString().ToUpper());
         }
     }
 }

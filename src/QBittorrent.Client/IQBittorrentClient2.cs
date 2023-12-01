@@ -306,7 +306,7 @@ namespace QBittorrent.Client
         /// <returns></returns>
         /// <seealso cref="ShareLimits.Ratio" />
         /// <seealso cref="ShareLimits.SeedingTime" />
-        [ApiLevel(ApiLevel.V2, MinVersion = "2.0.1")]
+        [ApiLevel(ApiLevel.V2, MinVersion = "2.0.1", MaxVersion = "2.9.1")]
         Task SetShareLimitsAsync(
             [NotNull, ItemNotNull] IEnumerable<string> hashes,
             double ratio,

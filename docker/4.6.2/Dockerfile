@@ -50,7 +50,7 @@ RUN set -x \
     # Build qBittorrent from source code
  && git clone https://github.com/qbittorrent/qBittorrent.git /tmp/qbittorrent \
  && cd /tmp/qbittorrent \
- && git checkout release-4.6.0 \
+ && git checkout release-4.6.2 \
     # Compile
  && PKG_CONFIG_PATH=/usr/local/lib/pkgconfig ./configure --disable-gui --disable-stacktrace CXXFLAGS="-std=c++17" \
  && make install \

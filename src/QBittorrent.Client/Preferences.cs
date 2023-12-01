@@ -414,6 +414,27 @@ namespace QBittorrent.Client
         public string ProxyPassword { get; set; }
 
         /// <summary>
+        /// True if proxy should be used for BitTorrent purposes.
+        /// </summary>
+        [JsonProperty("proxy_bittorrent")]
+        [ApiLevel(ApiLevel.V2, MinVersion = "2.9.1")]
+        public bool? ProxyBittorrent { get; set; }
+
+        /// <summary>
+        /// True if proxy should be used for general purposes.
+        /// </summary>
+        [JsonProperty("proxy_misc")]
+        [ApiLevel(ApiLevel.V2, MinVersion = "2.9.1")]
+        public bool? ProxyMisc { get; set; }
+
+        /// <summary>
+        /// True if proxy should be used for RSS purposes.
+        /// </summary>
+        [JsonProperty("proxy_rss")]
+        [ApiLevel(ApiLevel.V2, MinVersion = "2.9.1")]
+        public bool? ProxyRss { get; set; }
+
+        /// <summary>
         /// True if external IP filter should be enabled.
         /// </summary>
         [JsonProperty("ip_filter_enabled")]

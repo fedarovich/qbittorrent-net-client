@@ -362,6 +362,43 @@ namespace QBittorrent.Client
         }
 
         /// <summary>
+        /// Sets the torrent share limits.
+        /// </summary>
+        /// <param name="client">An <see cref="IQBittorrentClient2"/> instance.</param>
+        /// <param name="hash">The torrent hash.</param>
+        /// <param name="ratio">
+        /// The ratio limit.
+        /// Use <see cref="ShareLimits.Ratio.Global"/> in order to use global limit.
+        /// Use <see cref="ShareLimits.Ratio.Unlimited"/> in order to set no limit.
+        /// </param>
+        /// <param name="seedingTime">
+        /// The seeding time limit.
+        /// Use <see cref="ShareLimits.SeedingTime.Global"/> in order to use global limit.
+        /// Use <see cref="ShareLimits.SeedingTime.Unlimited"/> in order to set no limit.
+        /// </param>
+        /// <param name="inactiveSeedingTime">
+        /// The inactive seeding time limit.
+        /// Use <see cref="ShareLimits.SeedingTime.Global"/> in order to use global limit.
+        /// Use <see cref="ShareLimits.SeedingTime.Unlimited"/> in order to set no limit.
+        /// </param>
+        /// <param name="token">The cancellation token.</param>
+        /// <returns></returns>
+        /// <seealso cref="ShareLimits.Ratio" />
+        /// <seealso cref="ShareLimits.SeedingTime" />
+        [ApiLevel(ApiLevel.V2, MinVersion = "2.9.2")]
+        public static Task SetShareLimitsAsync(
+            [NotNull] this IQBittorrentClient2 client,
+            [NotNull] string hash,
+            double ratio,
+            TimeSpan seedingTime,
+            TimeSpan inactiveSeedingTime,
+            CancellationToken token = default)
+        {
+            ValidateHash(hash);
+            return client.SetShareLimitsAsync(new[] { hash }, ratio, seedingTime, inactiveSeedingTime, token);
+        }
+
+        /// <summary>
         /// Gets the list of IP addresses for all available network interfaces.
         /// </summary>
         /// <param name="client">An <see cref="IQBittorrentClient2"/> instance.</param>

@@ -1096,15 +1096,19 @@ namespace QBittorrent.Client
         /// </param>
         /// <param name="token">The cancellation token.</param>
         /// <returns></returns>
-        public Task SetPreferencesAsync(
+        public async Task SetPreferencesAsync(
             Preferences preferences,
             CancellationToken token = default)
         {
             if (preferences == null)
                 throw new ArgumentNullException(nameof(preferences));
 
-            var json = JsonConvert.SerializeObject(preferences);
-            return PostAsync(p => p.SetPreferences(json), token);
+            var json = JsonConvert.SerializeObject(preferences, new JsonSerializerSettings
+            {
+                Converters = { new ProxyTypeConverter(await GetApiVersionAsync(token).ConfigureAwait(false)) }
+            });
+
+            await PostAsync(p => p.SetPreferences(json), token);
         }
 
 

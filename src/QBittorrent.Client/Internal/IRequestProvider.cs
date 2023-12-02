@@ -124,6 +124,10 @@ namespace QBittorrent.Client.Internal
 
         (Uri url, HttpContent request) RenameFolder(string hash, string oldPath, string newPath);
 
+        // API 2.9
+
+        (Uri url, HttpContent request) SetShareLimits(IEnumerable<string> hashes, double ratio, TimeSpan seedingTime, TimeSpan inactiveSeedingTime);
+
         // RSS
 
         (Uri url, HttpContent request) AddRssFolder(string path);

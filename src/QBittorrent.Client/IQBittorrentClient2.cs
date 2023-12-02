@@ -306,11 +306,42 @@ namespace QBittorrent.Client
         /// <returns></returns>
         /// <seealso cref="ShareLimits.Ratio" />
         /// <seealso cref="ShareLimits.SeedingTime" />
-        [ApiLevel(ApiLevel.V2, MinVersion = "2.0.1")]
+        [ApiLevel(ApiLevel.V2, MinVersion = "2.0.1", MaxVersion = "2.9.1")]
         Task SetShareLimitsAsync(
             [NotNull, ItemNotNull] IEnumerable<string> hashes,
             double ratio,
             TimeSpan seedingTime,
+            CancellationToken token = default);
+
+        /// <summary>
+        /// Sets the torrent share limits.
+        /// </summary>
+        /// <param name="hashes">The torrent hashes.</param>
+        /// <param name="ratio">
+        /// The ratio limit.
+        /// Use <see cref="ShareLimits.Ratio.Global"/> in order to use global limit.
+        /// Use <see cref="ShareLimits.Ratio.Unlimited"/> in order to set no limit.
+        /// </param>
+        /// <param name="seedingTime">
+        /// The seeding time limit.
+        /// Use <see cref="ShareLimits.SeedingTime.Global"/> in order to use global limit.
+        /// Use <see cref="ShareLimits.SeedingTime.Unlimited"/> in order to set no limit.
+        /// </param>
+        /// <param name="inactiveSeedingTime">
+        /// The inactive seeding time limit.
+        /// Use <see cref="ShareLimits.SeedingTime.Global"/> in order to use global limit.
+        /// Use <see cref="ShareLimits.SeedingTime.Unlimited"/> in order to set no limit.
+        /// </param>
+        /// <param name="token">The cancellation token.</param>
+        /// <returns></returns>
+        /// <seealso cref="ShareLimits.Ratio" />
+        /// <seealso cref="ShareLimits.SeedingTime" />
+        [ApiLevel(ApiLevel.V2, MinVersion = "2.9.2")]
+        Task SetShareLimitsAsync(
+            [NotNull, ItemNotNull] IEnumerable<string> hashes,
+            double ratio,
+            TimeSpan seedingTime,
+            TimeSpan inactiveSeedingTime,
             CancellationToken token = default);
 
         /// <summary>

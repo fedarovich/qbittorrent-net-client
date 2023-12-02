@@ -99,6 +99,15 @@ namespace QBittorrent.Client.Internal
                 ("seedingTimeLimit", seedingTime.TotalMinutes.ToString("F0")));
         }
 
+        public override (Uri url, HttpContent request) SetShareLimits(IEnumerable<string> hashes, double ratio, TimeSpan seedingTime, TimeSpan inactiveSeedingTime)
+        {
+            return BuildForm(Url.SetShareLimits(),
+                ("hashes", JoinHashes(hashes)),
+                ("ratioLimit", ratio.ToString("R", CultureInfo.InvariantCulture)),
+                ("seedingTimeLimit", seedingTime.TotalMinutes.ToString("F0")),
+                ("inactiveSeedingTimeLimit", inactiveSeedingTime.TotalMinutes.ToString("F0")));
+        }
+
         public override (Uri url, HttpContent request) BanPeers(IEnumerable<string> peers)
         {
             return BuildForm(Url.BanPeers(),

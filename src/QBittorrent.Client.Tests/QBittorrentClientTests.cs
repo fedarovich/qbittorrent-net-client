@@ -984,9 +984,16 @@ namespace QBittorrent.Client.Tests
             var filesToAdd = Directory.GetFiles(Utils.TorrentsFolder, "*.torrent");
 
             await Client.AddTorrentsAsync(new AddTorrentFilesRequest(filesToAdd) { Paused = true });
-            await Task.Delay(1000);
 
-            var list = await Client.GetTorrentListAsync();
+            IReadOnlyList<TorrentInfo> list = null;
+
+            do
+            {
+                await Task.Delay(1000);
+                list = await Client.GetTorrentListAsync();
+            }
+            while (list.Any(t => t.State == TorrentState.CheckingResumeData));
+
             list.Should().OnlyContain(t => t.State == TorrentState.PausedDownload);
 
             await Client.ResumeAsync();

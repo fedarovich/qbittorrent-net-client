@@ -15,6 +15,7 @@ using BencodeNET.Parsing;
 using BencodeNET.Torrents;
 using Docker.DotNet.Models;
 using FluentAssertions;
+using FluentAssertions.Execution;
 using Newtonsoft.Json.Linq;
 using Org.BouncyCastle.Asn1.X509;
 using Org.BouncyCastle.Crypto;
@@ -812,56 +813,104 @@ namespace QBittorrent.Client.Tests
 
             int responseId = 0;
             var partialData = await Client.GetPartialDataAsync(responseId);
-            partialData.Should().NotBeNull();
-            partialData.FullUpdate.Should().BeTrue();
-            partialData.TorrentsChanged.Should().HaveCount(1);
-            partialData.TorrentsChanged.Should().Contain(p => p.Key.ToLower() == hashes[0]);
-            partialData.TorrentsRemoved.Should().BeNull();
-            if (ApiVersionLessThan(2, 9))
+            using (new AssertionScope())
             {
-                partialData.CategoriesAdded.Should().BeEmpty();
-                partialData.CategoriesChanged.Should().BeEmpty();
-            }
-            else
-            {
-                partialData.CategoriesAdded.Should().BeNull();
-                partialData.CategoriesChanged.Should().BeNull();
-            }
-            partialData.CategoriesRemoved.Should().BeNull();
+                partialData.Should().NotBeNull();
+                partialData.FullUpdate.Should().BeTrue();
+                partialData.TorrentsChanged.Should().HaveCount(1);
+                partialData.TorrentsChanged.Should().Contain(p => p.Key.ToLower() == hashes[0]);
+                partialData.TorrentsRemoved.Should().BeNull();
+                if (ApiVersionLessThan(2, 9))
+                {
+                    partialData.CategoriesAdded.Should().BeEmpty();
+                    partialData.CategoriesChanged.Should().BeEmpty();
+                }
+                else
+                {
+                    partialData.CategoriesAdded.Should().BeNull();
+                    partialData.CategoriesChanged.Should().BeNull();
+                }
 
-            if (!ApiVersionLessThan(2, 1, 1) && !ApiVersionIs(2, 9, 2))
-            {
-                partialData.ServerState.FreeSpaceOnDisk.Should().BeGreaterThan(0);
+                partialData.CategoriesRemoved.Should().BeNull();
+
+                if (!ApiVersionLessThan(2, 1, 1) && !ApiVersionIs(2, 9, 2))
+                {
+                    partialData.ServerState.FreeSpaceOnDisk.Should().BeGreaterThan(0);
+                }
             }
 
             responseId = partialData.ResponseId;
             var refreshInterval = partialData.ServerState.RefreshInterval ?? 1000;
+            bool hasNotPausedTorrents = partialData.TorrentsChanged.Values.Any(t => t.State != TorrentState.PausedDownload);
+
+            if (hasNotPausedTorrents)
+            {
+                await Task.Delay(refreshInterval);
+
+                partialData = await Client.GetPartialDataAsync(responseId);
+                using (new AssertionScope())
+                {
+                    partialData.Should().NotBeNull();
+                    partialData.FullUpdate.Should().BeFalse();
+                    partialData.TorrentsChanged.Should().HaveCount(1);
+                    partialData.TorrentsRemoved.Should().BeNull();
+                    partialData.CategoriesAdded.Should().BeNull();
+                    partialData.CategoriesChanged.Should().BeNull();
+                    partialData.CategoriesRemoved.Should().BeNull();
+                }
+                responseId = partialData.ResponseId;
+            }
 
             await Task.Delay(refreshInterval);
 
             partialData = await Client.GetPartialDataAsync(responseId);
-            partialData.Should().NotBeNull();
-            partialData.FullUpdate.Should().BeFalse();
-            partialData.TorrentsChanged.Should().BeNull();
-            partialData.TorrentsRemoved.Should().BeNull();
-            partialData.CategoriesAdded.Should().BeNull();
-            partialData.CategoriesChanged.Should().BeNull();
-            partialData.CategoriesRemoved.Should().BeNull();
+            using (new AssertionScope())
+            {
+                partialData.Should().NotBeNull();
+                partialData.FullUpdate.Should().BeFalse();
+                partialData.TorrentsChanged.Should().BeNull();
+                partialData.TorrentsRemoved.Should().BeNull();
+                partialData.CategoriesAdded.Should().BeNull();
+                partialData.CategoriesChanged.Should().BeNull();
+                partialData.CategoriesRemoved.Should().BeNull();
+            }
+
             responseId = partialData.ResponseId;
 
             await Client.AddTorrentsAsync(new AddTorrentFilesRequest(filesToAdd.Skip(1)) { Paused = true });
             await Task.Delay(refreshInterval);
 
             partialData = await Client.GetPartialDataAsync(responseId);
-            partialData.FullUpdate.Should().BeFalse();
-            partialData.TorrentsChanged.Should().HaveCount(2);
-            partialData.TorrentsChanged.Should().Contain(p => p.Key.ToLower() == hashes[1]);
-            partialData.TorrentsChanged.Should().Contain(p => p.Key.ToLower() == hashes[2]);
-            partialData.TorrentsRemoved.Should().BeNull();
-            partialData.CategoriesAdded.Should().BeNull();
-            partialData.CategoriesChanged.Should().BeNull();
-            partialData.CategoriesRemoved.Should().BeNull();
+            using (new AssertionScope())
+            {
+                partialData.FullUpdate.Should().BeFalse();
+                partialData.TorrentsChanged.Should().HaveCount(2);
+                partialData.TorrentsChanged.Should().Contain(p => p.Key.ToLower() == hashes[1]);
+                partialData.TorrentsChanged.Should().Contain(p => p.Key.ToLower() == hashes[2]);
+                partialData.TorrentsRemoved.Should().BeNull();
+                partialData.CategoriesAdded.Should().BeNull();
+                partialData.CategoriesChanged.Should().BeNull();
+                partialData.CategoriesRemoved.Should().BeNull();
+            }
             responseId = partialData.ResponseId;
+
+            var nonPausedTorrentCount = partialData.TorrentsChanged.Values.Count(t => t.State != TorrentState.PausedDownload);
+            while (nonPausedTorrentCount > 0)
+            {
+                partialData = await Client.GetPartialDataAsync(responseId);
+                using (new AssertionScope())
+                {
+                    partialData.FullUpdate.Should().BeFalse();
+                    partialData.TorrentsChanged.Should().HaveCountGreaterOrEqualTo(1);
+                    partialData.TorrentsChanged.Should().Contain(p => p.Key.ToLower() == hashes[1] || p.Key.ToLower() == hashes[2]);
+                    partialData.TorrentsRemoved.Should().BeNull();
+                    partialData.CategoriesAdded.Should().BeNull();
+                    partialData.CategoriesChanged.Should().BeNull();
+                    partialData.CategoriesRemoved.Should().BeNull();
+                }
+                responseId = partialData.ResponseId;
+                nonPausedTorrentCount = partialData.TorrentsChanged.Values.Count(t => t.State != TorrentState.PausedDownload);
+            }
 
             await Client.AddCategoryAsync("a");
             await Client.AddCategoryAsync("b", "/tmp");
@@ -869,18 +918,23 @@ namespace QBittorrent.Client.Tests
             await Task.Delay(refreshInterval);
 
             partialData = await Client.GetPartialDataAsync(responseId);
-            partialData.FullUpdate.Should().BeFalse();
-            partialData.TorrentsChanged.Should().HaveCount(1);
-            partialData.TorrentsChanged.Should().Contain(p => p.Key.ToLower() == hashes[0] && p.Value.Category == "b");
-            partialData.TorrentsRemoved.Should().BeNull();
-            partialData.CategoriesAdded.Should().BeNull();
-            partialData.CategoriesChanged.Should().BeEquivalentTo(
-                new Dictionary<string, Category>
-                {
-                    ["a"] = new Category { Name = "a", SavePath = "" },
-                    ["b"] = new Category { Name = "b", SavePath = "/tmp" }
-                });
-            partialData.CategoriesRemoved.Should().BeNull();
+            using (new AssertionScope())
+            {
+                partialData.FullUpdate.Should().BeFalse();
+                partialData.TorrentsChanged.Should().HaveCount(1);
+                partialData.TorrentsChanged.Should()
+                    .Contain(p => p.Key.ToLower() == hashes[0] && p.Value.Category == "b");
+                partialData.TorrentsRemoved.Should().BeNull();
+                partialData.CategoriesAdded.Should().BeNull();
+                partialData.CategoriesChanged.Should().BeEquivalentTo(
+                    new Dictionary<string, Category>
+                    {
+                        ["a"] = new Category { Name = "a", SavePath = "" },
+                        ["b"] = new Category { Name = "b", SavePath = "/tmp" }
+                    });
+                partialData.CategoriesRemoved.Should().BeNull();
+            }
+
             responseId = partialData.ResponseId;
 
             await Client.DeleteCategoryAsync("b");
@@ -888,14 +942,18 @@ namespace QBittorrent.Client.Tests
             await Task.Delay(refreshInterval);
 
             partialData = await Client.GetPartialDataAsync(responseId);
-            partialData.FullUpdate.Should().BeFalse();
-            partialData.TorrentsChanged.Should().HaveCountGreaterOrEqualTo(1);
-            partialData.TorrentsChanged.Should().Contain(p => p.Key.ToLower() == hashes[0] && p.Value.Category == "");
-            partialData.TorrentsRemoved.Should().HaveCount(1);
-            partialData.TorrentsRemoved.Should().Contain(hashes[1]);
-            partialData.CategoriesAdded.Should().BeNull();
-            partialData.CategoriesChanged.Should().BeNull();
-            partialData.CategoriesRemoved.Should().BeEquivalentTo("b");
+            using (new AssertionScope())
+            {
+                partialData.FullUpdate.Should().BeFalse();
+                partialData.TorrentsChanged.Should().HaveCountGreaterOrEqualTo(1);
+                partialData.TorrentsChanged.Should()
+                    .Contain(p => p.Key.ToLower() == hashes[0] && p.Value.Category == "");
+                partialData.TorrentsRemoved.Should().HaveCount(1);
+                partialData.TorrentsRemoved.Should().Contain(hashes[1]);
+                partialData.CategoriesAdded.Should().BeNull();
+                partialData.CategoriesChanged.Should().BeNull();
+                partialData.CategoriesRemoved.Should().BeEquivalentTo("b");
+            }
         }
 
 #pragma warning restore 618

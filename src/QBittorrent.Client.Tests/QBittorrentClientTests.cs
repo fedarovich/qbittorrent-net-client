@@ -939,15 +939,18 @@ namespace QBittorrent.Client.Tests
             await Client.AddTorrentsAsync(new AddTorrentFilesRequest(filesToAdd) { Paused = true });
             await Task.Delay(1000);
 
-            var list = await Client.GetTorrentListAsync();
-            list.Should().OnlyContain(t => t.State == TorrentState.PausedDownload);
+            var hash = await Utils.Retry(async () =>
+            {
+                var list = await Client.GetTorrentListAsync();
+                list.Should().OnlyContain(t => t.State == TorrentState.PausedDownload);
+                return list[1].Hash;
+            });
 
-            var hash = list[1].Hash;
             await Client.ResumeAsync(hash);
 
             await Utils.Retry(async () =>
             {
-                list = await Client.GetTorrentListAsync();
+                var list = await Client.GetTorrentListAsync();
                 list.Should().ContainSingle(t => t.State != TorrentState.PausedDownload)
                     .Which.Hash.Should().Be(hash);
             });
@@ -986,13 +989,16 @@ namespace QBittorrent.Client.Tests
             await Client.AddTorrentsAsync(new AddTorrentFilesRequest(filesToAdd) { Paused = true });
             await Task.Delay(1000);
 
-            var list = await Client.GetTorrentListAsync();
-            list.Should().OnlyContain(t => t.State == TorrentState.PausedDownload);
+            await Utils.Retry(async () =>
+            {
+                var list = await Client.GetTorrentListAsync();
+                list.Should().OnlyContain(t => t.State == TorrentState.PausedDownload);
+            });
 
             await Client.ResumeAsync();
             await Utils.Retry(async () =>
             {
-                list = await Client.GetTorrentListAsync();
+                var list = await Client.GetTorrentListAsync();
                 list.Should().OnlyContain(t => t.State != TorrentState.PausedDownload);
             });
         }
@@ -1032,15 +1038,18 @@ namespace QBittorrent.Client.Tests
             await Client.AddTorrentsAsync(new AddTorrentFilesRequest(filesToAdd) { Paused = true });
             await Task.Delay(1000);
 
-            var list = await Client.GetTorrentListAsync();
-            list.Should().OnlyContain(t => t.State == TorrentState.PausedDownload);
+            await Utils.Retry(async () =>
+            {
+                var list = await Client.GetTorrentListAsync();
+                list.Should().OnlyContain(t => t.State == TorrentState.PausedDownload);
+            });
 
 #pragma warning disable CS0618 // Type or member is obsolete
             await Client.ResumeAllAsync();
 #pragma warning restore CS0618 // Type or member is obsolete
             await Utils.Retry(async () =>
             {
-                list = await Client.GetTorrentListAsync();
+                var list = await Client.GetTorrentListAsync();
                 list.Should().OnlyContain(t => t.State != TorrentState.PausedDownload);
             });
         }

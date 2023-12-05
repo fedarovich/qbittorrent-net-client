@@ -1054,6 +1054,60 @@ namespace QBittorrent.Client.Tests
             });
         }
 
+        [SkippableFact]
+        [PrintTestName]
+        public async Task PauseMultiple()
+        {
+            Skip.If(ApiVersionLessThan(2, 0, 1), "API 2.0.1+ required for this test.");
+
+            await Client.LoginAsync(UserName, Password);
+
+            var filesToAdd = Directory.GetFiles(Utils.TorrentsFolder, "*.torrent");
+
+            await Client.AddTorrentsAsync(new AddTorrentFilesRequest(filesToAdd));
+            await Task.Delay(1000);
+
+            var list = await Client.GetTorrentListAsync();
+            list.Should().OnlyContain(t => t.State != TorrentState.PausedDownload);
+
+            var hashes = new[] { list[0].Hash, list[2].Hash };
+
+            await Client.PauseAsync(hashes);
+            await Utils.Retry(async () =>
+            {
+                list = await Client.GetTorrentListAsync();
+                list.Where(t => t.State == TorrentState.PausedDownload).Should().HaveCount(2);
+            });
+        }
+
+        [SkippableFact]
+        [PrintTestName]
+        public async Task ResumeMultiple()
+        {
+            Skip.If(ApiVersionLessThan(2, 0, 1), "API 2.0.1+ required for this test.");
+
+            await Client.LoginAsync(UserName, Password);
+
+            var filesToAdd = Directory.GetFiles(Utils.TorrentsFolder, "*.torrent");
+
+            await Client.AddTorrentsAsync(new AddTorrentFilesRequest(filesToAdd) { Paused = true });
+            await Task.Delay(1000);
+
+            var hashes = await Utils.Retry(async () =>
+            {
+                var list = await Client.GetTorrentListAsync();
+                list.Should().OnlyContain(t => t.State == TorrentState.PausedDownload);
+                return new[] { list[0].Hash, list[2].Hash };
+            });
+
+            await Client.ResumeAsync(hashes);
+            await Utils.Retry(async () =>
+            {
+                var list = await Client.GetTorrentListAsync();
+                list.Where(t => t.State != TorrentState.PausedDownload).Should().HaveCount(2);
+            });
+        }
+
         #endregion
 
         #region AddCategoryAsync/EditCategoryAsync/GetCategoriesAsync

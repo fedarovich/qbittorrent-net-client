@@ -95,6 +95,17 @@ namespace QBittorrent.Client
             CancellationToken token = default);
 
         /// <summary>
+        /// Pauses the torrents.
+        /// </summary>
+        /// <param name="hashes">The torrent hashes.</param>
+        /// <param name="token">The cancellation token.</param>
+        /// <returns></returns>
+        [ApiLevel(ApiLevel.V2)]
+        Task PauseAsync(
+            [NotNull, ItemNotNull] IEnumerable<string> hashes,
+            CancellationToken token = default);
+
+        /// <summary>
         /// Resumes all torrents.
         /// </summary>
         /// <param name="token">The cancellation token.</param>
@@ -102,6 +113,17 @@ namespace QBittorrent.Client
         /// <remarks>This method supersedes <see cref="IQBittorrentClient.ResumeAllAsync"/>.</remarks>
         [ApiLevel(ApiLevel.V1)]
         Task ResumeAsync(
+            CancellationToken token = default);
+
+        /// <summary>
+        /// Resumes the torrents.
+        /// </summary>
+        /// <param name="hashes">The torrent hashes.</param>
+        /// <param name="token">The cancellation token.</param>
+        /// <returns></returns>
+        [ApiLevel(ApiLevel.V2)]
+        Task ResumeAsync(
+            [NotNull, ItemNotNull] IEnumerable<string> hashes,
             CancellationToken token = default);
 
         /// <summary>

@@ -173,6 +173,18 @@ namespace QBittorrent.Client
         }
 
         /// <summary>
+        /// Pauses the torrents.
+        /// </summary>
+        /// <param name="hashes">The torrent hashes.</param>
+        /// <param name="token">The cancellation token.</param>
+        /// <returns></returns>
+        public Task PauseAsync(IEnumerable<string> hashes, CancellationToken token = default)
+        {
+            ValidateHashes(ref hashes);
+            return PostAsync(p => p.Pause(hashes), token, ApiLevel.V2);
+        }
+
+        /// <summary>
         /// Resumes all torrents.
         /// </summary>
         /// <param name="token">The cancellation token.</param>
@@ -182,6 +194,18 @@ namespace QBittorrent.Client
             CancellationToken token = default)
         {
             return PostAsync(p => p.ResumeAll(), token);
+        }
+
+        /// <summary>
+        /// Resumes the torrents.
+        /// </summary>
+        /// <param name="hashes">The torrent hashes.</param>
+        /// <param name="token">The cancellation token.</param>
+        /// <returns></returns>
+        public Task ResumeAsync(IEnumerable<string> hashes, CancellationToken token = default)
+        {
+            ValidateHashes(ref hashes);
+            return PostAsync(p => p.Resume(hashes), token, ApiLevel.V2);
         }
 
         /// <summary>

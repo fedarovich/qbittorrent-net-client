@@ -414,6 +414,13 @@ namespace QBittorrent.Client
         public string ProxyPassword { get; set; }
 
         /// <summary>
+        /// True if proxy should be used to perform hostname lookup.
+        /// </summary>
+        [JsonProperty("proxy_hostname_lookup")]
+        [ApiLevel(ApiLevel.V2, MinVersion = "2.8.18")]
+        public bool? ProxyHostnameLookup { get; set; }
+
+        /// <summary>
         /// True if proxy should be used for BitTorrent purposes.
         /// </summary>
         [JsonProperty("proxy_bittorrent")]

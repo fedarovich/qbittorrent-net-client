@@ -180,6 +180,20 @@ namespace QBittorrent.Client
         /// </summary>
         [JsonProperty("max_seeding_time_enabled")]
         public bool? MaxSeedingTimeEnabled { get; set; }
+        
+        /// <summary>
+        /// Maximal inactive seeding time in minutes.
+        /// </summary>
+        [JsonProperty("max_inactive_seeding_time")]
+        [ApiLevel(ApiLevel.V2, MinVersion = "2.9.2")]
+        public int? MaxInactiveSeedingTime { get; set; }
+
+        /// <summary>
+        /// True if maximal inactive seeding time is enabled.
+        /// </summary>
+        [JsonProperty("max_inactive_seeding_time_enabled")]
+        [ApiLevel(ApiLevel.V2, MinVersion = "2.9.2")]
+        public bool? MaxInactiveSeedingTimeEnabled { get; set; }
 
         /// <summary>
         /// If true <c>.!qB</c> extension will be appended to incomplete files.

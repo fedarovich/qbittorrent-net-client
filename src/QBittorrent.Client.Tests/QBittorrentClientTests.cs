@@ -2889,6 +2889,34 @@ namespace QBittorrent.Client.Tests
                 .Excluding(p => p.MaxSeedingTimeEnabled));
         }
 
+
+        [SkippableFact]
+        [PrintTestName]
+        public async Task SetPreferenceMaxInactiveSeedingTime()
+        {
+            Skip.If(ApiVersionLessThan(2, 9, 2));
+
+            await Client.LoginAsync(UserName, Password);
+
+            var oldPrefs = await Client.GetPreferencesAsync();
+            oldPrefs.MaxInactiveSeedingTime.Should().Be(-1);
+            oldPrefs.MaxInactiveSeedingTimeEnabled.Should().BeFalse();
+
+            var setPrefs = new Preferences
+            {
+                MaxInactiveSeedingTimeEnabled = true,
+                MaxInactiveSeedingTime = 600
+            };
+            await Client.SetPreferencesAsync(setPrefs);
+
+            var newPrefs = await Client.GetPreferencesAsync();
+            newPrefs.MaxInactiveSeedingTime.Should().Be(600);
+            newPrefs.MaxInactiveSeedingTimeEnabled.Should().BeTrue();
+            newPrefs.Should().BeEquivalentTo(oldPrefs, options => options
+                .Excluding(p => p.MaxInactiveSeedingTime)
+                .Excluding(p => p.MaxInactiveSeedingTimeEnabled));
+        }
+
         [Fact]
         [PrintTestName]
         public async Task SetPreferenceSchedule()

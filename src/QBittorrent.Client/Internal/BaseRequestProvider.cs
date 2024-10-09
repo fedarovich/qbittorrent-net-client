@@ -54,6 +54,7 @@ namespace QBittorrent.Client.Internal
                 .AddNonEmptyString("category", request.Category)
                 .AddValue("skip_checking", request.SkipHashChecking)
                 .AddValue("paused", request.Paused)
+                .AddValue("stopped", request.Paused) // "paused" was replaced with "stopped" from API 2.11.2
                 .AddNotNullValue("root_folder", request.CreateRootFolder)
                 .AddNonEmptyString("rename", request.Rename)
                 .AddNotNullValue("upLimit", request.UploadLimit)
@@ -309,7 +310,15 @@ namespace QBittorrent.Client.Internal
         public abstract (Uri url, HttpContent request) SetShareLimits(IEnumerable<string> hashes, double ratio, TimeSpan seedingTime);
 
         public abstract (Uri url, HttpContent request) SetShareLimits(IEnumerable<string> hashes, double ratio, TimeSpan seedingTime, TimeSpan inactiveSeedingTime);
-        
+
+        public abstract (Uri url, HttpContent request) Start(IEnumerable<string> hashes);
+
+        public abstract (Uri url, HttpContent request) StartAll();
+
+        public abstract (Uri url, HttpContent request) Stop(IEnumerable<string> hashes);
+
+        public abstract (Uri url, HttpContent request) StopAll();
+
         public abstract (Uri url, HttpContent request) BanPeers(IEnumerable<string> peers);
         
         public abstract (Uri url, HttpContent request) AddTorrentPeers(IEnumerable<string> hashes, IEnumerable<string> peers);

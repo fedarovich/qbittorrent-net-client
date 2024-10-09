@@ -86,6 +86,14 @@ namespace QBittorrent.Client.Internal
 
         public override (Uri url, HttpContent request) SetShareLimits(IEnumerable<string> hashes, double ratio, TimeSpan seedingTime, TimeSpan inactiveSeedingTime) => throw new ApiNotSupportedException(ApiLevel.V2, new ApiVersion(2, 9, 2));
         
+        public override (Uri url, HttpContent request) Start(IEnumerable<string> hashes) => throw new ApiNotSupportedException(ApiLevel.V2, new ApiVersion(2, 11, 0));
+
+        public override (Uri url, HttpContent request) StartAll() => throw new ApiNotSupportedException(ApiLevel.V2, new ApiVersion(2, 11, 0));
+
+        public override (Uri url, HttpContent request) Stop(IEnumerable<string> hashes) => throw new ApiNotSupportedException(ApiLevel.V2, new ApiVersion(2, 11, 0));
+        
+        public override (Uri url, HttpContent request) StopAll() => throw new ApiNotSupportedException(ApiLevel.V2, new ApiVersion(2, 11, 0));
+
         public override (Uri url, HttpContent request) BanPeers(IEnumerable<string> peers) => throw new ApiNotSupportedException(ApiLevel.V2, new ApiVersion(2, 3, 0));
 
         public override (Uri url, HttpContent request) AddTorrentPeers(IEnumerable<string> hashes, IEnumerable<string> peers) => throw new ApiNotSupportedException(ApiLevel.V2, new ApiVersion(2, 3, 0));

@@ -48,6 +48,12 @@ namespace QBittorrent.Client
         public int Bitness { get; set; }
 
         /// <summary>
+        /// The platform qBittorrent is running on.
+        /// </summary>
+        [JsonProperty("platform")]
+        public string Platform { get; set; }
+
+        /// <summary>
         /// Additional properties not handled by this library.
         /// </summary>
         [JsonExtensionData]

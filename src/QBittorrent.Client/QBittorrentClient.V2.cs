@@ -64,6 +64,9 @@ namespace QBittorrent.Client
         [SuppressMessage("ReSharper", "InconsistentNaming")]
         private static readonly ApiVersion Version_2_9_2 = new ApiVersion(2, 9, 2);
 
+        [SuppressMessage("ReSharper", "InconsistentNaming")]
+        private static readonly ApiVersion Version_2_11_0 = new ApiVersion(2, 11, 0);
+
         /// <summary>
         /// Gets the peer log.
         /// </summary>
@@ -166,10 +169,18 @@ namespace QBittorrent.Client
         /// <param name="token">The cancellation token.</param>
         /// <returns></returns>
         /// <remarks>This method supersedes <see cref="IQBittorrentClient.PauseAllAsync"/>.</remarks>
-        public Task PauseAsync(
+        public async Task PauseAsync(
             CancellationToken token = default)
         {
-            return PostAsync(p => p.PauseAll(), token);
+            var apiVersion = await GetApiVersionAsync(token).ConfigureAwait(false);
+            if (apiVersion < Version_2_11_0)
+            {
+                await PostAsync(p => p.PauseAll(), token).ConfigureAwait(false);
+            }
+            else
+            {
+                await PostAsync(p => p.StopAll(), token).ConfigureAwait(false);
+            }
         }
 
         /// <summary>
@@ -181,7 +192,20 @@ namespace QBittorrent.Client
         public Task PauseAsync(IEnumerable<string> hashes, CancellationToken token = default)
         {
             ValidateHashes(ref hashes);
-            return PostAsync(p => p.Pause(hashes), token, ApiLevel.V2);
+            return PauseCoreAsync(hashes, token);
+        }
+
+        private async Task PauseCoreAsync(IEnumerable<string> hashes, CancellationToken token)
+        {
+            var apiVersion = await GetApiVersionAsync(token).ConfigureAwait(false);
+            if (apiVersion < Version_2_11_0)
+            {
+                await PostAsync(p => p.Pause(hashes), token, ApiLevel.V2).ConfigureAwait(false);
+            }
+            else
+            {
+                await PostAsync(p => p.Stop(hashes), token, ApiLevel.V2).ConfigureAwait(false);
+            }
         }
 
         /// <summary>
@@ -190,10 +214,18 @@ namespace QBittorrent.Client
         /// <param name="token">The cancellation token.</param>
         /// <returns></returns>
         /// <remarks>This method supersedes <see cref="IQBittorrentClient.ResumeAllAsync"/>.</remarks>
-        public Task ResumeAsync(
+        public async Task ResumeAsync(
             CancellationToken token = default)
         {
-            return PostAsync(p => p.ResumeAll(), token);
+            var apiVersion = await GetApiVersionAsync(token).ConfigureAwait(false);
+            if (apiVersion < Version_2_11_0)
+            {
+                await PostAsync(p => p.ResumeAll(), token).ConfigureAwait(false);
+            }
+            else
+            {
+                await PostAsync(p => p.StartAll(), token).ConfigureAwait(false);
+            }
         }
 
         /// <summary>
@@ -205,7 +237,20 @@ namespace QBittorrent.Client
         public Task ResumeAsync(IEnumerable<string> hashes, CancellationToken token = default)
         {
             ValidateHashes(ref hashes);
-            return PostAsync(p => p.Resume(hashes), token, ApiLevel.V2);
+            return ResumeCoreAsync(hashes, token);
+        }
+
+        private async Task ResumeCoreAsync(IEnumerable<string> hashes, CancellationToken token)
+        {
+            var apiVersion = await GetApiVersionAsync(token).ConfigureAwait(false);
+            if (apiVersion < Version_2_11_0)
+            {
+                await PostAsync(p => p.Resume(hashes), token, ApiLevel.V2).ConfigureAwait(false);
+            }
+            else
+            {
+                await PostAsync(p => p.Start(hashes), token, ApiLevel.V2).ConfigureAwait(false);
+            }
         }
 
         /// <summary>

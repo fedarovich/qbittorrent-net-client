@@ -178,6 +178,10 @@ namespace QBittorrent.Client.Internal
         public Uri RenameFile() => throw new ApiNotSupportedException(ApiLevel.V2, new Version(2, 4, 0));
 
         public Uri RenameFolder() => throw new ApiNotSupportedException(ApiLevel.V2, new Version(2, 8, 0));
+       
+        public Uri Start() => throw new ApiNotSupportedException(ApiLevel.V2, new Version(2, 11, 0));
+
+        public Uri Stop() => throw new ApiNotSupportedException(ApiLevel.V2, new Version(2, 11, 0));
 
         public Uri AddRssFolder() => throw new ApiNotSupportedException(ApiLevel.V2);
 

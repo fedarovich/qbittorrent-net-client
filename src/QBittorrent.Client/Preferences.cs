@@ -18,6 +18,7 @@ namespace QBittorrent.Client
     public class Preferences
     {
         private const string WebUiPasswordPropertyName = "web_ui_password";
+        private const string AddTorrentStoppedPropertyName = "add_stopped_enabled";
 
         /// <summary>
         /// Currently selected language
@@ -1268,20 +1269,35 @@ namespace QBittorrent.Client
         {
             if (WebUIPassword != null)
             {
-                AdditionalData = AdditionalData ?? new Dictionary<string, JToken>();
+                AdditionalData ??= new Dictionary<string, JToken>();
                 AdditionalData[WebUiPasswordPropertyName] = WebUIPassword;
+            }
+
+            if (AddTorrentPaused != null)
+            {
+                AdditionalData ??= new Dictionary<string, JToken>();
+                AdditionalData[AddTorrentStoppedPropertyName] = AddTorrentPaused;
             }
         }
 
         [OnDeserialized]
         internal void OnDeserializedMethod(StreamingContext context)
         {
-            if (AdditionalData != null 
-                && AdditionalData.TryGetValue(WebUiPasswordPropertyName, out var hashToken)
+            if (AdditionalData == null)
+                return;
+
+            if (AdditionalData.TryGetValue(WebUiPasswordPropertyName, out var hashToken)
                 && hashToken.Type == JTokenType.String)
             {
                 WebUIPasswordHash = hashToken.Value<string>();
                 AdditionalData.Remove(WebUiPasswordPropertyName);
+            }
+
+            if (AdditionalData.TryGetValue(AddTorrentStoppedPropertyName, out var addTorrentStopped)
+                && addTorrentStopped.Type == JTokenType.Boolean)
+            {
+                AddTorrentPaused = addTorrentStopped.Value<bool>();
+                AdditionalData.Remove(AddTorrentStoppedPropertyName);
             }
         }
     }

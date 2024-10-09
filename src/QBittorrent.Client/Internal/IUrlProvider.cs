@@ -163,6 +163,12 @@ namespace QBittorrent.Client.Internal
 
         Uri RenameFolder();
 
+        // API 2.11
+
+        Uri Start();
+
+        Uri Stop();
+
         // RSS
 
         Uri AddRssFolder();

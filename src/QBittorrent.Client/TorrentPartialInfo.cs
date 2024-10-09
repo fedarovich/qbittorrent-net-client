@@ -99,7 +99,7 @@ namespace QBittorrent.Client
         /// Torrent state
         /// </summary>
         [JsonProperty("state")]
-        [JsonConverter(typeof(StringEnumConverter))]
+        [JsonConverter(typeof(TorrentStateConverter))]
         public TorrentState? State { get; set; }
 
         /// <summary>

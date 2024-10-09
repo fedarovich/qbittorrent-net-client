@@ -196,6 +196,10 @@ namespace QBittorrent.Client.Internal
 
         public Uri RenameFolder() => Create("api/v2/torrents/renameFolder");
 
+        public Uri Start() => Create("api/v2/torrents/start");
+
+        public Uri Stop() => Create("api/v2/torrents/stop");
+
         public Uri AddRssFolder() => Create("api/v2/rss/addFolder");
 
         public Uri AddRssFeed() => Create("api/v2/rss/addFeed");

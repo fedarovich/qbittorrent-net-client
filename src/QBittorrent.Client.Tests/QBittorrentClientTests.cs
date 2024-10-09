@@ -45,6 +45,8 @@ namespace QBittorrent.Client.Tests
 
         private long? DefaultTorrentRateLimit => ApiVersionLessThan(2, 9) ? default(long?) : default(long);
 
+        private bool SupportsIpV6 => ApiVersionMoreThan(2, 11, 0);
+
         #region Lifetime
 
         public QBittorrentClientTests(DockerFixture dockerFixture)
@@ -3485,8 +3487,17 @@ namespace QBittorrent.Client.Tests
 
             await Client.LoginAsync(UserName, Password);
             var addresses = await Client.GetNetworkInterfaceAddressesAsync();
-            addresses.Should().HaveCount(2);
-            addresses.Should().Contain("127.0.0.1");
+            if (SupportsIpV6)
+            {
+                addresses.Should().HaveCount(3);
+                addresses.Should().Contain("127.0.0.1");
+                addresses.Should().Contain("::1");
+            }
+            else
+            {
+                addresses.Should().HaveCount(2);
+                addresses.Should().Contain("127.0.0.1");
+            }
         }
 
         [SkippableFact]
@@ -3497,8 +3508,17 @@ namespace QBittorrent.Client.Tests
 
             await Client.LoginAsync(UserName, Password);
             var addresses = await Client.GetNetworkInterfaceAddressesAsync("lo");
-            addresses.Should().HaveCount(1);
-            addresses.Should().Contain("127.0.0.1");
+            if (SupportsIpV6)
+            {
+                addresses.Should().HaveCount(2);
+                addresses.Should().Contain("127.0.0.1");
+                addresses.Should().Contain("::1");
+            }
+            else
+            {
+                addresses.Should().HaveCount(1);
+                addresses.Should().Contain("127.0.0.1");
+            }
         }
 
         [SkippableFact]
@@ -3876,7 +3896,7 @@ namespace QBittorrent.Client.Tests
         public async Task AddAndProcessRssItems()
         {
             Skip.If(ApiVersionLessThan(2, 1));
-
+            
             await Client.LoginAsync(UserName, Password);
 
             await Client.SetPreferencesAsync(new Preferences {RssProcessingEnabled = true});
@@ -3887,7 +3907,6 @@ namespace QBittorrent.Client.Tests
             await Client.AddRssFeedAsync(new Uri("file:///rss/rutracker.rss"), "Test folder\\Rutracker");
             await Task.Delay(1000);
             
-            var items = await Client.GetRssItemsAsync(true);
             var expected = new RssFolder(
                 new RssItem[]
                 {
@@ -3974,11 +3993,15 @@ namespace QBittorrent.Client.Tests
                 }
             );
 
-            items.Should().BeEquivalentTo(expected, cfg => cfg
-                .Excluding(m => m.SelectedMemberPath.EndsWith(".Url"))
-                .Excluding(m => m.SelectedMemberPath.EndsWith(".Uid"))
-                .Excluding(m => m.SelectedMemberPath.EndsWith(".AdditionalData"))
-            );
+            await Utils.Retry(async () =>
+            {
+                var items = await Client.GetRssItemsAsync(true);
+                items.Should().BeEquivalentTo(expected, cfg => cfg
+                    .Excluding(m => m.SelectedMemberPath.EndsWith(".Url"))
+                    .Excluding(m => m.SelectedMemberPath.EndsWith(".Uid"))
+                    .Excluding(m => m.SelectedMemberPath.EndsWith(".AdditionalData"))
+                );
+            });
         }
         
         [SkippableFact]

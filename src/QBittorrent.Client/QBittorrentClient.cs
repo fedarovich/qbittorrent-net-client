@@ -549,7 +549,7 @@ namespace QBittorrent.Client
             CancellationToken token = default)
         {
             ValidateHash(hash);
-            return PostAsync(p => p.Pause(new[] {hash}), token);
+            return PauseCoreAsync(new[] { hash }, token);
         }
 
         /// <summary>
@@ -576,7 +576,7 @@ namespace QBittorrent.Client
             CancellationToken token = default)
         {
             ValidateHash(hash);
-            return PostAsync(p => p.Resume(new[] {hash}), token);
+            return ResumeCoreAsync(new[] { hash }, token);
         }
 
         /// <summary>

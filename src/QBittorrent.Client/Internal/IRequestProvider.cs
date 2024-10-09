@@ -128,6 +128,16 @@ namespace QBittorrent.Client.Internal
 
         (Uri url, HttpContent request) SetShareLimits(IEnumerable<string> hashes, double ratio, TimeSpan seedingTime, TimeSpan inactiveSeedingTime);
 
+        // API 2.11
+
+        (Uri url, HttpContent request) Start(IEnumerable<string> hashes);
+
+        (Uri url, HttpContent request) StartAll();
+
+        (Uri url, HttpContent request) Stop(IEnumerable<string> hashes);
+
+        (Uri url, HttpContent request) StopAll();
+
         // RSS
 
         (Uri url, HttpContent request) AddRssFolder(string path);

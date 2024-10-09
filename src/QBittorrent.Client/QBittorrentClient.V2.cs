@@ -200,7 +200,7 @@ namespace QBittorrent.Client
             var apiVersion = await GetApiVersionAsync(token).ConfigureAwait(false);
             if (apiVersion < Version_2_11_0)
             {
-                await PostAsync(p => p.Pause(hashes), token, ApiLevel.V2).ConfigureAwait(false);
+                await PostAsync(p => p.Pause(hashes), token).ConfigureAwait(false);
             }
             else
             {
@@ -245,7 +245,7 @@ namespace QBittorrent.Client
             var apiVersion = await GetApiVersionAsync(token).ConfigureAwait(false);
             if (apiVersion < Version_2_11_0)
             {
-                await PostAsync(p => p.Resume(hashes), token, ApiLevel.V2).ConfigureAwait(false);
+                await PostAsync(p => p.Resume(hashes), token).ConfigureAwait(false);
             }
             else
             {

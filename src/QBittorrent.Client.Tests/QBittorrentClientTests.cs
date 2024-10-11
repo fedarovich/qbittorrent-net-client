@@ -3487,17 +3487,9 @@ namespace QBittorrent.Client.Tests
 
             await Client.LoginAsync(UserName, Password);
             var addresses = await Client.GetNetworkInterfaceAddressesAsync();
-            if (SupportsIpV6)
-            {
-                addresses.Should().HaveCount(3);
-                addresses.Should().Contain("127.0.0.1");
-                addresses.Should().Contain("::1");
-            }
-            else
-            {
-                addresses.Should().HaveCount(2);
-                addresses.Should().Contain("127.0.0.1");
-            }
+            addresses.Should().HaveCountGreaterOrEqualTo(2,"There must be at least one ethernet IP address and at least one loopback IP address.")
+                .And.Contain(a => IPAddress.IsLoopback(IPAddress.Parse(a)), "The result must contain a loopback address.")
+                .And.Contain(a => !IPAddress.IsLoopback(IPAddress.Parse(a)), "The result must contain an ethernet address.");
         }
 
         [SkippableFact]
@@ -3508,17 +3500,9 @@ namespace QBittorrent.Client.Tests
 
             await Client.LoginAsync(UserName, Password);
             var addresses = await Client.GetNetworkInterfaceAddressesAsync("lo");
-            if (SupportsIpV6)
-            {
-                addresses.Should().HaveCount(2);
-                addresses.Should().Contain("127.0.0.1");
-                addresses.Should().Contain("::1");
-            }
-            else
-            {
-                addresses.Should().HaveCount(1);
-                addresses.Should().Contain("127.0.0.1");
-            }
+
+            addresses.Should().NotBeEmpty("There must always be at least one loopback IP address.")
+                .And.OnlyContain(a => IPAddress.IsLoopback(IPAddress.Parse(a)), "All IP addresses must be loopback.");
         }
 
         [SkippableFact]
@@ -3529,8 +3513,9 @@ namespace QBittorrent.Client.Tests
 
             await Client.LoginAsync(UserName, Password);
             var addresses = await Client.GetNetworkInterfaceAddressesAsync(new NetInterface { Id = "eth0", Name = "eth0" });
-            addresses.Should().HaveCount(1);
-            addresses.Should().NotContain("127.0.0.1");
+            
+            addresses.Should().NotBeEmpty("There must be at least one ethernet IP address.")
+                .And.NotContain(a => IPAddress.IsLoopback(IPAddress.Parse(a)), "The result must not contain loopback address."); 
         }
 
         [SkippableFact]

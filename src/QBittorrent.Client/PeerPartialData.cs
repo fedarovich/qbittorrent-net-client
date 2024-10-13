@@ -26,7 +26,7 @@ namespace QBittorrent.Client
         ///   <see langword="false" /> if this object contains only changes of data since the previous request.
         /// </value>
         [JsonProperty("full_update")]
-        public bool FullUpdate { get; set; }
+        public bool FullUpdate? { get; set; }
 
         /// <summary>
         /// Gets or sets a value indicating whether flags must be shown.
@@ -35,24 +35,24 @@ namespace QBittorrent.Client
         ///   <see langword="true" /> if flags must be shown; otherwise, <see langword="false" />.
         /// </value>
         [JsonProperty("show_flags")]
-        public bool ShowFlags { get; set; }
+        public bool ShowFlags? { get; set; }
 
         /// <summary>
         /// Gets or sets the changed and new peers.
         /// </summary>
         [JsonProperty("peers")]
-        public IReadOnlyDictionary<string, PeerPartialInfo> PeersChanged { get; set; }
+        public IReadOnlyDictionary<string, PeerPartialInfo>? PeersChanged { get; set; }
 
         /// <summary>
         /// Gets or sets the removed peers.
         /// </summary>
         [JsonProperty("peers_removed")]
-        public IReadOnlyList<string> PeersRemoved { get; set; }
+        public IReadOnlyList<string>? PeersRemoved { get; set; }
 
         /// <summary>
         /// Additional properties not handled by this library.
         /// </summary>
         [JsonExtensionData]
-        public IDictionary<string, JToken> AdditionalData { get; set; }
+        public IDictionary<string, JToken>? AdditionalData { get; set; }
     }
 }
